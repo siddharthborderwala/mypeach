@@ -26,8 +26,8 @@ Peach is a web application for selling and distributing TIFF layered textile des
 1. Clone the repository:
 
 ```bash
-git clone https://github.com/your-username/peach.git
-cd peach
+git clone https://github.com/siddharthborderwala/mypeach.git
+cd mypeach
 ```
 
 2. Install dependencies:
