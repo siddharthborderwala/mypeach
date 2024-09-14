@@ -24,6 +24,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { checkAuth } from "@/lib/auth/utils";
 import { NavItem, NavItemMobile } from "./nav";
 import { UserMenu } from "@/components/user-menu";
+import Head from "next/head";
 
 const navItems = [
 	{
@@ -67,7 +68,14 @@ export default async function Layout({
 	await checkAuth();
 
 	return (
-		<div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
+		<div className="grid h-[100svh] w-[100svw] overflow-hidden md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
+			<Head>
+				<style>{`
+          body {
+            overflow: hidden;
+          }
+        `}</style>
+			</Head>
 			<div className="hidden border-r bg-background md:block">
 				<div className="flex h-full max-h-screen flex-col gap-2">
 					<div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
