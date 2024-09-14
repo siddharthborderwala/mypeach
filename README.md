@@ -38,17 +38,7 @@ pnpm install
 
 3. Set up environment variables:
 
-Create a `.env` file in the root directory and add the following variables:
-
-```
-DATABASE_URL=your_postgresql_database_url
-RESEND_API_KEY=your_resend_api_key
-TRIGGER_SECRET_KEY=your_trigger_dev_secret_key
-R2_ACCOUNT_ID=your_cloudflare_r2_account_id
-R2_ACCESS_KEY_ID=your_r2_access_key_id
-R2_SECRET_ACCESS_KEY=your_r2_secret_access_key
-R2_BUCKET_NAME=your_r2_bucket_name
-```
+Create a `.env` file in the root directory and add the variables.
 
 4. Set up the database:
 
