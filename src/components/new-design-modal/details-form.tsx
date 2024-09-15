@@ -62,7 +62,7 @@ export function DetailsForm({
 	const onSubmit = useCallback(
 		async (values: z.infer<typeof formSchema>) => {
 			setFormState({ state: "loading" });
-			const response = await fetch("/api/design", {
+			const response = await fetch("/api/designs", {
 				method: "PUT",
 				body: JSON.stringify(values),
 			});

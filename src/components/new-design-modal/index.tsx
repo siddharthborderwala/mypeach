@@ -15,6 +15,7 @@ import { Progress } from "@/components/ui/progress";
 import { CheckCircle, WarningCircle } from "@phosphor-icons/react";
 import { getDesignFileStorageKey } from "@/lib/storage/util";
 import { DetailsForm } from "./details-form";
+import { Spinner } from "../spinner";
 
 type UploadState =
 	| {
@@ -306,16 +307,25 @@ export function NewDesignModal() {
 			) : null}
 			{uploadState.state === "uploading" || uploadState.state === "complete" ? (
 				<div className="min-h-80 grid grid-cols-[1fr_1fr] gap-4">
-					{designId ? (
-						<DetailsForm
-							designId={designId}
-							defaultValues={designDetails}
-							onSave={(d) => {
-								setIsDesignSaved(true);
-								setDesignDetails(d);
-							}}
-						/>
-					) : null}
+					{isDesignCreatedInDb ? (
+						<>
+							{designId ? (
+								<DetailsForm
+									designId={designId}
+									defaultValues={designDetails}
+									onSave={(d) => {
+										setIsDesignSaved(true);
+										setDesignDetails(d);
+									}}
+								/>
+							) : null}
+						</>
+					) : (
+						<div className="w-full h-full flex items-center justify-center">
+							<p className="font-bold">Creating your design...</p>
+							<Spinner />
+						</div>
+					)}
 					<div className="w-full h-full flex items-center justify-center">
 						<p className="font-bold">Preview</p>
 					</div>

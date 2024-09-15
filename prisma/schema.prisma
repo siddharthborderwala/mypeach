@@ -41,6 +41,7 @@ model EmailVerificationToken {
 
 model Design {
   id               String  @id
+  name             String  @default("Untitled")
   isDraft          Boolean @default(true)
   isUploadComplete Boolean @default(false)
 
