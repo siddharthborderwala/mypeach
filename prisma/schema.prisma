@@ -19,6 +19,7 @@ model User {
   name              String?
   sessions          Session[]
   VerificationToken EmailVerificationToken[]
+  Design            Design[]
 }
 
 model Session {
@@ -36,4 +37,35 @@ model EmailVerificationToken {
   createdAt DateTime @default(now())
 
   @@index([userId])
+}
+
+model Design {
+  id               String  @id
+  isDraft          Boolean @default(true)
+  isUploadComplete Boolean @default(false)
+
+  // should be different than id for security purposes
+  originalFileStorageKey String @unique
+  originalFileName       String
+  originalFileType       String @default("image/tiff")
+
+  // key will be based on the id of Design
+  thumbnailFileStorageKey String? @unique
+  thumbnailFileType       String? @default("image/jpeg")
+
+  metadata Json?
+  tags     String[]
+
+  // price is stored in the smallest unit of the currency
+  price    Int    @default(29000)
+  currency String @default("INR")
+
+  userId String
+  user   User   @relation(references: [id], fields: [userId], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([createdAt])
 }

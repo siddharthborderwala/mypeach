@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "Design" ADD COLUMN     "isDraft" BOOLEAN NOT NULL DEFAULT true,
+ALTER COLUMN "price" SET DEFAULT 29000;

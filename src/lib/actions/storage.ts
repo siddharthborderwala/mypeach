@@ -9,23 +9,23 @@ import { env } from "../env.mjs";
 
 export async function getPresignedUrl({
 	fileType,
-	fileName,
+	storageKey,
 }: {
 	fileType: string;
-	fileName: string;
+	storageKey: string;
 }) {
 	const { session } = await getUserAuth();
 	if (!session) return err("Unauthorised");
 
 	const command = new PutObjectCommand({
 		Bucket: env.R2_BUCKET_NAME,
-		Key: fileName,
+		Key: storageKey,
 		ContentType: fileType,
 	});
 
-	const signedUrl = await getSignedUrl(storage, command, {
+	const presignedUrl = await getSignedUrl(storage, command, {
 		expiresIn: 3600, // 1 hour expiration
 	});
 
-	return ok({ signedUrl });
+	return ok({ presignedUrl });
 }

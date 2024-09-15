@@ -11,14 +11,6 @@ import {
 } from "@phosphor-icons/react/dist/ssr";
 
 import { Button } from "@/components/ui/button";
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from "@/components/ui/card";
-
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { checkAuth } from "@/lib/auth/utils";
@@ -69,13 +61,13 @@ export default async function Layout({
 
 	return (
 		<div className="grid h-[100svh] w-[100svw] overflow-hidden md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
-			<Head>
-				<style>{`
+			<style>
+				{`
           body {
             overflow: hidden;
           }
-        `}</style>
-			</Head>
+        `}
+			</style>
 			<div className="hidden border-r bg-background md:block">
 				<div className="flex h-full max-h-screen flex-col gap-2">
 					<div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
@@ -98,22 +90,6 @@ export default async function Layout({
 								))}
 							</section>
 						</nav>
-					</div>
-					<div className="mt-auto p-4">
-						<Card>
-							<CardHeader className="p-2 pt-0 md:p-4">
-								<CardTitle>Upgrade to Pro</CardTitle>
-								<CardDescription>
-									Unlock all features and get unlimited access to our support
-									team.
-								</CardDescription>
-							</CardHeader>
-							<CardContent className="p-2 pt-0 md:p-4 md:pt-0">
-								<Button size="sm" className="w-full">
-									Upgrade
-								</Button>
-							</CardContent>
-						</Card>
 					</div>
 				</div>
 			</div>
@@ -151,22 +127,6 @@ export default async function Layout({
 									))}
 								</section>
 							</nav>
-							<div className="mt-auto">
-								<Card>
-									<CardHeader>
-										<CardTitle>Upgrade to Pro</CardTitle>
-										<CardDescription>
-											Unlock all features and get unlimited access to our
-											support team.
-										</CardDescription>
-									</CardHeader>
-									<CardContent>
-										<Button size="sm" className="w-full">
-											Upgrade
-										</Button>
-									</CardContent>
-								</Card>
-							</div>
 						</SheetContent>
 					</Sheet>
 					<div className="w-full flex-1">
