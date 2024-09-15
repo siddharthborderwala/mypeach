@@ -32,7 +32,7 @@ export default async function VerifyEmail({ searchParams }: VerifyEmailProps) {
 							</p>
 						</div>
 						<Button asChild>
-							<Link href="/dashboard">View Dashboard</Link>
+							<Link href="/home">View Dashboard</Link>
 						</Button>
 					</section>
 				</div>
@@ -52,7 +52,7 @@ export default async function VerifyEmail({ searchParams }: VerifyEmailProps) {
 						</p>
 					</div>
 					<Button asChild>
-						<Link href="/account">Request New Verification Link</Link>
+						<Link href="/account">Request Email Verification</Link>
 					</Button>
 				</section>
 			</div>

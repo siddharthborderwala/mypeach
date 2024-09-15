@@ -21,7 +21,7 @@ interface VerifyEmailProps {
 }
 
 const VerifyEmailComponent = ({ token }: VerifyEmailProps) => {
-	const verficiationURL = `${appBaseURL}/verify-email?code=${token}`;
+	const verficiationURL = `${appBaseURL}/verify-email?token=${token}`;
 
 	return (
 		<Html>
@@ -67,7 +67,7 @@ const VerifyEmailComponent = ({ token }: VerifyEmailProps) => {
 };
 
 const verifyEmailText = ({ token }: VerifyEmailProps) => {
-	const verificationURL = `${appBaseURL}/verify-email?code=${token}`;
+	const verificationURL = `${appBaseURL}/verify-email?token=${token}`;
 
 	return stripIndent(`
     Verify your email for Peach
