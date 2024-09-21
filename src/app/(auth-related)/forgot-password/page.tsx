@@ -2,28 +2,40 @@
 
 import Link from "next/link";
 import { useFormState, useFormStatus } from "react-dom";
-import { useQueryState } from "nuqs";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { signUpAction } from "@/lib/actions/users";
+import { forgotPasswordAction } from "@/lib/actions/users";
 import { FormError } from "@/components/form-error";
 import { Spinner } from "@/components/spinner";
+import { useEffect, useRef } from "react";
+import { toast } from "sonner";
 
-export default function Register() {
-	const [redirectTo] = useQueryState("redirectTo");
-	const [state, formAction] = useFormState(signUpAction, {
+export default function ForgotPassword() {
+	const formRef = useRef<HTMLFormElement>(null);
+	const [state, formAction] = useFormState(forgotPasswordAction, {
 		error: "",
 	});
 
+	useEffect(() => {
+		if (state.success) {
+			toast.success("You will receive an email to reset your password.");
+			formRef.current?.reset();
+		}
+	}, [state.success]);
+
 	return (
 		<div className="flex items-center justify-center py-12 px-4 w-full h-full">
-			<form className="grid gap-6 max-w-[400px] w-full" action={formAction}>
+			<form
+				ref={formRef}
+				className="grid gap-6 max-w-[400px] w-full"
+				action={formAction}
+			>
 				<div className="grid gap-2">
-					<h1 className="text-3xl font-bold">Register</h1>
+					<h1 className="text-3xl font-bold">Forgot Password?</h1>
 					<p className="text-balance text-muted-foreground">
-						Get started with Peach
+						We&apos;ll send you a link to reset your password.
 					</p>
 				</div>
 				<div className="grid gap-4">
@@ -31,20 +43,11 @@ export default function Register() {
 						<Label htmlFor="email">Email</Label>
 						<Input name="email" type="email" required />
 					</div>
-					<div className="grid gap-2">
-						<div className="flex items-center">
-							<Label htmlFor="password">Password</Label>
-						</div>
-						<Input name="password" type="password" required />
-					</div>
-					{redirectTo ? (
-						<input type="hidden" name="redirectTo" value={redirectTo} />
-					) : null}
 					<SubmitButton />
 				</div>
 				<FormError state={state} />
 				<div className="mt-4 text-center text-sm">
-					Already have an account?
+					Remember your password?
 					<Link href="/login" className="underline ml-1">
 						Login
 					</Link>
@@ -60,7 +63,7 @@ export const SubmitButton = () => {
 	return (
 		<Button type="submit" className="w-full" disabled={pending}>
 			{pending ? <Spinner size={16} className="mr-2" /> : null}
-			<span>Create Account</span>
+			<span>Reset Password</span>
 		</Button>
 	);
 };

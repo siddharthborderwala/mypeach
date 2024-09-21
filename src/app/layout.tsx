@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Manrope } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
+import { FlashToast } from "@/components/flash-toast";
 
 import "./globals.css";
 
@@ -23,7 +24,13 @@ export default function RootLayout({
 		<html lang="en">
 			<body className={`${manrope.variable} font-sans`}>
 				{children}
-				<Toaster richColors theme="light" className="font-sans" />
+				<Toaster
+					richColors
+					theme="light"
+					className="font-sans"
+					duration={5000}
+				/>
+				<FlashToast />
 			</body>
 		</html>
 	);

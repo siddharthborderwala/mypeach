@@ -1,19 +1,18 @@
 "use client";
 
-import Link from "next/link";
 import { useFormState, useFormStatus } from "react-dom";
 import { useQueryState } from "nuqs";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { signUpAction } from "@/lib/actions/users";
+import { resetPasswordAction } from "@/lib/actions/users";
 import { FormError } from "@/components/form-error";
 import { Spinner } from "@/components/spinner";
 
-export default function Register() {
-	const [redirectTo] = useQueryState("redirectTo");
-	const [state, formAction] = useFormState(signUpAction, {
+export default function ResetPassword() {
+	const [token] = useQueryState("token");
+	const [state, formAction] = useFormState(resetPasswordAction, {
 		error: "",
 	});
 
@@ -21,34 +20,24 @@ export default function Register() {
 		<div className="flex items-center justify-center py-12 px-4 w-full h-full">
 			<form className="grid gap-6 max-w-[400px] w-full" action={formAction}>
 				<div className="grid gap-2">
-					<h1 className="text-3xl font-bold">Register</h1>
+					<h1 className="text-3xl font-bold">Reset Password</h1>
 					<p className="text-balance text-muted-foreground">
-						Get started with Peach
+						Enter your new password
 					</p>
 				</div>
 				<div className="grid gap-4">
 					<div className="grid gap-2">
-						<Label htmlFor="email">Email</Label>
-						<Input name="email" type="email" required />
-					</div>
-					<div className="grid gap-2">
-						<div className="flex items-center">
-							<Label htmlFor="password">Password</Label>
-						</div>
+						<Label htmlFor="password">New Password</Label>
 						<Input name="password" type="password" required />
 					</div>
-					{redirectTo ? (
-						<input type="hidden" name="redirectTo" value={redirectTo} />
-					) : null}
+					<div className="grid gap-2">
+						<Label htmlFor="confirmPassword">Confirm New Password</Label>
+						<Input name="confirmPassword" type="password" required />
+					</div>
+					{token ? <input type="hidden" name="token" value={token} /> : null}
 					<SubmitButton />
 				</div>
 				<FormError state={state} />
-				<div className="mt-4 text-center text-sm">
-					Already have an account?
-					<Link href="/login" className="underline ml-1">
-						Login
-					</Link>
-				</div>
 			</form>
 		</div>
 	);
@@ -60,7 +49,7 @@ export const SubmitButton = () => {
 	return (
 		<Button type="submit" className="w-full" disabled={pending}>
 			{pending ? <Spinner size={16} className="mr-2" /> : null}
-			<span>Create Account</span>
+			<span>Reset Password</span>
 		</Button>
 	);
 };

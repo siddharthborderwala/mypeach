@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { signInAction } from "@/lib/actions/users";
-import { AuthFormError } from "@/components/auth/auth-form-error";
+import { FormError } from "@/components/form-error";
 import { Spinner } from "@/components/spinner";
 
 export default function Login() {
@@ -48,7 +48,7 @@ export default function Login() {
 					) : null}
 					<SubmitButton />
 				</div>
-				<AuthFormError state={state} />
+				<FormError state={state} />
 				<div className="mt-4 text-center text-sm">
 					Don&apos;t have an account?
 					<Link href="/register" className="underline ml-1">

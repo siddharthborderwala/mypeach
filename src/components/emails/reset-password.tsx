@@ -20,7 +20,7 @@ interface ResetPasswordProps {
 	token?: string;
 }
 
-export const ResetPassword = ({ token }: ResetPasswordProps) => {
+const ResetPasswordComponent = ({ token }: ResetPasswordProps) => {
 	const resetURL = `${appBaseURL}/reset-password?token=${token}`;
 
 	return (
@@ -70,11 +70,7 @@ export const ResetPassword = ({ token }: ResetPasswordProps) => {
 	);
 };
 
-export default ResetPassword;
-
-export function getResetPasswordEmailString({
-	token,
-}: ResetPasswordProps): string {
+const resetPasswordText = ({ token }: ResetPasswordProps) => {
 	const resetURL = `${appBaseURL}/reset-password?token=${token}`;
 
 	return stripIndent(`
@@ -89,7 +85,14 @@ export function getResetPasswordEmailString({
 		Peach
     ${appBaseURL}
 	`);
-}
+};
+
+const ResetPassword = {
+	react: ResetPasswordComponent,
+	text: resetPasswordText,
+};
+
+export default ResetPassword;
 
 const logo = {
 	borderRadius: 21,
