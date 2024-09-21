@@ -3,7 +3,11 @@ export function getDesignFileStorageKey(id: string) {
 }
 
 export function getDesignThumbnailFileStorageKey(id: string) {
-	return `design-thumbnails/${id}.webp`;
+	return {
+		folder: `design-thumbnails/${id}`,
+		2000: `design-thumbnails/${id}/2000.webp`,
+		1200: `design-thumbnails/${id}/1200.webp`,
+	};
 }
 
 export function getFileURL(key: string) {

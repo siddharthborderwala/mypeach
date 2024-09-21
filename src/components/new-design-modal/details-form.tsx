@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Spinner } from "../spinner";
 import { FormError } from "../form-error";
+import { toast } from "sonner";
 
 const formSchema = z.object({
 	price: z.number().min(290, "Price must be at least 290"),
@@ -73,11 +74,15 @@ export function DetailsForm({
 			}
 			const data = await response.json();
 			setFormState({ state: "success" });
+			toast.success("Design details saved");
 			onSave({
 				price: data.design.price,
 				fileDPI: data.design.metadata.fileDPI,
 				tags: data.design.tags.join(","),
 			});
+			setTimeout(() => {
+				setFormState({ state: "idle" });
+			}, 1000);
 		},
 		[onSave],
 	);

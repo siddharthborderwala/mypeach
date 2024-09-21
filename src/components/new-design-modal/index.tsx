@@ -148,8 +148,8 @@ export function NewDesignModal() {
 						state: "complete",
 						fileName: file.name,
 					});
-					fetch("/api/designs", {
-						method: "PUT",
+					fetch("/api/designs/is-upload-complete", {
+						method: "POST",
 						body: JSON.stringify({
 							designId: newDesignId,
 							isUploadComplete: true,
@@ -321,7 +321,7 @@ export function NewDesignModal() {
 							) : null}
 						</>
 					) : (
-						<div className="w-full h-full flex items-center justify-center">
+						<div className="w-full h-full flex flex-col items-center justify-center">
 							<p className="font-bold">Creating your design...</p>
 							<Spinner />
 						</div>

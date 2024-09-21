@@ -61,7 +61,6 @@ export async function POST(request: Request) {
 
 const putValidator = z.object({
 	designId: z.string().length(24),
-	isUploadComplete: z.boolean().optional(),
 	isDraft: z.boolean().optional(),
 	thumbnailFileStorageKey: z.string().optional(),
 	thumbnailFileType: z.string().optional(),

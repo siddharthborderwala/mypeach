@@ -64,7 +64,7 @@ model Design {
 
   // key will be based on the id of Design
   thumbnailFileStorageKey String? @unique
-  thumbnailFileType       String? @default("image/jpeg")
+  thumbnailFileType       String? @default("image/webp")
 
   metadata Json?
   tags     String[]
