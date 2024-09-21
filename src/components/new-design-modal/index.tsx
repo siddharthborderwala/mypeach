@@ -215,6 +215,7 @@ export function NewDesignModal() {
 				</div>,
 				{
 					id: toastId.current,
+					position: "bottom-left",
 				},
 			);
 		}
@@ -233,6 +234,7 @@ export function NewDesignModal() {
 				</div>,
 				{
 					id: toastId.current,
+					position: "bottom-left",
 				},
 			);
 		}
@@ -249,6 +251,7 @@ export function NewDesignModal() {
 				</div>,
 				{
 					id: toastId.current,
+					position: "bottom-left",
 				},
 			);
 			toastId.current = undefined;

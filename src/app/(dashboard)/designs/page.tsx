@@ -5,6 +5,14 @@ import { NewDesignModal } from "@/components/new-design-modal";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import { getCurrentUserDesigns } from "@/lib/actions/designs";
 import { getFileURL } from "@/lib/storage/util";
+import ImageWithFallback from "@/components/image-with-fallback";
+
+function getDesignThumbnailURL(key: string | null, width: 2000 | 1200) {
+	if (!key) {
+		return "";
+	}
+	return getFileURL(`${key}/${width}.webp`);
+}
 
 export default async function Designs() {
 	const designs = await getCurrentUserDesigns();
@@ -48,20 +56,15 @@ export default async function Designs() {
 									key={design.id}
 									className="border rounded-lg p-4 shadow-sm"
 								>
-									<object
-										type="image/webp"
-										data={getFileURL(design.thumbnailFileStorageKey ?? "")}
+									<ImageWithFallback
+										src={getDesignThumbnailURL(
+											design.thumbnailFileStorageKey,
+											1200,
+										)}
 										width="100%"
+										height="100%"
 										className="aspect-square flex items-center justify-center"
-									>
-										<img
-											src="/favicon.ico"
-											alt=""
-											width="60"
-											height="60"
-											className="filter grayscale"
-										/>
-									</object>
+									/>
 									<div className="flex flex-col gap-1 mt-2">
 										<h3 className="font-semibold truncate">{design.name}</h3>
 										<p className="text-sm text-muted-foreground truncate">
