@@ -4,15 +4,8 @@ import { Button } from "@/components/ui/button";
 import { NewDesignModal } from "@/components/new-design-modal";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import { getCurrentUserDesigns } from "@/lib/actions/designs";
-import { getUserContentUrl } from "@/lib/storage/util";
-import ImageWithFallback from "@/components/image-with-fallback";
-
-function getDesignThumbnailURL(key: string | null, width: 2000 | 1200) {
-	if (!key) {
-		return "";
-	}
-	return getUserContentUrl(`${key}/${width}.webp`);
-}
+import DesignPreview from "@/components/pages/home/design-preview";
+import EditDesignSheet from "@/components/pages/home/edit-design-sheet";
 
 export default async function Designs() {
 	const designs = await getCurrentUserDesigns();
@@ -52,28 +45,10 @@ export default async function Designs() {
 					<div>
 						<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
 							{designs.map((design) => (
-								<div
-									key={design.id}
-									className="border rounded-lg p-4 shadow-sm"
-								>
-									<ImageWithFallback
-										src={getDesignThumbnailURL(
-											design.thumbnailFileStorageKey,
-											1200,
-										)}
-										width="100%"
-										height="100%"
-										className="aspect-square flex items-center justify-center"
-									/>
-									<div className="flex flex-col gap-1 mt-2">
-										<h3 className="font-semibold truncate">{design.name}</h3>
-										<p className="text-sm text-muted-foreground truncate">
-											{design.originalFileName}
-										</p>
-									</div>
-								</div>
+								<DesignPreview key={design.id} design={design} />
 							))}
 						</div>
+						<EditDesignSheet />
 					</div>
 				)}
 				<NewDesignModal />

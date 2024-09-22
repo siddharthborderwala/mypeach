@@ -1,27 +1,25 @@
 "use client";
 
-import type { ImgHTMLAttributes } from "react";
+import { useState } from "react";
 
-interface ImageWithFallbackProps extends ImgHTMLAttributes<HTMLImageElement> {
+interface ImageWithFallbackProps
+	extends React.ImgHTMLAttributes<HTMLImageElement> {
 	fallbackSrc?: string;
 }
 
 const ImageWithFallback: React.FC<ImageWithFallbackProps> = ({
 	src,
 	fallbackSrc = "/favicon.ico",
+	alt = "",
 	...props
 }) => {
-	return (
-		<img
-			{...props}
-			alt={props.alt || ""}
-			src={src}
-			onError={(e) => {
-				e.currentTarget.onerror = null;
-				e.currentTarget.src = fallbackSrc;
-			}}
-		/>
-	);
+	const [imgSrc, setImgSrc] = useState(src);
+
+	const handleError = () => {
+		setImgSrc(fallbackSrc);
+	};
+
+	return <img {...props} src={imgSrc} alt={alt} onError={handleError} />;
 };
 
 export default ImageWithFallback;

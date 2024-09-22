@@ -12,11 +12,9 @@ export async function getCurrentUserDesigns() {
 		redirect("/login");
 	}
 
-	const designs = await db.design.findMany({
+	return db.design.findMany({
 		where: {
 			userId: session.user.id,
 		},
 	});
-
-	return designs;
 }
