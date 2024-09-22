@@ -150,7 +150,7 @@ export function DetailsForm({
 					disabled={formState.state === "loading"}
 					className="w-full"
 				>
-					{formState.state === "loading" ? <Spinner /> : null}
+					{formState.state === "loading" ? <Spinner className="mr-2" /> : null}
 					{formState.state === "loading" ? "Saving..." : "Save"}
 				</Button>
 			</form>

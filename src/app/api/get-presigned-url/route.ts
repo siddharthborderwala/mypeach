@@ -1,9 +1,17 @@
 import { NextResponse } from "next/server";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { z } from "zod";
+
 import { storage } from "@/lib/storage";
 import { getUserAuth } from "@/lib/auth/utils";
 import { env } from "@/lib/env.mjs";
+
+const bodyValidator = z.object({
+	storageKey: z.string(),
+	fileType: z.string(),
+	type: z.enum(["public", "protected"]).optional().default("protected"),
+});
 
 export async function POST(request: Request) {
 	try {
@@ -12,10 +20,19 @@ export async function POST(request: Request) {
 			return NextResponse.json({ error: "Unauthorised" }, { status: 401 });
 		}
 
-		const { storageKey, fileType } = await request.json();
+		const result = bodyValidator.safeParse(await request.json());
+		if (!result.success) {
+			return NextResponse.json(
+				{ error: result.error.message },
+				{ status: 400 },
+			);
+		}
+
+		const { storageKey, fileType, type } = result.data;
 
 		const command = new PutObjectCommand({
-			Bucket: env.R2_BUCKET_NAME,
+			Bucket:
+				type === "public" ? env.R2_PUBLIC_BUCKET_NAME : env.R2_BUCKET_NAME,
 			Key: storageKey,
 			ContentType: fileType,
 		});

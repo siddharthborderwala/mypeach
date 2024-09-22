@@ -6,12 +6,12 @@ export default async function LandingPage() {
 	const { session } = await validateRequest();
 
 	return (
-		<div className="flex items-center justify-between p-4">
-			<div className="flex items-center">
-				<img src="/favicon.ico" alt="logo" className="h-10 w-10" />
-				<p className="text-black text-3xl font-bold tracking-tight">Peach</p>
-			</div>
-			<Button asChild>
+		<div className="flex items-center justify-between px-5 py-3">
+			<Link href="/" className="flex items-center gap-1 font-semibold">
+				<img src="/favicon.ico" alt="Peach" className="h-10 w-10" />
+				<span className="text-xl mt-1">Peach</span>
+			</Link>
+			<Button asChild className="h-auto py-1.5">
 				<Link href={session?.userId ? "/home" : "/register"}>
 					{session?.userId ? "Dashboard" : "Start Selling"}
 				</Link>

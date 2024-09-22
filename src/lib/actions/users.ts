@@ -125,7 +125,11 @@ export async function signUpAction(
 	const session = await lucia.createSession(userId, {});
 	const sessionCookie = lucia.createSessionCookie(session.id);
 	setAuthCookie(sessionCookie);
-	return redirect(redirectTo);
+	return redirectWithFlash(
+		redirectTo,
+		"Please check your email for a verification link",
+		"success",
+	);
 }
 
 export async function signOutAction(): Promise<ActionResult> {

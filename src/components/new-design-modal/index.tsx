@@ -290,7 +290,7 @@ export function NewDesignModal() {
 				<DialogTitle>
 					{uploadState.state === "idle"
 						? "Add New Design"
-						: getFileNameWithoutExtension(uploadState.fileName)}
+						: `Creating ${getFileNameWithoutExtension(uploadState.fileName)}`}
 				</DialogTitle>
 			</DialogHeader>
 			{uploadState.state === "idle" || uploadState.state === "error" ? (
@@ -325,8 +325,8 @@ export function NewDesignModal() {
 						</>
 					) : (
 						<div className="w-full h-full flex flex-col items-center justify-center">
-							<p className="font-bold">Creating your design...</p>
 							<Spinner />
+							<p className="font-bold">Creating your design...</p>
 						</div>
 					)}
 					<div className="w-full h-full flex items-center justify-center">

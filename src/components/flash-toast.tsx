@@ -19,7 +19,9 @@ export function FlashToast() {
 				decodeURIComponent(toastData.split("=")[1]),
 			);
 			const toastType = type as "success" | "error" | "info" | "warning";
-			toast[toastType](message);
+			toast[toastType](message, {
+				duration: 5000,
+			});
 			document.cookie = "toast=; Max-Age=0; path=/; SameSite=strict";
 		}
 	}, [pathname]);

@@ -4,14 +4,14 @@ import { Button } from "@/components/ui/button";
 import { NewDesignModal } from "@/components/new-design-modal";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import { getCurrentUserDesigns } from "@/lib/actions/designs";
-import { getFileURL } from "@/lib/storage/util";
+import { getUserContentUrl } from "@/lib/storage/util";
 import ImageWithFallback from "@/components/image-with-fallback";
 
 function getDesignThumbnailURL(key: string | null, width: 2000 | 1200) {
 	if (!key) {
 		return "";
 	}
-	return getFileURL(`${key}/${width}.webp`);
+	return getUserContentUrl(`${key}/${width}.webp`);
 }
 
 export default async function Designs() {

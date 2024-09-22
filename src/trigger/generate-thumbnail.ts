@@ -12,21 +12,19 @@ import { env } from "@/lib/env.mjs";
 // Function to convert TIFF from S3 to WebP and save it back to S3
 async function getInputStreamFromS3(
 	originalFileStorageKey: string,
+	bucket: string,
 ): Promise<Readable> {
-	logger.info("Fetching object from S3", { originalFileStorageKey });
 	const getObjectCommand = new GetObjectCommand({
 		Key: originalFileStorageKey,
-		Bucket: env.R2_BUCKET_NAME,
+		Bucket: bucket,
 	});
 
 	const inputS3Stream = await storage.send(getObjectCommand);
-	logger.info("Successfully fetched object from S3");
 
 	if (!inputS3Stream.Body) {
-		throw new Error("Input S3 stream is empty");
+		throw new Error("Empty body");
 	}
 
-	logger.info("Converting S3 Body to Node.js Readable stream");
 	return Readable.fromWeb(
 		// @ts-expect-error
 		inputS3Stream.Body.transformToWebStream(),
@@ -37,7 +35,6 @@ async function createSharpTransform(
 	width: number,
 	quality: number,
 ): Promise<sharp.Sharp> {
-	logger.info(`Creating sharp transform for ${width}w WebP conversion`);
 	return sharp()
 		.resize({
 			width: width,
@@ -47,26 +44,19 @@ async function createSharpTransform(
 		.webp({ quality, effort: 6 })
 		.on("error", (error) => {
 			logger.error("Error in sharp transform:", { error });
-		})
-		.on("info", (info) => {
-			logger.info("Sharp transform info:", {
-				width: info.width,
-				height: info.height,
-				size: info.size,
-			});
 		});
 }
 
-async function uploadToS3(
+async function uploadToPublicBucket(
 	readableStream: Readable,
 	transform: sharp.Sharp,
 	key: string,
+	bucket: string,
 ): Promise<void> {
-	logger.info("Initiating upload to S3", { thumbnailStorageKey: key });
 	const upload = new Upload({
 		client: storage,
 		params: {
-			Bucket: env.R2_BUCKET_NAME,
+			Bucket: bucket,
 			Key: key,
 			Body: readableStream.pipe(transform),
 			ContentType: "image/webp",
@@ -74,9 +64,7 @@ async function uploadToS3(
 		},
 	});
 
-	logger.info("Waiting for upload to complete");
 	await upload.done();
-	logger.info("Upload to S3 completed");
 }
 
 async function convertTiffToWebp({
@@ -84,20 +72,28 @@ async function convertTiffToWebp({
 	thumbnailStorageKey,
 	width,
 	quality,
+	sourceBucket,
+	destinationBucket,
 }: {
 	originalFileStorageKey: string;
 	thumbnailStorageKey: string;
 	width: 2000 | 1200;
 	quality: number;
+	sourceBucket: string;
+	destinationBucket: string;
 }): Promise<void> {
-	logger.info(`Starting conversion for ${width}w`);
-
 	try {
-		const readableStream = await getInputStreamFromS3(originalFileStorageKey);
+		const readableStream = await getInputStreamFromS3(
+			originalFileStorageKey,
+			sourceBucket,
+		);
 		const transform = await createSharpTransform(width, quality);
-		await uploadToS3(readableStream, transform, thumbnailStorageKey);
-
-		logger.info(`Completed conversion for ${width}w`);
+		await uploadToPublicBucket(
+			readableStream,
+			transform,
+			thumbnailStorageKey,
+			destinationBucket,
+		);
 	} catch (error) {
 		logger.error(`Error in convertTiffToWebp for ${width}w:`, {
 			error,
@@ -112,7 +108,6 @@ async function updateDesignRecord(
 	designId: string,
 	thumbnailStorageKey: string,
 ): Promise<void> {
-	logger.info("Updating design record in database", { designId });
 	await db.design.update({
 		where: { id: designId },
 		data: {
@@ -120,7 +115,6 @@ async function updateDesignRecord(
 			thumbnailFileType: "image/webp",
 		},
 	});
-	logger.info("Successfully updated design record");
 }
 
 export const generateThumbnailTask = task({
@@ -143,14 +137,14 @@ export const generateThumbnailTask = task({
 		);
 
 		try {
-			logger.info("Starting TIFF to WebP conversions");
-
 			// Generate 2000w WebP
 			await convertTiffToWebp({
 				originalFileStorageKey: payload.originalFileStorageKey,
 				thumbnailStorageKey: thumbnailStorageKey[2000],
 				width: 2000,
 				quality: 50,
+				sourceBucket: env.R2_BUCKET_NAME,
+				destinationBucket: env.R2_PUBLIC_BUCKET_NAME,
 			});
 
 			// generate 1200w WebP from 2000w WebP
@@ -159,9 +153,9 @@ export const generateThumbnailTask = task({
 				thumbnailStorageKey: thumbnailStorageKey[1200],
 				width: 1200,
 				quality: 50,
+				sourceBucket: env.R2_PUBLIC_BUCKET_NAME,
+				destinationBucket: env.R2_PUBLIC_BUCKET_NAME,
 			});
-
-			logger.info("Successfully converted TIFF to WebP for both sizes");
 
 			await updateDesignRecord(payload.designId, thumbnailStorageKey.folder);
 

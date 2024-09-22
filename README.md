@@ -76,6 +76,14 @@ Authentication is handled using Lucia. The main configuration can be found in `s
 
 File storage is managed using AWS S3 compatible Cloudflare R2. The configuration is in `src/lib/storage/index.ts`.
 
+### Public Bucket
+
+The public bucket is used to store files that are publicly accessible, such as design thumbnails.
+
+### Protected Bucket
+
+The protected bucket is used to store files that are protected by authentication, such as the original design files.
+
 ## Background Jobs
 
 Background jobs are managed using [trigger.dev](https://trigger.dev). The configuration can be found in `trigger.config.ts`.

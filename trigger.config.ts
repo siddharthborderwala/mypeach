@@ -1,6 +1,7 @@
-import type { TriggerConfig } from "@trigger.dev/sdk/v3";
+import { defineConfig } from "@trigger.dev/sdk/v3";
+import { prismaExtension } from "@trigger.dev/build/extensions/prisma";
 
-export const config: TriggerConfig = {
+export default defineConfig({
 	project: "proj_wojrgrrhrubpqptwqgcc",
 	logLevel: "log",
 	retries: {
@@ -13,5 +14,12 @@ export const config: TriggerConfig = {
 			randomize: true,
 		},
 	},
-	dependenciesToBundle: [/.*/],
-};
+	build: {
+		external: ["sharp"],
+		extensions: [
+			prismaExtension({
+				schema: "prisma/schema.prisma",
+			}),
+		],
+	},
+});
