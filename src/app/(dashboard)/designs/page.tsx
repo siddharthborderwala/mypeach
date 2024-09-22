@@ -6,6 +6,7 @@ import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import { getCurrentUserDesigns } from "@/lib/actions/designs";
 import DesignPreview from "@/components/pages/home/design-preview";
 import EditDesignSheet from "@/components/pages/home/edit-design-sheet";
+import NewDesignModalTrigger from "@/components/pages/home/new-design-modal/new-design-modal-trigger";
 
 export default async function Designs() {
 	const designs = await getCurrentUserDesigns();
@@ -15,14 +16,7 @@ export default async function Designs() {
 			<main className="relative flex h-[calc(100svh-3.5rem)] flex-col gap-4 p-4 md:gap-6 md:p-8">
 				<div className="flex items-center justify-between">
 					<h1 className="text-lg font-semibold md:text-2xl">Your Designs</h1>
-					{designs.length > 0 ? (
-						<DialogTrigger asChild>
-							<Button className="gap-2">
-								<Plus weight="bold" className="h-4 w-4" />
-								Add Design
-							</Button>
-						</DialogTrigger>
-					) : null}
+					{designs.length > 0 ? <NewDesignModalTrigger /> : null}
 				</div>
 				{designs.length === 0 ? (
 					<div className="flex flex-1 items-center justify-center rounded-lg border border-dashed shadow-sm">
@@ -33,12 +27,7 @@ export default async function Designs() {
 							<p className="text-sm text-muted-foreground">
 								You can start selling as soon as you add a design.
 							</p>
-							<DialogTrigger asChild>
-								<Button className="mt-4 gap-2">
-									<Plus weight="bold" className="h-4 w-4" />
-									Add Design
-								</Button>
-							</DialogTrigger>
+							<NewDesignModalTrigger className="mt-4" />
 						</div>
 					</div>
 				) : (

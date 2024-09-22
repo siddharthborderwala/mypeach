@@ -20,9 +20,12 @@ export function TiffPreview({ file }: TiffPreviewProps) {
 		const renderTiffPreview = async () => {
 			setIsLoading(true);
 			try {
-				const worker = new Worker(new URL("./tiff-worker.js", import.meta.url), {
-					type: "module",
-        });
+				const worker = new Worker(
+					new URL("./tiff-worker.js", import.meta.url),
+					{
+						type: "module",
+					},
+				);
 
 				worker.onmessage = (event) => {
 					if (event.data.error) {
@@ -48,9 +51,9 @@ export function TiffPreview({ file }: TiffPreviewProps) {
 	}, [file]);
 
 	return (
-		<div className="w-full h-full flex flex-col items-center justify-center">
+		<div className="w-full h-full flex flex-col items-center justify-center bg-muted rounded-lg">
 			{isLoading ? (
-				<Spinner size={40} />
+				<Spinner size={20} />
 			) : previewUrl ? (
 				<img
 					src={previewUrl}
