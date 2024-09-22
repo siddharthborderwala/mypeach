@@ -4,6 +4,7 @@ import { ErrorCode, useDropzone } from "react-dropzone";
 import { generateId } from "lucia";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
+import { atom, useAtom } from "jotai";
 import {
 	DialogContent,
 	DialogHeader,
@@ -15,7 +16,14 @@ import { Progress } from "@/components/ui/progress";
 import { CheckCircle, WarningCircle } from "@phosphor-icons/react";
 import { getDesignFileStorageKey } from "@/lib/storage/util";
 import { DetailsForm } from "./details-form";
-import { Spinner } from "../spinner";
+import { Spinner } from "@/components/spinner";
+import {
+	designDetailsAtom,
+	designIdAtom,
+	isDesignCreatedInDbAtom,
+	isDesignSavedAtom,
+} from "./atoms";
+import { TiffPreview } from "./tiff-preview";
 
 type UploadState =
 	| {
@@ -39,151 +47,148 @@ type UploadState =
 function getFileNameWithoutExtension(fileName: string) {
 	return fileName.split(".").slice(0, -1).join(".");
 }
-
 export function NewDesignModal() {
-	const [designId, setDesignId] = useState<string>();
-	const [isDesignCreatedInDb, setIsDesignCreatedInDb] = useState(false);
-	const [isDesignSaved, setIsDesignSaved] = useState(false);
-	const [designDetails, setDesignDetails] = useState<
-		| {
-				price: number;
-				fileDPI: number;
-				tags: string;
-		  }
-		| undefined
-	>(undefined);
+	const [designId, setDesignId] = useAtom(designIdAtom);
+	const [isDesignCreatedInDb, setIsDesignCreatedInDb] = useAtom(
+		isDesignCreatedInDbAtom,
+	);
+	const [isDesignSaved, setIsDesignSaved] = useAtom(isDesignSavedAtom);
+	const [designDetails, setDesignDetails] = useAtom(designDetailsAtom);
 
 	const toastId = useRef<string | number>();
 	const [uploadState, setUploadState] = useState<UploadState>({
 		state: "idle",
 	});
 
-	const onDrop = useCallback(async (acceptedFiles: File[]) => {
-		const file = acceptedFiles[0];
+	const onDrop = useCallback(
+		async (acceptedFiles: File[]) => {
+			const file = acceptedFiles[0];
 
-		if (!file) {
-			return;
-		}
-
-		const newDesignId = generateId(24);
-		const newDesignFileId = generateId(24);
-
-		setDesignId(newDesignId);
-
-		setUploadState({
-			state: "uploading",
-			fileName: file.name,
-			progress: 0,
-		});
-
-		const res = await fetch("/api/get-presigned-url", {
-			method: "POST",
-			body: JSON.stringify({
-				fileType: file.type,
-				storageKey: getDesignFileStorageKey(newDesignFileId),
-			}),
-		});
-
-		if (res.status !== 200) {
-			setUploadState({
-				state: "error",
-				fileName: file.name,
-				error: "Failed to start upload",
-			});
-			setTimeout(() => {
-				setDesignId(undefined);
-				setUploadState({
-					state: "idle",
-				});
-			}, 5000);
-			return;
-		}
-
-		const { presignedUrl } = await res.json();
-
-		const worker = new Worker(new URL("./worker.js", import.meta.url));
-
-		worker.onmessage = (event) => {
-			switch (event.data.type) {
-				case "start":
-					setUploadState({
-						state: "uploading",
-						fileName: file.name,
-						progress: 0,
-					});
-					fetch("/api/designs", {
-						method: "POST",
-						body: JSON.stringify({
-							designId: newDesignId,
-							fileId: newDesignFileId,
-							fileName: file.name,
-							fileType: file.type,
-						}),
-					})
-						.then((res) => {
-							if (res.status !== 200) {
-								throw new Error("Failed to create new design");
-							}
-							return res.json();
-						})
-						.then(() => {
-							setIsDesignCreatedInDb(true);
-						})
-						.catch((error) => {
-							worker.postMessage({
-								type: "cancelUpload",
-								reason: error.message,
-							});
-						});
-					break;
-				case "progress":
-					setUploadState({
-						state: "uploading",
-						fileName: file.name,
-						progress: event.data.progress,
-					});
-					break;
-				case "complete":
-					setUploadState({
-						state: "complete",
-						fileName: file.name,
-					});
-					fetch("/api/designs/is-upload-complete", {
-						method: "POST",
-						body: JSON.stringify({
-							designId: newDesignId,
-							isUploadComplete: true,
-						}),
-					});
-					worker.terminate();
-					break;
-				case "error":
-				case "cancelled":
-					setUploadState({
-						state: "error",
-						fileName: file.name,
-						error: event.data.message,
-					});
-					setTimeout(() => {
-						setDesignId(undefined);
-						setUploadState({
-							state: "idle",
-						});
-					}, 5000);
-					worker.terminate();
-					break;
+			if (!file) {
+				return;
 			}
-		};
 
-		// Start the upload
-		worker.postMessage({
-			type: "upload",
-			file,
-			presignedUrl,
-		});
-	}, []);
+			const newDesignId = generateId(24);
+			const newDesignFileId = generateId(24);
 
-	const { getRootProps, isDragActive } = useDropzone({
+			setDesignId(newDesignId);
+
+			setUploadState({
+				state: "uploading",
+				fileName: file.name,
+				progress: 0,
+			});
+
+			const res = await fetch("/api/get-presigned-url", {
+				method: "POST",
+				body: JSON.stringify({
+					fileType: file.type,
+					storageKey: getDesignFileStorageKey(newDesignFileId),
+				}),
+			});
+
+			if (res.status !== 200) {
+				setUploadState({
+					state: "error",
+					fileName: file.name,
+					error: "Failed to start upload",
+				});
+				setTimeout(() => {
+					setDesignId(undefined);
+					setUploadState({
+						state: "idle",
+					});
+				}, 5000);
+				return;
+			}
+
+			const { presignedUrl } = await res.json();
+
+			const worker = new Worker(new URL("./upload-worker.js", import.meta.url));
+
+			worker.onmessage = (event) => {
+				switch (event.data.type) {
+					case "start":
+						setUploadState({
+							state: "uploading",
+							fileName: file.name,
+							progress: 0,
+						});
+						fetch("/api/designs", {
+							method: "POST",
+							body: JSON.stringify({
+								designId: newDesignId,
+								fileId: newDesignFileId,
+								fileName: file.name,
+								fileType: file.type,
+							}),
+						})
+							.then((res) => {
+								if (res.status !== 200) {
+									throw new Error("Failed to create new design");
+								}
+								return res.json();
+							})
+							.then(() => {
+								setIsDesignCreatedInDb(true);
+							})
+							.catch((error) => {
+								worker.postMessage({
+									type: "cancelUpload",
+									reason: error.message,
+								});
+							});
+						break;
+					case "progress":
+						setUploadState({
+							state: "uploading",
+							fileName: file.name,
+							progress: event.data.progress,
+						});
+						break;
+					case "complete":
+						setUploadState({
+							state: "complete",
+							fileName: file.name,
+						});
+						fetch("/api/designs/is-upload-complete", {
+							method: "POST",
+							body: JSON.stringify({
+								designId: newDesignId,
+								isUploadComplete: true,
+							}),
+						});
+						worker.terminate();
+						break;
+					case "error":
+					case "cancelled":
+						setUploadState({
+							state: "error",
+							fileName: file.name,
+							error: event.data.message,
+						});
+						setTimeout(() => {
+							setDesignId(undefined);
+							setUploadState({
+								state: "idle",
+							});
+						}, 5000);
+						worker.terminate();
+						break;
+				}
+			};
+
+			// Start the upload
+			worker.postMessage({
+				type: "upload",
+				file,
+				presignedUrl,
+			});
+		},
+		[setDesignId, setIsDesignCreatedInDb],
+	);
+
+	const { getRootProps, isDragActive, acceptedFiles } = useDropzone({
 		onDrop,
 		multiple: false,
 		accept: { "image/tiff": [".tif", ".tiff"] },
@@ -282,7 +287,13 @@ export function NewDesignModal() {
 			setIsDesignSaved(false);
 			setIsDesignCreatedInDb(false);
 		}
-	}, [isDesignSaved, uploadState.state]);
+	}, [
+		isDesignSaved,
+		uploadState.state,
+		setDesignId,
+		setIsDesignSaved,
+		setIsDesignCreatedInDb,
+	]);
 
 	return (
 		<DialogContent className="w-full max-w-2xl">
@@ -330,7 +341,7 @@ export function NewDesignModal() {
 						</div>
 					)}
 					<div className="w-full h-full flex items-center justify-center">
-						<p className="font-bold">Preview</p>
+						<TiffPreview file={acceptedFiles[0]} />
 					</div>
 				</div>
 			) : null}

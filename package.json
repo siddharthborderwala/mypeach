@@ -37,6 +37,7 @@
 		"@trigger.dev/sdk": "3.0.6",
 		"class-variance-authority": "0.7.0",
 		"clsx": "2.1.1",
+		"jotai": "2.10.0",
 		"lucia": "3.2.0",
 		"lucide-react": "0.441.0",
 		"neverthrow": "8.0.0",
@@ -54,6 +55,7 @@
 		"strip-indent": "4.0.0",
 		"tailwind-merge": "2.5.2",
 		"tailwindcss-animate": "1.0.7",
+		"utif": "3.1.0",
 		"zod": "3.23.8"
 	},
 	"devDependencies": {
@@ -62,6 +64,7 @@
 		"@types/node": "^20",
 		"@types/react": "^18",
 		"@types/react-dom": "^18",
+		"@types/utif": "3.0.5",
 		"dotenv-cli": "7.4.2",
 		"postcss": "^8",
 		"prisma": "5.19.1",

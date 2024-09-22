@@ -1,7 +1,7 @@
 import { Plus } from "@phosphor-icons/react/dist/ssr";
 
 import { Button } from "@/components/ui/button";
-import { NewDesignModal } from "@/components/new-design-modal";
+import { NewDesignModal } from "@/components/pages/home/new-design-modal";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import { getCurrentUserDesigns } from "@/lib/actions/designs";
 import DesignPreview from "@/components/pages/home/design-preview";

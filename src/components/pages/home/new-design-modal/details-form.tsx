@@ -16,11 +16,12 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { Spinner } from "../spinner";
-import { FormError } from "../form-error";
+import { Spinner } from "@/components/spinner";
+import { FormError } from "@/components/form-error";
 import { toast } from "sonner";
 
 const formSchema = z.object({
+	name: z.string().min(1, "Name is required"),
 	price: z.number().min(290, "Price must be at least 290"),
 	fileDPI: z.number().min(300, "File DPI must be at least 300"),
 	tags: z.string().min(1, "At least one tag is required"),
@@ -54,6 +55,7 @@ export function DetailsForm({
 		resolver: zodResolver(formSchema),
 		defaultValues: {
 			designId,
+			name: defaultValues?.name ?? "Untitled",
 			price: defaultValues?.price ?? 290,
 			fileDPI: defaultValues?.fileDPI ?? 300,
 			tags: defaultValues?.tags ?? "",
@@ -79,6 +81,7 @@ export function DetailsForm({
 				price: data.design.price,
 				fileDPI: data.design.metadata.fileDPI,
 				tags: data.design.tags.join(","),
+				name: data.design.name,
 			});
 			setTimeout(() => {
 				setFormState({ state: "idle" });
@@ -93,6 +96,19 @@ export function DetailsForm({
 				onSubmit={form.handleSubmit(onSubmit)}
 				className={cn("space-y-4", className)}
 			>
+				<FormField
+					control={form.control}
+					name="name"
+					render={({ field }) => (
+						<FormItem>
+							<FormLabel className="font-bold">Name</FormLabel>
+							<FormControl>
+								<Input {...field} />
+							</FormControl>
+							<FormMessage />
+						</FormItem>
+					)}
+				/>
 				<FormField
 					control={form.control}
 					name="price"
@@ -151,7 +167,9 @@ export function DetailsForm({
 					className="w-full"
 				>
 					{formState.state === "loading" ? <Spinner className="mr-2" /> : null}
-					{formState.state === "loading" ? "Saving..." : "Save"}
+					{formState.state === "loading" ? "Saving..." : null}
+					{formState.state === "idle" ? "Save" : null}
+					{formState.state === "success" ? "Saved" : null}
 				</Button>
 			</form>
 		</Form>
