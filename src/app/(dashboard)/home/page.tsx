@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { ArrowUpRight, Plus } from "@phosphor-icons/react/dist/ssr";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -20,6 +21,10 @@ import {
 	TableRow,
 } from "@/components/ui/table";
 import { Overview } from "./overview";
+
+export const metadata: Metadata = {
+	title: "Dashboard | Peach",
+};
 
 export default function Home() {
 	return (

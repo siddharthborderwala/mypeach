@@ -32,7 +32,10 @@ export function TiffPreview({ file }: TiffPreviewProps) {
 						console.error("Error rendering TIFF preview:", event.data.error);
 						setPreviewUrl(null);
 					} else {
-						setPreviewUrl(event.data.previewUrl);
+						const { buffer, width, height, type } = event.data;
+						const blob = new Blob([buffer], { type });
+						const previewUrl = URL.createObjectURL(blob);
+						setPreviewUrl(previewUrl);
 					}
 					setIsLoading(false);
 					worker.terminate();

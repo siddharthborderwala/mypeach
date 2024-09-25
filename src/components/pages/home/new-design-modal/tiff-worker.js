@@ -15,8 +15,20 @@ self.onmessage = async (event) => {
 			imageData.data.set(rgba);
 			ctx.putImageData(imageData, 0, 0);
 			const blob = await canvas.convertToBlob();
-			const previewUrl = URL.createObjectURL(blob);
-			self.postMessage({ previewUrl });
+
+			// Convert blob to ArrayBuffer
+			const arrayBuffer = await blob.arrayBuffer();
+
+			// Send the ArrayBuffer along with image dimensions and type
+			self.postMessage(
+				{
+					buffer: arrayBuffer,
+					width: firstPage.width,
+					height: firstPage.height,
+					type: blob.type,
+				},
+				[arrayBuffer],
+			);
 		} else {
 			throw new Error("Could not get canvas context");
 		}

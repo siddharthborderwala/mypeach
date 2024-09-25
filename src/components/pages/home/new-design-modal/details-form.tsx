@@ -19,6 +19,8 @@ import { cn } from "@/lib/utils";
 import { Spinner } from "@/components/spinner";
 import { FormError } from "@/components/form-error";
 import { toast } from "sonner";
+import { designDetailsAtom, designIdAtom } from "./atoms";
+import { useAtom, useAtomValue } from "jotai";
 
 const formSchema = z.object({
 	name: z.string().min(1, "Name is required"),
@@ -30,14 +32,8 @@ const formSchema = z.object({
 
 export function DetailsForm({
 	className,
-	designId,
-	onSave,
-	defaultValues,
 }: {
 	className?: string;
-	designId: string;
-	defaultValues?: Omit<z.infer<typeof formSchema>, "designId">;
-	onSave: (values: Omit<z.infer<typeof formSchema>, "designId">) => void;
 }) {
 	const [formState, setFormState] = useState<
 		| {
@@ -51,14 +47,17 @@ export function DetailsForm({
 		state: "idle",
 	});
 
+	const designId = useAtomValue(designIdAtom);
+	const [designDetails, setDesignDetails] = useAtom(designDetailsAtom);
+
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
 		defaultValues: {
 			designId,
-			name: defaultValues?.name ?? "Untitled",
-			price: defaultValues?.price ?? 290,
-			fileDPI: defaultValues?.fileDPI ?? 300,
-			tags: defaultValues?.tags ?? "",
+			name: designDetails?.name ?? "Untitled",
+			price: designDetails?.price ?? 290,
+			fileDPI: designDetails?.fileDPI ?? 300,
+			tags: designDetails?.tags ?? "",
 		},
 	});
 
@@ -76,18 +75,15 @@ export function DetailsForm({
 			}
 			const data = await response.json();
 			setFormState({ state: "success" });
-			toast.success("Design details saved");
-			onSave({
-				price: data.design.price,
-				fileDPI: data.design.metadata.fileDPI,
-				tags: data.design.tags.join(","),
-				name: data.design.name,
+			toast.success("Design details saved", {
+				duration: 3000,
 			});
+			setDesignDetails(data);
 			setTimeout(() => {
 				setFormState({ state: "idle" });
 			}, 1000);
 		},
-		[onSave],
+		[setDesignDetails],
 	);
 
 	return (

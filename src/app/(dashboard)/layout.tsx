@@ -49,7 +49,7 @@ const navItems = [
 const secondaryNavItems = [
 	{
 		label: "Purchases",
-		href: "/library",
+		href: "/purchases",
 		icon: <ShoppingCart className="h-4 w-4" />,
 	},
 ];

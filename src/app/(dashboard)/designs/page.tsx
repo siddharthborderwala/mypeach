@@ -1,12 +1,15 @@
-import { Plus } from "@phosphor-icons/react/dist/ssr";
+import type { Metadata } from "next";
 
-import { Button } from "@/components/ui/button";
 import { NewDesignModal } from "@/components/pages/home/new-design-modal";
-import { Dialog, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog } from "@/components/ui/dialog";
 import { getCurrentUserDesigns } from "@/lib/actions/designs";
 import DesignPreview from "@/components/pages/home/design-preview";
 import EditDesignSheet from "@/components/pages/home/edit-design-sheet";
 import NewDesignModalTrigger from "@/components/pages/home/new-design-modal/new-design-modal-trigger";
+
+export const metadata: Metadata = {
+	title: "Designs | Peach",
+};
 
 export default async function Designs() {
 	const designs = await getCurrentUserDesigns();

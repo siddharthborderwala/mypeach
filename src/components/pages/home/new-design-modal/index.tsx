@@ -4,7 +4,7 @@ import { ErrorCode, useDropzone } from "react-dropzone";
 import { generateId } from "lucia";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import { atom, useAtom } from "jotai";
+import { useAtom, useAtomValue } from "jotai";
 import {
 	DialogContent,
 	DialogHeader,
@@ -53,7 +53,7 @@ export function NewDesignModal() {
 		isDesignCreatedInDbAtom,
 	);
 	const [isDesignSaved, setIsDesignSaved] = useAtom(isDesignSavedAtom);
-	const [designDetails, setDesignDetails] = useAtom(designDetailsAtom);
+	const designDetails = useAtomValue(designDetailsAtom);
 
 	const toastId = useRef<string | number>();
 	const [uploadState, setUploadState] = useState<UploadState>({
@@ -189,7 +189,7 @@ export function NewDesignModal() {
 	);
 
 	const { getRootProps, isDragActive, acceptedFiles } = useDropzone({
-		onDrop,
+		// onDrop,
 		multiple: false,
 		accept: { "image/tiff": [".tif", ".tiff"] },
 		disabled: uploadState.state !== "idle",
@@ -304,6 +304,7 @@ export function NewDesignModal() {
 						: `Creating ${getFileNameWithoutExtension(uploadState.fileName)}`}
 				</DialogTitle>
 			</DialogHeader>
+			<TiffPreview file={acceptedFiles[0]} />
 			{uploadState.state === "idle" || uploadState.state === "error" ? (
 				<div
 					{...getRootProps()}
@@ -322,18 +323,7 @@ export function NewDesignModal() {
 			{uploadState.state === "uploading" || uploadState.state === "complete" ? (
 				<div className="min-h-80 grid grid-cols-[1fr_1fr] gap-4">
 					{isDesignCreatedInDb ? (
-						<>
-							{designId ? (
-								<DetailsForm
-									designId={designId}
-									defaultValues={designDetails}
-									onSave={(d) => {
-										setIsDesignSaved(true);
-										setDesignDetails(d);
-									}}
-								/>
-							) : null}
-						</>
+						<>{designId ? <DetailsForm /> : null}</>
 					) : (
 						<div className="w-full h-full flex flex-col items-center justify-center">
 							<Spinner />
