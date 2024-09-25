@@ -16,5 +16,8 @@ export async function getCurrentUserDesigns() {
 		where: {
 			userId: session.user.id,
 		},
+		orderBy: {
+			createdAt: "desc",
+		},
 	});
 }

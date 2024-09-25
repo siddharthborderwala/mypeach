@@ -4,7 +4,6 @@ import { ErrorCode, useDropzone } from "react-dropzone";
 import { generateId } from "lucia";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import { useAtom, useAtomValue } from "jotai";
 import {
 	DialogContent,
 	DialogHeader,
@@ -17,13 +16,8 @@ import { CheckCircle, WarningCircle } from "@phosphor-icons/react";
 import { getDesignFileStorageKey } from "@/lib/storage/util";
 import { DetailsForm } from "./details-form";
 import { Spinner } from "@/components/spinner";
-import {
-	designDetailsAtom,
-	designIdAtom,
-	isDesignCreatedInDbAtom,
-	isDesignSavedAtom,
-} from "./atoms";
 import { TiffPreview } from "./tiff-preview";
+import { useUploadContext } from "../upload-context";
 
 type UploadState =
 	| {
@@ -47,13 +41,17 @@ type UploadState =
 function getFileNameWithoutExtension(fileName: string) {
 	return fileName.split(".").slice(0, -1).join(".");
 }
+
 export function NewDesignModal() {
-	const [designId, setDesignId] = useAtom(designIdAtom);
-	const [isDesignCreatedInDb, setIsDesignCreatedInDb] = useAtom(
-		isDesignCreatedInDbAtom,
-	);
-	const [isDesignSaved, setIsDesignSaved] = useAtom(isDesignSavedAtom);
-	const designDetails = useAtomValue(designDetailsAtom);
+	const {
+		setNewDesignId,
+		reset,
+		setNewDesignIsCreatedInDb,
+		setNewDesignIsUploaded,
+		newDesignIsUploaded,
+		newDesignId,
+		newDesignIsCreatedInDb,
+	} = useUploadContext();
 
 	const toastId = useRef<string | number>();
 	const [uploadState, setUploadState] = useState<UploadState>({
@@ -71,7 +69,7 @@ export function NewDesignModal() {
 			const newDesignId = generateId(24);
 			const newDesignFileId = generateId(24);
 
-			setDesignId(newDesignId);
+			setNewDesignId(newDesignId);
 
 			setUploadState({
 				state: "uploading",
@@ -94,7 +92,7 @@ export function NewDesignModal() {
 					error: "Failed to start upload",
 				});
 				setTimeout(() => {
-					setDesignId(undefined);
+					reset();
 					setUploadState({
 						state: "idle",
 					});
@@ -130,7 +128,7 @@ export function NewDesignModal() {
 								return res.json();
 							})
 							.then(() => {
-								setIsDesignCreatedInDb(true);
+								setNewDesignIsCreatedInDb(true);
 							})
 							.catch((error) => {
 								worker.postMessage({
@@ -158,6 +156,7 @@ export function NewDesignModal() {
 								isUploadComplete: true,
 							}),
 						});
+						setNewDesignIsUploaded(true);
 						worker.terminate();
 						break;
 					case "error":
@@ -168,7 +167,7 @@ export function NewDesignModal() {
 							error: event.data.message,
 						});
 						setTimeout(() => {
-							setDesignId(undefined);
+							reset();
 							setUploadState({
 								state: "idle",
 							});
@@ -185,11 +184,11 @@ export function NewDesignModal() {
 				presignedUrl,
 			});
 		},
-		[setDesignId, setIsDesignCreatedInDb],
+		[reset, setNewDesignId, setNewDesignIsCreatedInDb, setNewDesignIsUploaded],
 	);
 
 	const { getRootProps, isDragActive, acceptedFiles } = useDropzone({
-		// onDrop,
+		onDrop,
 		multiple: false,
 		accept: { "image/tiff": [".tif", ".tiff"] },
 		disabled: uploadState.state !== "idle",
@@ -279,21 +278,13 @@ export function NewDesignModal() {
 	}, [uploadState.state]);
 
 	useEffect(() => {
-		if (isDesignSaved && uploadState.state === "complete") {
+		if (newDesignIsUploaded && uploadState.state === "complete") {
 			setUploadState({
 				state: "idle",
 			});
-			setDesignId(undefined);
-			setIsDesignSaved(false);
-			setIsDesignCreatedInDb(false);
+			reset();
 		}
-	}, [
-		isDesignSaved,
-		uploadState.state,
-		setDesignId,
-		setIsDesignSaved,
-		setIsDesignCreatedInDb,
-	]);
+	}, [newDesignIsUploaded, uploadState.state, reset]);
 
 	return (
 		<DialogContent className="w-full max-w-2xl">
@@ -304,7 +295,6 @@ export function NewDesignModal() {
 						: `Creating ${getFileNameWithoutExtension(uploadState.fileName)}`}
 				</DialogTitle>
 			</DialogHeader>
-			<TiffPreview file={acceptedFiles[0]} />
 			{uploadState.state === "idle" || uploadState.state === "error" ? (
 				<div
 					{...getRootProps()}
@@ -322,8 +312,8 @@ export function NewDesignModal() {
 			) : null}
 			{uploadState.state === "uploading" || uploadState.state === "complete" ? (
 				<div className="min-h-80 grid grid-cols-[1fr_1fr] gap-4">
-					{isDesignCreatedInDb ? (
-						<>{designId ? <DetailsForm /> : null}</>
+					{newDesignIsCreatedInDb ? (
+						<>{newDesignId ? <DetailsForm /> : null}</>
 					) : (
 						<div className="w-full h-full flex flex-col items-center justify-center">
 							<Spinner />

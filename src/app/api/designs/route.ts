@@ -4,8 +4,10 @@ import { db } from "@/lib/db";
 import { getDesignFileStorageKey } from "@/lib/storage/util";
 import { z } from "zod";
 import { checkDesignUploadAfterADayTask } from "@/trigger/check-design-upload-after-a-day";
+import { revalidatePath } from "next/cache";
 
 const bodyValidator = z.object({
+	name: z.string().optional().default("Untitled"),
 	designId: z.string().length(24),
 	fileId: z.string().length(24),
 	fileName: z.string(),
@@ -60,6 +62,7 @@ export async function POST(request: Request) {
 }
 
 const putValidator = z.object({
+	name: z.string().optional(),
 	designId: z.string().length(24),
 	isDraft: z.boolean().optional(),
 	thumbnailFileStorageKey: z.string().optional(),
@@ -88,7 +91,7 @@ export async function PUT(request: Request) {
 			);
 		}
 
-		const { designId, fileDPI, tags, ...designData } = result.data;
+		const { designId, fileDPI, tags, name, ...designData } = result.data;
 
 		const tagsArray =
 			typeof tags === "string" ? tags.split(",").map((t) => t.trim()) : tags;
@@ -97,12 +100,15 @@ export async function PUT(request: Request) {
 			where: { id: designId, userId: session.user.id },
 			data: {
 				...designData,
+				name,
 				metadata: {
 					fileDPI,
 				},
 				tags: tagsArray,
 			},
 		});
+
+		revalidatePath("/designs");
 
 		return NextResponse.json({ design: dbResult });
 	} catch (error) {

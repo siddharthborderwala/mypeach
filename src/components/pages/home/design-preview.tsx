@@ -3,10 +3,9 @@
 import ImageWithFallback from "@/components/image-with-fallback";
 import type { getCurrentUserDesigns } from "@/lib/actions/designs";
 import { getUserContentUrl } from "@/lib/storage/util";
-import { useAtomValue } from "jotai";
 import { parseAsString, useQueryState } from "nuqs";
-import { designIdAtom } from "./new-design-modal/atoms";
 import { Badge } from "@/components/ui/badge";
+import { useUploadContext } from "./upload-context";
 
 function getDesignThumbnailURL(key: string | null, width: 2000 | 1200) {
 	if (!key) {
@@ -21,7 +20,7 @@ export default function DesignPreview({
 	design: Awaited<ReturnType<typeof getCurrentUserDesigns>>[number];
 }) {
 	const [, setDesign] = useQueryState("design", parseAsString);
-	const uploadingDesignId = useAtomValue(designIdAtom);
+	const { newDesignId } = useUploadContext();
 
 	return (
 		<button
@@ -37,7 +36,7 @@ export default function DesignPreview({
 			<div className="flex flex-col mt-2 text-left">
 				<div className="flex items-center justify-between">
 					<h3 className="font-semibold truncate">{design.name}</h3>
-					{uploadingDesignId === design.id && <Badge>Uploading</Badge>}
+					{newDesignId === design.id && <Badge>Uploading</Badge>}
 				</div>
 				<p className="text-sm text-muted-foreground truncate">
 					{design.originalFileName}

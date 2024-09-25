@@ -19,14 +19,13 @@ import { cn } from "@/lib/utils";
 import { Spinner } from "@/components/spinner";
 import { FormError } from "@/components/form-error";
 import { toast } from "sonner";
-import { designDetailsAtom, designIdAtom } from "./atoms";
-import { useAtom, useAtomValue } from "jotai";
+import { useUploadContext } from "../upload-context";
 
 const formSchema = z.object({
 	name: z.string().min(1, "Name is required"),
 	price: z.number().min(290, "Price must be at least 290"),
 	fileDPI: z.number().min(300, "File DPI must be at least 300"),
-	tags: z.string().min(1, "At least one tag is required"),
+	tags: z.string().optional(),
 	designId: z.string(),
 });
 
@@ -47,17 +46,17 @@ export function DetailsForm({
 		state: "idle",
 	});
 
-	const designId = useAtomValue(designIdAtom);
-	const [designDetails, setDesignDetails] = useAtom(designDetailsAtom);
+	const { newDesignId, newDesignDetails, setNewDesignDetails } =
+		useUploadContext();
 
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
 		defaultValues: {
-			designId,
-			name: designDetails?.name ?? "Untitled",
-			price: designDetails?.price ?? 290,
-			fileDPI: designDetails?.fileDPI ?? 300,
-			tags: designDetails?.tags ?? "",
+			designId: newDesignId,
+			name: newDesignDetails?.name ?? "Untitled",
+			price: newDesignDetails?.price ?? 290,
+			fileDPI: newDesignDetails?.fileDPI ?? 300,
+			tags: newDesignDetails?.tags ?? "",
 		},
 	});
 
@@ -78,12 +77,12 @@ export function DetailsForm({
 			toast.success("Design details saved", {
 				duration: 3000,
 			});
-			setDesignDetails(data);
+			setNewDesignDetails(data);
 			setTimeout(() => {
 				setFormState({ state: "idle" });
 			}, 1000);
 		},
-		[setDesignDetails],
+		[setNewDesignDetails],
 	);
 
 	return (

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Spinner } from "@/components/spinner";
 
 interface TiffPreviewProps {
@@ -8,6 +8,7 @@ interface TiffPreviewProps {
 }
 
 export function TiffPreview({ file }: TiffPreviewProps) {
+	const previewUrlRef = useRef<string | null>(null);
 	const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 	const [isLoading, setIsLoading] = useState(false);
 
@@ -32,7 +33,7 @@ export function TiffPreview({ file }: TiffPreviewProps) {
 						console.error("Error rendering TIFF preview:", event.data.error);
 						setPreviewUrl(null);
 					} else {
-						const { buffer, width, height, type } = event.data;
+						const { buffer, type } = event.data;
 						const blob = new Blob([buffer], { type });
 						const previewUrl = URL.createObjectURL(blob);
 						setPreviewUrl(previewUrl);
@@ -53,10 +54,27 @@ export function TiffPreview({ file }: TiffPreviewProps) {
 		renderTiffPreview();
 	}, [file]);
 
+	useEffect(() => {
+		if (previewUrl) {
+			previewUrlRef.current = previewUrl;
+		}
+	}, [previewUrl]);
+
+	useEffect(() => {
+		return () => {
+			if (previewUrlRef.current) {
+				URL.revokeObjectURL(previewUrlRef.current);
+			}
+		};
+	}, []);
+
 	return (
 		<div className="w-full h-full flex flex-col items-center justify-center bg-muted rounded-lg">
 			{isLoading ? (
-				<Spinner size={20} />
+				<>
+					<Spinner size={20} />
+					<p className="text-sm mt-2">Loading preview...</p>
+				</>
 			) : previewUrl ? (
 				<img
 					src={previewUrl}
@@ -64,9 +82,9 @@ export function TiffPreview({ file }: TiffPreviewProps) {
 					className="max-w-full max-h-[300px] object-contain"
 				/>
 			) : file ? (
-				<p>Error loading preview</p>
+				<p className="text-sm">Error loading preview</p>
 			) : (
-				<p>No file selected</p>
+				<p className="text-sm">No file selected</p>
 			)}
 		</div>
 	);

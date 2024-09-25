@@ -24,12 +24,7 @@ export default function RootLayout({
 		<html lang="en">
 			<body className={`${manrope.variable} font-sans`}>
 				{children}
-				<Toaster
-					richColors
-					theme="light"
-					className="font-sans"
-					duration={5000}
-				/>
+				<Toaster richColors theme="light" className="font-sans" />
 				<FlashToast />
 			</body>
 		</html>
