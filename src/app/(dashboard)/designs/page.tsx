@@ -35,7 +35,7 @@ export default async function Designs({ searchParams }: PageProps) {
 						{designs.length > 0 ? <NewDesignModalTrigger /> : null}
 					</div>
 					{designs.length === 0 ? (
-						<div className="pb-4 px-4 md:pb-8 md:px-8 flex flex-1 items-center justify-center rounded-lg border border-dashed shadow-sm">
+						<div className="mb-4 mx-4 md:mb-8 md:mx-8 flex flex-1 items-center justify-center rounded-lg border border-dashed shadow-sm">
 							<div className="flex flex-col items-center gap-1 text-center">
 								<h3 className="text-2xl font-bold tracking-tight">
 									You have no designs

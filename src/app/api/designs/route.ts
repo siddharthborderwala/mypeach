@@ -4,7 +4,6 @@ import { db } from "@/lib/db";
 import { getDesignFileStorageKey } from "@/lib/storage/util";
 import { z } from "zod";
 import { checkDesignUploadAfterADayTask } from "@/trigger/check-design-upload-after-a-day";
-import { revalidatePath } from "next/cache";
 
 const bodyValidator = z.object({
 	name: z.string().optional().default("Untitled"),
@@ -107,8 +106,6 @@ export async function PUT(request: Request) {
 				tags: tagsArray,
 			},
 		});
-
-		revalidatePath("/designs");
 
 		return NextResponse.json({ design: dbResult });
 	} catch (error) {

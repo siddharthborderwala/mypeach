@@ -12,6 +12,7 @@ import { FormError } from "@/components/form-error";
 import { Spinner } from "@/components/spinner";
 
 export default function Login() {
+	const [email] = useQueryState("email");
 	const [redirectTo] = useQueryState("redirectTo");
 	const [state, formAction] = useFormState(signInAction, {
 		error: "",
@@ -29,7 +30,13 @@ export default function Login() {
 				<div className="grid gap-4">
 					<div className="grid gap-2">
 						<Label htmlFor="email">Email</Label>
-						<Input id="email" name="email" type="email" required />
+						<Input
+							id="email"
+							name="email"
+							type="email"
+							defaultValue={email}
+							required
+						/>
 					</div>
 					<div className="grid gap-2">
 						<div className="flex items-center">

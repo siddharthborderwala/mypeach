@@ -29,6 +29,7 @@ export default function DesignPreview({
 			onClick={() => setDesign(design.id)}
 		>
 			<ImageWithFallback
+				suppressHydrationWarning
 				src={getDesignThumbnailURL(design.thumbnailFileStorageKey, 1200)}
 				width="100%"
 				className="aspect-square flex items-center justify-center select-none pointer-events-none"

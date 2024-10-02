@@ -1,7 +1,27 @@
 import { CommonHeader } from "@/components/common-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { validateRequest } from "@/lib/auth/lucia";
+import Link from "next/link";
 
+async function CTA() {
+	const { session } = await validateRequest();
+
+	return session?.userId ? (
+		<Button asChild className="mt-8 px-7 w-min">
+			<Link href="/home">View Dashboard</Link>
+		</Button>
+	) : (
+		<form
+			action="/login"
+			method="GET"
+			className="flex mt-6 flex-col w-full max-w-md"
+		>
+			<Input type="text" name="email" placeholder="Enter your email" />
+			<Button className="mt-4 px-7 w-min">Get Started</Button>
+		</form>
+	);
+}
 export default function LandingPage() {
 	return (
 		<>
@@ -12,14 +32,7 @@ export default function LandingPage() {
 						Start selling your <br />
 						<span className="text-primary">textile designs</span>
 					</h1>
-					{/* <p className="text-lg font-medium mt-8 text-muted-foreground">
-						Peach is a platform that allows you to sell your textile designs to
-						anyone.
-					</p> */}
-					<div className="flex mt-4 flex-col w-full max-w-md">
-						<Input type="text" placeholder="Enter your email" />
-						<Button className="mt-4 px-7 w-min">Get Started</Button>
-					</div>
+					<CTA />
 				</section>
 			</main>
 		</>
