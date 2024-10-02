@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useFormStatus, useFormState } from "react-dom";
-import { useQueryState } from "nuqs";
+import { parseAsString, useQueryState } from "nuqs";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,7 +12,7 @@ import { FormError } from "@/components/form-error";
 import { Spinner } from "@/components/spinner";
 
 export default function Login() {
-	const [email] = useQueryState("email");
+	const [email] = useQueryState("email", parseAsString);
 	const [redirectTo] = useQueryState("redirectTo");
 	const [state, formAction] = useFormState(signInAction, {
 		error: "",
@@ -34,7 +34,7 @@ export default function Login() {
 							id="email"
 							name="email"
 							type="email"
-							defaultValue={email}
+							defaultValue={email ?? ""}
 							required
 						/>
 					</div>
