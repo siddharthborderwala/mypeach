@@ -143,7 +143,7 @@ export const generateThumbnailTask = task({
 				thumbnailStorageKey: thumbnailStorageKey[2000],
 				width: 2000,
 				quality: 50,
-				sourceBucket: env.R2_BUCKET_NAME,
+				sourceBucket: env.R2_PROTECTED_BUCKET_NAME,
 				destinationBucket: env.R2_PUBLIC_BUCKET_NAME,
 			});
 

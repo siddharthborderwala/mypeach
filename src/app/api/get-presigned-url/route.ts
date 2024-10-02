@@ -32,7 +32,9 @@ export async function POST(request: Request) {
 
 		const command = new PutObjectCommand({
 			Bucket:
-				type === "public" ? env.R2_PUBLIC_BUCKET_NAME : env.R2_BUCKET_NAME,
+				type === "public"
+					? env.R2_PUBLIC_BUCKET_NAME
+					: env.R2_PROTECTED_BUCKET_NAME,
 			Key: storageKey,
 			ContentType: fileType,
 		});

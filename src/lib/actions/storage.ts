@@ -18,7 +18,7 @@ export async function getPresignedUrl({
 	if (!session) return err("Unauthorised");
 
 	const command = new PutObjectCommand({
-		Bucket: env.R2_BUCKET_NAME,
+		Bucket: env.R2_PROTECTED_BUCKET_NAME,
 		Key: storageKey,
 		ContentType: fileType,
 	});
