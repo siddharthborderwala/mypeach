@@ -12,6 +12,7 @@ import {
 import { Button } from "./ui/button";
 import { signOutAction } from "@/lib/actions/users";
 import { useFormStatus } from "react-dom";
+import Link from "next/link";
 
 function LogoutButton() {
 	const { pending } = useFormStatus();
@@ -44,8 +45,12 @@ export function UserMenu() {
 			<DropdownMenuContent align="end">
 				<DropdownMenuLabel>My Account</DropdownMenuLabel>
 				<DropdownMenuSeparator />
-				<DropdownMenuItem>Settings</DropdownMenuItem>
-				<DropdownMenuItem>Support</DropdownMenuItem>
+				<DropdownMenuItem asChild>
+					<Link href="/settings">Settings</Link>
+				</DropdownMenuItem>
+				<DropdownMenuItem asChild>
+					<Link href="/support">Support</Link>
+				</DropdownMenuItem>
 				<DropdownMenuSeparator />
 				<LogoutButton />
 			</DropdownMenuContent>

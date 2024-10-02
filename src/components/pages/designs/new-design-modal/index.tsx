@@ -331,7 +331,7 @@ export function NewDesignModal() {
 							<p className="font-bold">Creating your design...</p>
 						</div>
 					)}
-					<div className="w-full h-full flex items-center justify-center">
+					<div className="w-full h-auto flex items-center justify-center">
 						<TiffPreview file={acceptedFiles[0]} />
 					</div>
 				</div>
