@@ -165,6 +165,9 @@ importers:
       '@types/react-dom':
         specifier: ^18
         version: 18.3.0
+      '@unly/cli-confirm':
+        specifier: 1.1.1
+        version: 1.1.1
       dotenv-cli:
         specifier: 7.4.2
         version: 7.4.2
@@ -2307,6 +2310,10 @@ packages:
 
   '@types/tinycolor2@1.4.6':
     resolution: {integrity: sha512-iEN8J0BoMnsWBqjVbWH/c0G0Hh7O21lpR2/+PrvAVgWdzL7eexIFm4JN/Wn10PTcmNdtS6U67r499mlWMXOxNw==}
+
+  '@unly/cli-confirm@1.1.1':
+    resolution: {integrity: sha512-OqjK3zNlhqBfd+G8y5qCXjYvh2FHg1FOOtns6Zy4hOGaVTyQcUR2AWoXXyF6AN852vsx6l7ctFXBWr5y20DrJw==}
+    hasBin: true
 
   abbrev@2.0.0:
     resolution: {integrity: sha512-6/mh1E2u2YgEsCHdY0Yx5oW+61gZU+1vXaoiHHrpKeuRNNgFvS+/jrwHiQhB5apAf5oB7UB7E19ol2R2LKH8hQ==}
@@ -6097,6 +6104,8 @@ snapshots:
   '@types/shimmer@1.2.0': {}
 
   '@types/tinycolor2@1.4.6': {}
+
+  '@unly/cli-confirm@1.1.1': {}
 
   abbrev@2.0.0: {}
 
