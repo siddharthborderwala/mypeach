@@ -7,6 +7,7 @@ on:
     paths:
       - "src/trigger/**"
       - "trigger.config.ts"
+      - ".github/workflows/deploy-trigger-production.yml"
 
 jobs:
   deploy:
@@ -41,5 +42,5 @@ jobs:
         env:
           TRIGGER_ACCESS_TOKEN: ${{ secrets.TRIGGER_ACCESS_TOKEN }}
         run: |
-          pnpm db:generate
+          pnpm run db:generate
           pnpm dlx trigger.dev deploy
