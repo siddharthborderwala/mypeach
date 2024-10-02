@@ -1,7 +1,7 @@
 "use client";
 
 import ImageWithFallback from "@/components/image-with-fallback";
-import type { getCurrentUserDesigns } from "@/lib/actions/designs";
+import type { DesignData } from "@/lib/actions/designs";
 import { getUserContentUrl } from "@/lib/storage/util";
 import { parseAsString, useQueryState } from "nuqs";
 import { Badge } from "@/components/ui/badge";
@@ -17,7 +17,7 @@ function getDesignThumbnailURL(key: string | null, width: 2000 | 1200) {
 export default function DesignPreview({
 	design,
 }: {
-	design: Awaited<ReturnType<typeof getCurrentUserDesigns>>[number];
+	design: DesignData;
 }) {
 	const [, setDesign] = useQueryState("design", parseAsString);
 	const { newDesignId } = useUploadContext();

@@ -1,14 +1,14 @@
 import type { Metadata } from "next";
+import { parseAsBoolean } from "nuqs";
 
-import { NewDesignModal } from "@/components/pages/home/new-design-modal";
+import { NewDesignModal } from "@/components/pages/designs/new-design-modal";
 import { Dialog } from "@/components/ui/dialog";
 import { getCurrentUserDesigns } from "@/lib/actions/designs";
-import DesignPreview from "@/components/pages/home/design-preview";
-import EditDesignSheet from "@/components/pages/home/edit-design-sheet";
-import NewDesignModalTrigger from "@/components/pages/home/new-design-modal/new-design-modal-trigger";
-import { UploadProvider } from "@/components/pages/home/upload-context";
+import EditDesignSheet from "@/components/pages/designs/edit-design-sheet";
+import NewDesignModalTrigger from "@/components/pages/designs/new-design-modal/new-design-modal-trigger";
+import { UploadProvider } from "@/components/pages/designs/upload-context";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { parseAsBoolean } from "nuqs";
+import InfiniteScrollDesigns from "@/components/pages/designs/infinite-scroll-designs-view";
 
 export const metadata: Metadata = {
 	title: "Designs | Peach",
@@ -23,7 +23,7 @@ type PageProps = {
 const newParser = parseAsBoolean.withDefault(false);
 
 export default async function Designs({ searchParams }: PageProps) {
-	const designs = await getCurrentUserDesigns();
+	const { designs, pagination } = await getCurrentUserDesigns();
 	const newDesign = newParser.parseServerSide(searchParams.new);
 
 	return (
@@ -49,11 +49,7 @@ export default async function Designs({ searchParams }: PageProps) {
 					) : (
 						<ScrollArea>
 							<div className="pb-4 px-4 md:pb-8 md:px-8">
-								<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-									{designs.map((design) => (
-										<DesignPreview key={design.id} design={design} />
-									))}
-								</div>
+								<InfiniteScrollDesigns initialData={{ designs, pagination }} />
 								<EditDesignSheet />
 							</div>
 						</ScrollArea>
