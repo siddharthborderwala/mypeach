@@ -54,7 +54,7 @@ export default function Register() {
 	);
 }
 
-export const SubmitButton = () => {
+const SubmitButton = () => {
 	const { pending } = useFormStatus();
 
 	return (

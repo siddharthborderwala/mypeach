@@ -57,7 +57,7 @@ export default function ForgotPassword() {
 	);
 }
 
-export const SubmitButton = () => {
+const SubmitButton = () => {
 	const { pending } = useFormStatus();
 
 	return (

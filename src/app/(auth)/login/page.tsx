@@ -67,7 +67,7 @@ export default function Login() {
 	);
 }
 
-export const SubmitButton = () => {
+const SubmitButton = () => {
 	const { pending } = useFormStatus();
 
 	return (
