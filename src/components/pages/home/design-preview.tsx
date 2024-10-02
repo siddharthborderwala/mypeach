@@ -31,7 +31,7 @@ export default function DesignPreview({
 			<ImageWithFallback
 				src={getDesignThumbnailURL(design.thumbnailFileStorageKey, 1200)}
 				width="100%"
-				className="aspect-square flex items-center justify-center"
+				className="aspect-square flex items-center justify-center select-none pointer-events-none"
 			/>
 			<div className="flex flex-col mt-2 text-left">
 				<div className="flex items-center justify-between">

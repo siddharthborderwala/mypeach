@@ -8,17 +8,27 @@ import EditDesignSheet from "@/components/pages/home/edit-design-sheet";
 import NewDesignModalTrigger from "@/components/pages/home/new-design-modal/new-design-modal-trigger";
 import { UploadProvider } from "@/components/pages/home/upload-context";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { parseAsBoolean } from "nuqs";
 
 export const metadata: Metadata = {
 	title: "Designs | Peach",
 };
 
-export default async function Designs() {
+type PageProps = {
+	searchParams: {
+		new?: string | string[];
+	};
+};
+
+const newParser = parseAsBoolean.withDefault(false);
+
+export default async function Designs({ searchParams }: PageProps) {
 	const designs = await getCurrentUserDesigns();
+	const newDesign = newParser.parseServerSide(searchParams.new);
 
 	return (
 		<UploadProvider>
-			<Dialog>
+			<Dialog defaultOpen={newDesign}>
 				<main className="relative flex h-[calc(100svh-3.5rem)] flex-col gap-4 md:gap-6">
 					<div className="flex items-center justify-between pt-4 px-4 md:pt-8 md:px-8">
 						<h1 className="text-lg font-semibold md:text-2xl">Your Designs</h1>

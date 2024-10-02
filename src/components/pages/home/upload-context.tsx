@@ -1,9 +1,11 @@
 "use client";
 
+import { parseAsBoolean, useQueryState } from "nuqs";
 import {
 	createContext,
 	useCallback,
 	useContext,
+	useEffect,
 	useMemo,
 	useState,
 } from "react";
@@ -61,12 +63,23 @@ export const UploadProvider = ({ children }: { children: React.ReactNode }) => {
 	const [newDesignIsCreatedInDb, setNewDesignIsCreatedInDb] =
 		useState<boolean>(false);
 
+	const [openNewDesignModal, setOpenNewDesignModal] = useQueryState(
+		"new",
+		parseAsBoolean,
+	);
+
 	const reset = useCallback(() => {
 		setNewDesignId(undefined);
 		setNewDesignDetails(undefined);
 		setNewDesignIsUploaded(false);
 		setNewDesignIsCreatedInDb(false);
 	}, []);
+
+	useEffect(() => {
+		if (openNewDesignModal) {
+			setOpenNewDesignModal(null);
+		}
+	}, [openNewDesignModal, setOpenNewDesignModal]);
 
 	const value = useMemo(
 		() => ({

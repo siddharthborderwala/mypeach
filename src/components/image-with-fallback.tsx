@@ -2,9 +2,10 @@
 
 import { cn } from "@/lib/utils";
 import type * as React from "react";
+import { useState } from "react";
 
 interface ImageWithFallbackProps
-	extends React.ObjectHTMLAttributes<HTMLObjectElement> {
+	extends React.ObjectHTMLAttributes<HTMLImageElement> {
 	src: string;
 	fallbackSrc?: string;
 	alt?: string;
@@ -15,17 +16,41 @@ const ImageWithFallback: React.FC<ImageWithFallbackProps> = ({
 	fallbackSrc = "/favicon.ico",
 	className,
 	alt = "",
+	onError,
 	...props
 }) => {
+	const [effectiveSrc, setEffectiveSrc] = useState(src || fallbackSrc);
+
+	if (effectiveSrc === fallbackSrc) {
+		return (
+			<div
+				className={cn(
+					"flex items-center justify-center border rounded",
+					className,
+				)}
+			>
+				<img
+					src={fallbackSrc}
+					alt={alt}
+					className="w-8 h-8 md:w-10 md:h-10 filter grayscale"
+				/>
+			</div>
+		);
+	}
+
 	return (
-		<object
-			data={src}
-			type="image/png"
+		<img
 			{...props}
-			className={cn("border-none flex items-center justify-center", className)}
-		>
-			<img src={fallbackSrc} alt={alt} className="w-10 h-10" />
-		</object>
+			src={effectiveSrc}
+			alt={alt}
+			className={cn("border-none flex items-center justify-center", className, {
+				"object-none": effectiveSrc === fallbackSrc,
+			})}
+			onError={(e) => {
+				setEffectiveSrc(fallbackSrc);
+				onError?.(e);
+			}}
+		/>
 	);
 };
 

@@ -21,20 +21,19 @@ import {
 	TableRow,
 } from "@/components/ui/table";
 import { Overview } from "./overview";
+import { Image } from "@phosphor-icons/react/dist/ssr";
 
 export const metadata: Metadata = {
 	title: "Dashboard | Peach",
 };
 
-export default function Home() {
+function Home() {
 	return (
 		<main className="flex h-[calc(100svh-3.5rem)] flex-col gap-4 p-4 md:gap-6 md:p-8 overflow-y-auto">
 			<div className="flex items-center justify-between">
-				<h1 className="text-lg font-semibold md:text-2xl">
-					Welcome back to Peach
-				</h1>
+				<h1 className="text-lg font-semibold md:text-2xl">Welcome to Peach</h1>
 				<Button className="gap-2" asChild>
-					<Link href="/designs/new">
+					<Link href="/designs?new=true">
 						<Plus weight="bold" className="h-4 w-4" />
 						Add Design
 					</Link>
@@ -243,6 +242,31 @@ export default function Home() {
 						</div>
 					</CardContent>
 				</Card>
+			</div>
+		</main>
+	);
+}
+
+export default function HomePage() {
+	return (
+		<main className="relative flex h-[calc(100svh-3.5rem)] flex-col gap-4 md:gap-6">
+			<div className="flex items-center justify-between pt-4 px-4 md:pt-8 md:px-8">
+				<h1 className="text-lg font-semibold md:text-2xl">Welcome to Peach</h1>
+			</div>
+			<div className="flex flex-col flex-1 items-center justify-center rounded-lg border border-dashed shadow-sm mb-4 mx-4 md:mb-8 md:mx-8">
+				<Image weight="thin" className="text-primary h-32 w-32" />
+				<div className="flex flex-col items-center gap-1 text-center">
+					<h3 className="text-lg font-bold">Add a new design!</h3>
+					<p className="text-sm text-muted-foreground">
+						It's easy to get started.
+					</p>
+				</div>
+				<Button className="gap-2 mt-8 w-1/5" variant="default" asChild>
+					<Link href="/designs?new=true">
+						<Plus weight="bold" className="h-4 w-4" />
+						Add Design
+					</Link>
+				</Button>
 			</div>
 		</main>
 	);

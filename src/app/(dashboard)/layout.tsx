@@ -1,7 +1,6 @@
 import Link from "next/link";
 import {
 	House,
-	ChartLineUp,
 	List as Menu,
 	MagnifyingGlass as Search,
 	PaintBrush,
@@ -16,7 +15,6 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { checkAuth } from "@/lib/auth/utils";
 import { NavItem, NavItemMobile } from "./nav";
 import { UserMenu } from "@/components/user-menu";
-import Head from "next/head";
 
 const navItems = [
 	{
@@ -38,11 +36,6 @@ const navItems = [
 		label: "Payouts",
 		href: "/payouts",
 		icon: <CurrencyCircleDollar className="h-4 w-4" />,
-	},
-	{
-		label: "Analytics",
-		href: "/analytics",
-		icon: <ChartLineUp className="h-4 w-4" />,
 	},
 ];
 

@@ -1,3 +1,4 @@
+import { DashboardComingSoonPlaceholder } from "@/components/dashboard-coming-soon-placeholder";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -5,5 +6,5 @@ export const metadata: Metadata = {
 };
 
 export default function Purchases() {
-	return <div>Purchases</div>;
+	return <DashboardComingSoonPlaceholder title="Purchases" />;
 }
