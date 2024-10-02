@@ -20,6 +20,7 @@ import { Spinner } from "@/components/spinner";
 import { FormError } from "@/components/form-error";
 import { toast } from "sonner";
 import { useUploadContext } from "../upload-context";
+import { useRefetchDesigns } from "@/hooks/dashboard";
 
 const formSchema = z.object({
 	name: z.string().min(1, "Name is required"),
@@ -48,6 +49,8 @@ export function DetailsForm({
 
 	const { newDesignId, newDesignDetails, setNewDesignDetails } =
 		useUploadContext();
+
+	const refetchDesigns = useRefetchDesigns();
 
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
@@ -78,11 +81,12 @@ export function DetailsForm({
 				duration: 3000,
 			});
 			setNewDesignDetails(data);
+			refetchDesigns();
 			setTimeout(() => {
 				setFormState({ state: "idle" });
 			}, 1000);
 		},
-		[setNewDesignDetails],
+		[setNewDesignDetails, refetchDesigns],
 	);
 
 	return (

@@ -18,6 +18,8 @@ import { DetailsForm } from "./details-form";
 import { Spinner } from "@/components/spinner";
 import { TiffPreview } from "./tiff-preview";
 import { useUploadContext } from "../upload-context";
+import { useMutation } from "@tanstack/react-query";
+import { useRefetchDesigns } from "@/hooks/dashboard";
 
 type UploadState =
 	| {
@@ -52,6 +54,8 @@ export function NewDesignModal() {
 		newDesignId,
 		newDesignIsCreatedInDb,
 	} = useUploadContext();
+
+	const refetchDesigns = useRefetchDesigns();
 
 	const toastId = useRef<string | number>();
 	const [uploadState, setUploadState] = useState<UploadState>({
@@ -129,6 +133,7 @@ export function NewDesignModal() {
 							})
 							.then(() => {
 								setNewDesignIsCreatedInDb(true);
+								refetchDesigns();
 							})
 							.catch((error) => {
 								worker.postMessage({
@@ -184,7 +189,13 @@ export function NewDesignModal() {
 				presignedUrl,
 			});
 		},
-		[reset, setNewDesignId, setNewDesignIsCreatedInDb, setNewDesignIsUploaded],
+		[
+			reset,
+			setNewDesignId,
+			setNewDesignIsCreatedInDb,
+			setNewDesignIsUploaded,
+			refetchDesigns,
+		],
 	);
 
 	const { getRootProps, isDragActive, acceptedFiles } = useDropzone({

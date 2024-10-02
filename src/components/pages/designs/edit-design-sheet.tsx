@@ -23,10 +23,7 @@ export default function EditDesignSheet() {
 			<SheetContent>
 				<SheetHeader>
 					<SheetTitle>Edit Design</SheetTitle>
-					<SheetDescription>
-						This action cannot be undone. This will permanently delete your
-						account and remove your data from our servers.
-					</SheetDescription>
+					<SheetDescription>This feature is coming soon.</SheetDescription>
 				</SheetHeader>
 			</SheetContent>
 		</Sheet>
