@@ -1,8 +1,13 @@
 import { defineConfig } from "@trigger.dev/sdk/v3";
 import { prismaExtension } from "@trigger.dev/build/extensions/prisma";
 
+const project =
+	process.env.NODE_ENV === "production"
+		? "proj_wojrgrrhrubpqptwqgcc"
+		: "proj_vkutkwszmpyewlwnavsr";
+
 export default defineConfig({
-	project: "proj_wojrgrrhrubpqptwqgcc",
+	project,
 	logLevel: "log",
 	retries: {
 		enabledInDev: true,
