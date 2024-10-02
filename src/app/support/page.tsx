@@ -8,8 +8,8 @@ import {
 	AccordionTrigger,
 } from "@/components/ui/accordion";
 import Link from "next/link";
-import { validateRequest } from "@/lib/auth/lucia";
 import { Button } from "@/components/ui/button";
+import { CommonHeader } from "@/components/common-header";
 
 // Add this array outside of the component
 const faqItems: { question: string; answer: React.ReactNode }[] = [
@@ -70,22 +70,10 @@ const faqItems: { question: string; answer: React.ReactNode }[] = [
 	},
 ];
 
-export default async function SupportPage() {
-	const { session } = await validateRequest();
-
+export default function SupportPage() {
 	return (
 		<>
-			<div className="flex items-center justify-between px-5 py-3">
-				<Link href="/" className="flex items-center gap-1 font-semibold">
-					<img src="/favicon.ico" alt="Peach" className="h-10 w-10" />
-					<span className="text-xl mt-1">Peach</span>
-				</Link>
-				<Button asChild className="h-auto py-1.5">
-					<Link href={session?.userId ? "/home" : "/register"}>
-						{session?.userId ? "Dashboard" : "Start Selling"}
-					</Link>
-				</Button>
-			</div>
+			<CommonHeader />
 			<main className="relative flex h-[calc(100svh-3.5rem)] flex-col gap-4 p-4 md:gap-6 md:p-8 mx-auto max-w-3xl">
 				<div className="space-y-2">
 					<h1 className="text-lg font-semibold md:text-2xl">Support</h1>

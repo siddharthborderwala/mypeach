@@ -1,9 +1,8 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
-import { db } from "@/lib/db/index";
+import { db, PrismaError } from "@/lib/db/index";
 
 import { Argon2id } from "oslo/password";
 import { generateId } from "lucia";
@@ -17,7 +16,6 @@ import {
 	getUserAuth,
 } from "../auth/utils";
 
-import { updateUserSchema } from "../db/schema/auth";
 import { generateUsername } from "../username";
 import { emailVerificationTask } from "@/trigger/email-verification";
 import { getSafeRedirect } from "../utils";
@@ -66,7 +64,6 @@ export async function signInAction(
 
 		return redirect(redirectTo);
 	} catch (e) {
-		console.log(e);
 		return genericError;
 	}
 }
@@ -118,7 +115,12 @@ export async function signUpAction(
 			token,
 		});
 	} catch (e) {
-		console.log(e);
+		// if it's a prisma error, return a specific error message
+		if (e instanceof PrismaError) {
+			if (e.code === "P2002") {
+				return { error: "You already have an account, please login" };
+			}
+		}
 		return genericError;
 	}
 
@@ -145,37 +147,6 @@ export async function signOutAction(): Promise<ActionResult> {
 	const sessionCookie = lucia.createBlankSessionCookie();
 	setAuthCookie(sessionCookie);
 	redirect("/");
-}
-
-export async function updateUser(
-	_: unknown,
-	formData: FormData,
-): Promise<ActionResult & { success?: boolean }> {
-	const { session } = await getUserAuth();
-	if (!session) return { error: "Unauthorised" };
-
-	const name = formData.get("name") ?? undefined;
-	const email = formData.get("email") ?? undefined;
-
-	const result = updateUserSchema.safeParse({ name, email });
-
-	if (!result.success) {
-		const error = result.error.flatten().fieldErrors;
-		if (error.name) return { error: `Invalid name - ${error.name[0]}` };
-		if (error.email) return { error: `Invalid email - ${error.email[0]}` };
-		return genericError;
-	}
-
-	try {
-		await db.user.update({
-			data: { ...result.data },
-			where: { id: session.user.id },
-		});
-		revalidatePath("/account");
-		return { success: true, error: "" };
-	} catch (e) {
-		return genericError;
-	}
 }
 
 const emailValidator = z.string().email();

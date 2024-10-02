@@ -1,21 +1,27 @@
-import Link from "next/link";
+import { CommonHeader } from "@/components/common-header";
 import { Button } from "@/components/ui/button";
-import { validateRequest } from "@/lib/auth/lucia";
+import { Input } from "@/components/ui/input";
 
-export default async function LandingPage() {
-	const { session } = await validateRequest();
-
+export default function LandingPage() {
 	return (
-		<div className="flex items-center justify-between px-5 py-3">
-			<Link href="/" className="flex items-center gap-1 font-semibold">
-				<img src="/favicon.ico" alt="Peach" className="h-10 w-10" />
-				<span className="text-xl mt-1">Peach</span>
-			</Link>
-			<Button asChild className="h-auto py-1.5">
-				<Link href={session?.userId ? "/home" : "/register"}>
-					{session?.userId ? "Dashboard" : "Start Selling"}
-				</Link>
-			</Button>
-		</div>
+		<>
+			<CommonHeader />
+			<main className="flex items-center w-full h-[70svh] px-4 md:py-6 md:px-8">
+				<section className="w-full max-w-7xl mx-auto">
+					<h1 className="text-5xl font-bold leading-tight">
+						Start selling your <br />
+						<span className="text-primary">textile designs</span>
+					</h1>
+					{/* <p className="text-lg font-medium mt-8 text-muted-foreground">
+						Peach is a platform that allows you to sell your textile designs to
+						anyone.
+					</p> */}
+					<div className="flex mt-4 flex-col w-full max-w-md">
+						<Input type="text" placeholder="Enter your email" />
+						<Button className="mt-4 px-7 w-min">Get Started</Button>
+					</div>
+				</section>
+			</main>
+		</>
 	);
 }
