@@ -43,9 +43,7 @@ const ImageWithFallback: React.FC<ImageWithFallbackProps> = ({
 			{...props}
 			src={effectiveSrc}
 			alt={alt}
-			className={cn("border-none flex items-center justify-center", className, {
-				"object-none": effectiveSrc === fallbackSrc,
-			})}
+			className={cn("border-none flex items-center justify-center", className)}
 			onError={(e) => {
 				setEffectiveSrc(fallbackSrc);
 				onError?.(e);

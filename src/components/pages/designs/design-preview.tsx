@@ -32,7 +32,7 @@ export default function DesignPreview({
 				suppressHydrationWarning
 				src={getDesignThumbnailURL(design.thumbnailFileStorageKey, 1200)}
 				width="100%"
-				className="aspect-square flex items-center justify-center select-none pointer-events-none"
+				className="aspect-square flex items-center justify-center select-none pointer-events-none object-cover"
 			/>
 			<div className="flex flex-col mt-2 text-left">
 				<div className="flex items-center justify-between">
