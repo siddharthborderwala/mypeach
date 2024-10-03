@@ -107,12 +107,12 @@ export default function SupportPage() {
 						<CardHeader>
 							<CardTitle className="flex items-center gap-2">
 								<Phone className="h-5 w-5" />
-								Phone Support
+								WhatsApp Support
 							</CardTitle>
 						</CardHeader>
 						<CardContent>
 							<div className="flex">
-								<p className="text-lg font-medium">+91 84900 88657</p>
+								<p className="text-lg font-medium">+91 75678 10000</p>
 							</div>
 							<p className="text-sm text-muted-foreground mt-2">
 								Available Monday to Saturday, 9 AM - 9 PM IST
