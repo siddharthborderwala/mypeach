@@ -5,6 +5,8 @@ import { Input } from "@/components/ui/input";
 import { validateRequest } from "@/lib/auth/lucia";
 import Link from "next/link";
 
+// meaningless comment
+
 export const metadata: Metadata = {
 	title: "Peach",
 	description:
