@@ -36,13 +36,9 @@ export default function InfiniteScrollDesigns({
 		}
 	}, [inView, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
-	console.log(inView);
-
 	if (status === "error") return <div>Error loading designs</div>;
 
 	const allDesigns = data.pages.flatMap((page) => page.designs);
-
-	console.log(allDesigns.length);
 
 	return (
 		<>
