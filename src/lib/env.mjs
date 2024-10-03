@@ -23,11 +23,15 @@ export const env = createEnv({
 		NEXT_PUBLIC_USERCONTENT_BASE_URL: z.string().min(1),
 	},
 	// If you're using Next.js < 13.4.4, you'll need to specify the runtimeEnv manually
-	// runtimeEnv: {
-	//   DATABASE_URL: process.env.DATABASE_URL,
-	//   NEXT_PUBLIC_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_PUBLISHABLE_KEY,
-	// },
 	// For Next.js >= 13.4.4, you only need to destructure client variables:
+	runtimeEnv: {
+		NEXT_PUBLIC_R2_PROTECTED_BUCKET_NAME:
+			process.env.NEXT_PUBLIC_R2_PROTECTED_BUCKET_NAME,
+		NEXT_PUBLIC_R2_PUBLIC_BUCKET_NAME:
+			process.env.NEXT_PUBLIC_R2_PUBLIC_BUCKET_NAME,
+		NEXT_PUBLIC_USERCONTENT_BASE_URL:
+			process.env.NEXT_PUBLIC_USERCONTENT_BASE_URL,
+	},
 	experimental__runtimeEnv: {
 		// NEXT_PUBLIC_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_PUBLISHABLE_KEY,
 	},
