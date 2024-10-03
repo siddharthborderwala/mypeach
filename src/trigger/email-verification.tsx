@@ -1,6 +1,6 @@
 import React from "react";
 import { task, retry, logger } from "@trigger.dev/sdk/v3";
-import VerifyEmail from "@/components/emails/verify-email";
+import VerifyEmail from "./emails/verify-email";
 import { resend } from "./util/resend";
 
 export const emailVerificationTask = task({

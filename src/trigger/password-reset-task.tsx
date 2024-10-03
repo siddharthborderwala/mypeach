@@ -1,7 +1,6 @@
 import React from "react";
 import { task, retry, logger } from "@trigger.dev/sdk/v3";
-import PasswordResetEmail from "@/components/emails/reset-password";
-
+import PasswordResetEmail from "./emails/reset-password";
 import { resend } from "./util/resend";
 
 export const passwordResetTask = task({

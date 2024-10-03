@@ -20,7 +20,7 @@ async function CTA() {
 		</Button>
 	) : (
 		<form
-			action="/login"
+			action="/register"
 			method="GET"
 			className="flex mt-6 flex-col w-full max-w-sm"
 		>

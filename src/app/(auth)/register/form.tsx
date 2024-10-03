@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useFormState, useFormStatus } from "react-dom";
-import { useQueryState } from "nuqs";
+import { parseAsString, useQueryState } from "nuqs";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,6 +12,7 @@ import { FormError } from "@/components/form-error";
 import { Spinner } from "@/components/spinner";
 
 export function RegisterForm() {
+	const [email] = useQueryState("email", parseAsString);
 	const [redirectTo] = useQueryState("redirectTo");
 	const [state, formAction] = useFormState(signUpAction, {
 		error: "",
@@ -28,7 +29,12 @@ export function RegisterForm() {
 			<div className="grid gap-4">
 				<div className="grid gap-2">
 					<Label htmlFor="email">Email</Label>
-					<Input name="email" type="email" required />
+					<Input
+						name="email"
+						type="email"
+						defaultValue={email ?? ""}
+						required
+					/>
 				</div>
 				<div className="grid gap-2">
 					<div className="flex items-center">
