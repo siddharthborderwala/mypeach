@@ -4,10 +4,16 @@ import { Readable } from "node:stream";
 import { Upload } from "@aws-sdk/lib-storage";
 import { task, logger } from "@trigger.dev/sdk/v3";
 
-import { storage } from "@/lib/storage";
 import { db } from "@/lib/db";
-import { getDesignThumbnailFileStorageKey } from "@/lib/storage/util";
-import { env } from "@/lib/env.mjs";
+import { storage } from "./util/storage";
+
+export function getDesignThumbnailFileStorageKey(id: string) {
+	return {
+		folder: `design-thumbnails/${id}`,
+		2000: `design-thumbnails/${id}/2000.webp`,
+		1200: `design-thumbnails/${id}/1200.webp`,
+	};
+}
 
 // Function to convert TIFF from S3 to WebP and save it back to S3
 async function getInputStreamFromS3(
@@ -143,8 +149,8 @@ export const generateThumbnailTask = task({
 				thumbnailStorageKey: thumbnailStorageKey[2000],
 				width: 2000,
 				quality: 50,
-				sourceBucket: env.R2_PROTECTED_BUCKET_NAME,
-				destinationBucket: env.R2_PUBLIC_BUCKET_NAME,
+				sourceBucket: process.env.R2_PROTECTED_BUCKET_NAME!,
+				destinationBucket: process.env.R2_PUBLIC_BUCKET_NAME!,
 			});
 
 			// generate 1200w WebP from 2000w WebP
@@ -153,8 +159,8 @@ export const generateThumbnailTask = task({
 				thumbnailStorageKey: thumbnailStorageKey[1200],
 				width: 1200,
 				quality: 50,
-				sourceBucket: env.R2_PUBLIC_BUCKET_NAME,
-				destinationBucket: env.R2_PUBLIC_BUCKET_NAME,
+				sourceBucket: process.env.R2_PUBLIC_BUCKET_NAME!,
+				destinationBucket: process.env.R2_PUBLIC_BUCKET_NAME!,
 			});
 
 			await updateDesignRecord(payload.designId, thumbnailStorageKey.folder);
