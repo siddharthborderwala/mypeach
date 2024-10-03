@@ -3,7 +3,6 @@ import { getUserAuth } from "@/lib/auth/utils";
 import { db } from "@/lib/db";
 import { getDesignFileStorageKey } from "@/lib/storage/util";
 import { z } from "zod";
-import { checkDesignUploadAfterADayTask } from "@/trigger/check-design-upload-after-a-day";
 
 const bodyValidator = z.object({
 	name: z.string().optional().default("Untitled"),
@@ -45,10 +44,10 @@ export async function POST(request: Request) {
 			},
 		});
 
-		await checkDesignUploadAfterADayTask.trigger({
-			designId,
-			userId,
-		});
+		// await checkDesignUploadAfterADayTask.trigger({
+		// 	designId,
+		// 	userId,
+		// });
 
 		return NextResponse.json({ designId });
 	} catch (error) {

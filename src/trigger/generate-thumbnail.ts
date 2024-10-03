@@ -10,6 +10,7 @@ import { storage } from "./util/storage";
 export function getDesignThumbnailFileStorageKey(id: string) {
 	return {
 		folder: `design-thumbnails/${id}`,
+		social: `design-thumbnails/${id}/social.jpeg`,
 		2000: `design-thumbnails/${id}/2000.webp`,
 		1200: `design-thumbnails/${id}/1200.webp`,
 	};
@@ -146,6 +147,49 @@ async function convertToWebp({
 	}
 }
 
+async function convertToJpeg({
+	originalFileStorageKey,
+	thumbnailStorageKey,
+	width,
+	quality,
+	sourceBucket,
+	destinationBucket,
+}: {
+	originalFileStorageKey: string;
+	thumbnailStorageKey: string;
+	width: number;
+	quality: number;
+	sourceBucket: string;
+	destinationBucket: string;
+}): Promise<void> {
+	try {
+		const readableStream = await getInputStreamFromS3(
+			originalFileStorageKey,
+			sourceBucket,
+		);
+		const transform = sharp()
+			.resize({
+				width: width,
+				fit: "inside",
+				withoutEnlargement: true,
+			})
+			.jpeg({ quality, progressive: true });
+		await uploadToPublicBucket(
+			readableStream,
+			transform,
+			thumbnailStorageKey,
+			destinationBucket,
+		);
+	} catch (error) {
+		logger.error(`Error in convertToJpeg for ${width}w:`, {
+			error,
+			originalFileStorageKey,
+			thumbnailStorageKey,
+		});
+		throw error;
+	}
+}
+
 async function updateDesignRecord(
 	designId: string,
 	thumbnailStorageKey: string,
@@ -190,8 +234,8 @@ export const generateThumbnailTask = task({
 				addWatermark: true,
 			});
 
-			// generate 1200w WebP from 2000w WebP
-			await convertToWebp({
+			// Generate 1200w WebP from 2000w WebP
+			const p1 = convertToWebp({
 				originalFileStorageKey: thumbnailStorageKey[2000],
 				thumbnailStorageKey: thumbnailStorageKey[1200],
 				width: 1200,
@@ -200,6 +244,18 @@ export const generateThumbnailTask = task({
 				destinationBucket: process.env.R2_PUBLIC_BUCKET_NAME!,
 				addWatermark: false,
 			});
+
+			// Generate 1200w JPEG for social sharing from 2000w WebP
+			const p2 = convertToJpeg({
+				originalFileStorageKey: thumbnailStorageKey[2000],
+				thumbnailStorageKey: thumbnailStorageKey.social,
+				width: 1200,
+				quality: 80,
+				sourceBucket: process.env.R2_PUBLIC_BUCKET_NAME!,
+				destinationBucket: process.env.R2_PUBLIC_BUCKET_NAME!,
+			});
+
+			await Promise.all([p1, p2]);
 
 			await updateDesignRecord(payload.designId, thumbnailStorageKey.folder);
 
