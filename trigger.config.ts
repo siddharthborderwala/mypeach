@@ -1,10 +1,14 @@
 import { defineConfig } from "@trigger.dev/sdk/v3";
 import { prismaExtension } from "@trigger.dev/build/extensions/prisma";
 
+// team@mypeach.in
 const project =
 	process.env.NODE_ENV === "production"
 		? "proj_maroqjmxibdowszyhuhv"
 		: "proj_vkutkwszmpyewlwnavsr";
+
+// siddharthborderwala@gmail.com
+// const project = "proj_wojrgrrhrubpqptwqgcc";
 
 export default defineConfig({
 	project,
