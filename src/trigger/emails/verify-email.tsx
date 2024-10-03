@@ -30,7 +30,7 @@ const VerifyEmailComponent = ({ token }: VerifyEmailProps) => {
 			<Body style={main}>
 				<Container style={container}>
 					<Img
-						src={`${appBaseURL}/favicon.ico`}
+						src={`${appBaseURL}/logo.png`}
 						width="42"
 						height="42"
 						alt="Peach"

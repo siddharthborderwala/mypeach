@@ -67,7 +67,7 @@ export default async function Layout({
 					<div className="flex h-full max-h-screen flex-col gap-2">
 						<div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
 							<Link href="/" className="flex items-center gap-1 font-semibold">
-								<img src="/favicon.ico" alt="Peach" className="h-8 w-8" />
+								<img src="/logo.png" alt="Peach" className="h-8 w-8" />
 								<span className="text-lg mt-1">Peach</span>
 							</Link>
 						</div>
@@ -109,7 +109,7 @@ export default async function Layout({
 									href="/"
 									className="flex items-center gap-2 font-semibold"
 								>
-									<img src="/favicon.ico" alt="Peach" className="h-8 w-8" />
+									<img src="/logo.png" alt="Peach" className="h-8 w-8" />
 									<span className="text-lg mt-1">Peach</span>
 								</Link>
 								<nav className="grid gap-2 mt-4 text-base font-medium">

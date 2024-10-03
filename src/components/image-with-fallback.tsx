@@ -13,7 +13,7 @@ interface ImageWithFallbackProps
 
 const ImageWithFallback: React.FC<ImageWithFallbackProps> = ({
 	src,
-	fallbackSrc = "/favicon.ico",
+	fallbackSrc = "/logo.png",
 	className,
 	alt = "",
 	onError,

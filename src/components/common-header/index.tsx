@@ -40,7 +40,7 @@ export function CommonHeader() {
 	return (
 		<div className="flex items-center justify-between md:gap-6 px-4 md:py-6 md:px-8">
 			<Link href="/" className="flex items-center gap-1 font-semibold">
-				<img src="/favicon.ico" alt="Peach" className="h-10 w-10" />
+				<img src="/logo.png" alt="Peach" className="h-10 w-10" />
 				<span className="text-xl mt-1">Peach</span>
 			</Link>
 			<Header />
