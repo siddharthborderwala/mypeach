@@ -80,7 +80,7 @@ export function DetailsForm({
 			toast.success("Design details saved", {
 				duration: 3000,
 			});
-			setNewDesignDetails(data);
+			setNewDesignDetails(data.design);
 			refetchDesigns();
 			setTimeout(() => {
 				setFormState({ state: "idle" });
