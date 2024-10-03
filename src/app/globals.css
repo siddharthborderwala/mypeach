@@ -4,11 +4,6 @@
 
 /* peach - hsl(1deg 98% 78%) */
 
-/* :root {
-	--background: #fafafa;
-	--foreground: #09090b;
-} */
-
 body {
 	color: var(--foreground);
 	background: var(--background);
