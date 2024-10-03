@@ -3,7 +3,7 @@ import { prismaExtension } from "@trigger.dev/build/extensions/prisma";
 
 const project =
 	process.env.NODE_ENV === "production"
-		? "proj_wojrgrrhrubpqptwqgcc"
+		? "proj_maroqjmxibdowszyhuhv"
 		: "proj_vkutkwszmpyewlwnavsr";
 
 export default defineConfig({
