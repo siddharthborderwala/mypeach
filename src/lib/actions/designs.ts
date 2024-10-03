@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { getUserAuth } from "../auth/utils";
 
-export async function getCurrentUserDesigns(page = 1, pageSize = 4) {
+export async function getCurrentUserDesigns(page = 1, pageSize = 24) {
 	const { session } = await getUserAuth();
 
 	if (!session) {

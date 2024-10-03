@@ -2,11 +2,14 @@ import { cookies } from "next/headers";
 import { cache } from "react";
 
 import { type Session, type User, Lucia } from "lucia";
-import { db } from "@/lib/db/index";
+import { RedisAdapter } from "./redis-adapter";
+// import { db } from "@/lib/db/index";
 
-import { PrismaAdapter } from "@lucia-auth/adapter-prisma";
+// import { PrismaAdapter } from "@lucia-auth/adapter-prisma";
 
-const adapter = new PrismaAdapter(db.session, db.user);
+// const adapter = new PrismaAdapter(db.session, db.user);
+
+const adapter = new RedisAdapter(process.env.REDIS_URL!);
 
 declare module "lucia" {
 	interface Register {
@@ -15,9 +18,8 @@ declare module "lucia" {
 	}
 }
 
-interface DatabaseUserAttributes {
-	username: string;
-}
+// biome-ignore lint/suspicious/noEmptyInterface: <explanation>
+interface DatabaseUserAttributes {}
 
 export const lucia = new Lucia(adapter, {
 	sessionCookie: {
@@ -26,10 +28,8 @@ export const lucia = new Lucia(adapter, {
 			secure: process.env.NODE_ENV === "production",
 		},
 	},
-	getUserAttributes: (attributes) => {
-		return {
-			username: attributes.username,
-		} satisfies DatabaseUserAttributes;
+	getUserAttributes: () => {
+		return {} satisfies DatabaseUserAttributes;
 	},
 });
 
@@ -45,7 +45,9 @@ export const validateRequest = cache(
 			};
 		}
 
+		console.time("validateRequest");
 		const result = await lucia.validateSession(sessionId);
+		console.timeEnd("validateRequest");
 		// next.js throws when you attempt to set cookie when rendering page
 		try {
 			if (result.session?.fresh) {
