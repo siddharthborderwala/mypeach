@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import type { Metadata } from "next";
 
 import { SealCheck, SealWarning } from "@phosphor-icons/react/dist/ssr";
 import { verifyEmailVerificationToken } from "@/lib/auth/verification";
@@ -9,6 +10,10 @@ type VerifyEmailProps = {
 	searchParams: {
 		token?: string;
 	};
+};
+
+export const metadata: Metadata = {
+	title: "Verify Email | Peach",
 };
 
 export default async function VerifyEmail({ searchParams }: VerifyEmailProps) {

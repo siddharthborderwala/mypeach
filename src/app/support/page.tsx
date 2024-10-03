@@ -1,4 +1,5 @@
 import type * as React from "react";
+import type { Metadata } from "next";
 import { Envelope, Phone } from "@phosphor-icons/react/dist/ssr";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -10,6 +11,12 @@ import {
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { CommonHeader } from "@/components/common-header";
+
+export const metadata: Metadata = {
+	title: "Support | Peach",
+	description:
+		"Get help with Peach - the platform for buying and selling latest TIFF layered textile design files.",
+};
 
 // Add this array outside of the component
 const faqItems: { question: string; answer: React.ReactNode }[] = [

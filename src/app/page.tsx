@@ -1,8 +1,15 @@
+import type { Metadata } from "next";
 import { CommonHeader } from "@/components/common-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { validateRequest } from "@/lib/auth/lucia";
 import Link from "next/link";
+
+export const metadata: Metadata = {
+	title: "Peach",
+	description:
+		"Buy and sell the latest TIFF layered textile design files from Peach",
+};
 
 async function CTA() {
 	const { session } = await validateRequest();
