@@ -52,40 +52,69 @@ async function createSharpTransform(
 		.webp({ quality, effort: 6 });
 
 	if (addWatermark) {
-		// Load the watermark from https://usercontent.mypeach.in/watermark.png
-		const watermarkBuffer = await fetch(
-			"https://usercontent.mypeach.in/watermark.png",
-		).then((res) => res.arrayBuffer());
+		const watermarkText = "mypeach.in";
+		const repetitions = 5; // Set the desired number of repetitions
 
-		// Create a new sharp instance for the watermark
-		const watermarkWithMargin = await sharp(Buffer.from(watermarkBuffer))
-			.ensureAlpha()
-			.extend({
-				top: 60,
-				bottom: 60,
-				left: 80,
-				right: 80,
-				background: { r: 0, g: 0, b: 0, alpha: 0 }, // Transparent background
-			})
-			.rotate(-45, {
-				background: { r: 0, g: 0, b: 0, alpha: 0 },
-			})
-			.toBuffer();
+		// Generate the watermark SVG
+		const svgBuffer = generateWatermarkSVG(
+			width,
+			width, // If your images are not square, adjust this
+			watermarkText,
+			repetitions,
+		);
 
-		// Add the watermark with margins to the image
+		// Composite the watermark SVG over the image
 		transform = transform.composite([
 			{
-				input: watermarkWithMargin,
-				tile: true,
-				gravity: "northeast",
+				input: svgBuffer,
+				blend: "over",
 			},
 		]);
 	}
 
 	return transform.on("error", (error: unknown) => {
-		logger.error("Error in sharp transform:", { error });
+		console.error("Error in sharp transform:", { error });
 		throw error;
 	});
+}
+
+function generateWatermarkSVG(
+	width: number,
+	height: number,
+	text: string,
+	repetitions: number,
+): Buffer {
+	const xmlns = "http://www.w3.org/2000/svg";
+
+	// Calculate pattern dimensions based on the number of repetitions
+	const patternWidth = width / repetitions;
+	const patternHeight = patternWidth; // Assuming square patterns
+
+	// Center positions for the rotated text
+	const centerX = patternWidth / 2;
+	const centerY = patternHeight / 2;
+
+	// Adjust font size
+	const fontSize = patternWidth * 0.25; // Increase multiplier to increase font size
+
+	// Create the SVG content
+	const svgContent = `
+<svg xmlns="${xmlns}" width="${width}" height="${height}">
+  <defs>
+    <pattern id="watermarkPattern" patternUnits="userSpaceOnUse" width="${patternWidth}" height="${patternHeight}">
+      <g transform="translate(${centerX}, ${centerY}) rotate(-45)">
+        <text x="0" y="0" font-size="${fontSize}" fill="rgba(255,255,255,0.3)"
+          text-anchor="middle" dominant-baseline="central" font-family="Arial, sans-serif">
+          ${text}
+        </text>
+      </g>
+    </pattern>
+  </defs>
+  <rect width="100%" height="100%" fill="url(#watermarkPattern)" />
+</svg>
+`;
+
+	return Buffer.from(svgContent);
 }
 
 async function uploadToPublicBucket(
