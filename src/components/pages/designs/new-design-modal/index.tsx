@@ -3,6 +3,7 @@
 import { ErrorCode, useDropzone } from "react-dropzone";
 import { generateId } from "lucia";
 import { useCallback, useEffect, useRef, useState } from "react";
+import type { Dispatch, SetStateAction } from "react";
 import { toast } from "sonner";
 import {
 	DialogContent,
@@ -18,8 +19,8 @@ import { DetailsForm } from "./details-form";
 import { Spinner } from "@/components/spinner";
 import { TiffPreview } from "./tiff-preview";
 import { useUploadContext } from "../upload-context";
-import { useMutation } from "@tanstack/react-query";
 import { useRefetchDesigns } from "@/hooks/dashboard";
+import Separator from "@/components/ui/separator";
 
 type UploadState =
 	| {
@@ -61,6 +62,7 @@ export function NewDesignModal() {
 	const [uploadState, setUploadState] = useState<UploadState>({
 		state: "idle",
 	});
+	const resetAfterUpload = useRef(false);
 
 	const onDrop = useCallback(
 		async (acceptedFiles: File[]) => {
@@ -217,23 +219,6 @@ export function NewDesignModal() {
 		if (uploadState.state === "idle") {
 			toastId.current = undefined;
 		}
-		if (uploadState.state === "uploading") {
-			toastId.current = toast.loading(
-				<div className="w-full">
-					<p className="font-bold text-lg break-words">
-						Uploading {uploadState.fileName}
-					</p>
-					<p className="text-xs text-gray-500 mt-1">
-						Please do not close this window or refresh the page.
-					</p>
-					<Progress className="mt-3" value={uploadState.progress} />
-				</div>,
-				{
-					id: toastId.current,
-					position: "bottom-left",
-				},
-			);
-		}
 		if (uploadState.state === "complete") {
 			toast.success(
 				<div className="flex items-start w-full">
@@ -277,7 +262,6 @@ export function NewDesignModal() {
 		const handleBeforeUnload = (e: BeforeUnloadEvent) => {
 			if (uploadState.state === "uploading") {
 				e.preventDefault();
-				e.returnValue = "";
 			}
 		};
 
@@ -288,17 +272,45 @@ export function NewDesignModal() {
 		};
 	}, [uploadState.state]);
 
-	useEffect(() => {
+	const completeSaveAndReset = () => {
 		if (newDesignIsUploaded && uploadState.state === "complete") {
 			setUploadState({
 				state: "idle",
 			});
 			reset();
+		} else {
+			resetAfterUpload.current = true;
 		}
-	}, [newDesignIsUploaded, uploadState.state, reset]);
+	};
+
+	useEffect(() => {
+		if (
+			resetAfterUpload.current &&
+			newDesignIsUploaded &&
+			uploadState.state === "complete"
+		) {
+			setUploadState({
+				state: "idle",
+			});
+			reset();
+		}
+	}, [newDesignIsUploaded, uploadState, reset]);
 
 	return (
-		<DialogContent className="w-full max-w-2xl">
+		<DialogContent
+			className="w-full max-w-2xl"
+			onInteractOutside={(e) => {
+				if (
+					uploadState.state === "uploading" ||
+					uploadState.state === "complete"
+				) {
+					e.preventDefault();
+				}
+			}}
+			isCloseButtonHidden={
+				uploadState.state === "uploading" || uploadState.state === "complete"
+			}
+		>
 			<DialogHeader>
 				<DialogTitle>
 					{uploadState.state === "idle"
@@ -322,19 +334,39 @@ export function NewDesignModal() {
 				</div>
 			) : null}
 			{uploadState.state === "uploading" || uploadState.state === "complete" ? (
-				<div className="min-h-80 grid grid-cols-[1fr_1fr] gap-4">
-					{newDesignIsCreatedInDb ? (
-						<>{newDesignId ? <DetailsForm /> : null}</>
-					) : (
-						<div className="w-full h-full flex flex-col items-center justify-center">
-							<Spinner />
-							<p className="font-bold">Creating your design...</p>
+				<>
+					<div className="min-h-80 grid grid-cols-[1fr_1fr] gap-4">
+						{newDesignIsCreatedInDb ? (
+							<>
+								{newDesignId ? (
+									<DetailsForm onSave={completeSaveAndReset} />
+								) : null}
+							</>
+						) : (
+							<div className="w-full h-full flex flex-col items-center justify-center">
+								<Spinner />
+								<p className="font-bold">Creating your design...</p>
+							</div>
+						)}
+						<div className="w-full h-auto flex items-center justify-center">
+							<TiffPreview file={acceptedFiles[0]} />
 						</div>
-					)}
-					<div className="w-full h-auto flex items-center justify-center">
-						<TiffPreview file={acceptedFiles[0]} />
 					</div>
-				</div>
+					{uploadState.state === "uploading" && (
+						<>
+							<Separator />
+							<div className="w-full">
+								<p className="font-bold text-lg break-words">
+									Uploading {uploadState.fileName}
+								</p>
+								<p className="text-xs text-gray-500 mt-1">
+									Please do not close this window or refresh the page.
+								</p>
+								<Progress className="mt-3" value={uploadState.progress} />
+							</div>
+						</>
+					)}
+				</>
 			) : null}
 		</DialogContent>
 	);

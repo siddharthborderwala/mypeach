@@ -12,7 +12,7 @@ export default function NewDesignModalTrigger({
 }: {
 	className?: string;
 }) {
-	const { newDesignId } = useUploadContext();
+	const { newDesignId, uploadState } = useUploadContext();
 
 	return (
 		<DialogTrigger asChild>

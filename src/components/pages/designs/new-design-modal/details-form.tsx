@@ -32,8 +32,10 @@ const formSchema = z.object({
 
 export function DetailsForm({
 	className,
+	onSave,
 }: {
 	className?: string;
+	onSave?: () => void;
 }) {
 	const [formState, setFormState] = useState<
 		| {
@@ -82,11 +84,11 @@ export function DetailsForm({
 			});
 			setNewDesignDetails(data.design);
 			refetchDesigns();
-			setTimeout(() => {
-				setFormState({ state: "idle" });
-			}, 1000);
+			if (onSave) {
+				onSave();
+			}
 		},
-		[setNewDesignDetails, refetchDesigns],
+		[setNewDesignDetails, refetchDesigns, onSave],
 	);
 
 	return (
@@ -98,6 +100,9 @@ export function DetailsForm({
 				<FormField
 					control={form.control}
 					name="name"
+					disabled={
+						formState.state === "loading" || formState.state === "success"
+					}
 					render={({ field }) => (
 						<FormItem>
 							<FormLabel className="font-bold">Name</FormLabel>
@@ -111,6 +116,9 @@ export function DetailsForm({
 				<FormField
 					control={form.control}
 					name="price"
+					disabled={
+						formState.state === "loading" || formState.state === "success"
+					}
 					render={({ field }) => (
 						<FormItem>
 							<FormLabel className="font-bold">Price (INR)</FormLabel>
@@ -128,6 +136,9 @@ export function DetailsForm({
 				<FormField
 					control={form.control}
 					name="fileDPI"
+					disabled={
+						formState.state === "loading" || formState.state === "success"
+					}
 					render={({ field }) => (
 						<FormItem>
 							<FormLabel className="font-bold">File DPI</FormLabel>
@@ -145,6 +156,9 @@ export function DetailsForm({
 				<FormField
 					control={form.control}
 					name="tags"
+					disabled={
+						formState.state === "loading" || formState.state === "success"
+					}
 					render={({ field }) => (
 						<FormItem>
 							<FormLabel className="font-bold">
@@ -162,7 +176,9 @@ export function DetailsForm({
 				) : null}
 				<Button
 					type="submit"
-					disabled={formState.state === "loading"}
+					disabled={
+						formState.state === "loading" || formState.state === "success"
+					}
 					className="w-full"
 				>
 					{formState.state === "loading" ? <Spinner className="mr-2" /> : null}

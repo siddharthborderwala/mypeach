@@ -3,6 +3,7 @@ import { getUserAuth } from "@/lib/auth/utils";
 import { db } from "@/lib/db";
 import { getDesignFileStorageKey } from "@/lib/storage/util";
 import { z } from "zod";
+import type { DesignData } from "@/lib/actions/designs";
 
 const bodyValidator = z.object({
 	name: z.string().optional().default("Untitled"),
@@ -115,3 +116,56 @@ export async function PUT(request: Request) {
 		);
 	}
 }
+
+export async function GET(request: Request) {
+	const { searchParams } = new URL(request.url);
+	const pageParam = searchParams.get("page");
+	const page = pageParam ? Number(pageParam) : 1;
+	const pageSize = 24; // or get from query params if needed
+
+	const { session } = await getUserAuth();
+
+	if (!session) {
+		return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+	}
+
+	const skip = (page - 1) * pageSize;
+
+	const [designs, totalCount] = await Promise.all([
+		db.design.findMany({
+			where: {
+				userId: session.user.id,
+			},
+			orderBy: {
+				createdAt: "desc",
+			},
+			skip,
+			take: pageSize,
+		}),
+		db.design.count({
+			where: {
+				userId: session.user.id,
+			},
+		}),
+	]);
+
+	return NextResponse.json({
+		designs,
+		pagination: {
+			currentPage: page,
+			pageSize,
+			totalCount,
+			totalPages: Math.ceil(totalCount / pageSize),
+		},
+	});
+}
+
+export type InfiniteDesignsResponse = {
+	designs: DesignData[];
+	pagination: {
+		currentPage: number;
+		pageSize: number;
+		totalCount: number;
+		totalPages: number;
+	};
+};

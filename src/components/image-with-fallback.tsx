@@ -1,11 +1,11 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import type * as React from "react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { SpinnerGap } from "@phosphor-icons/react/dist/ssr";
 
 interface ImageWithFallbackProps
-	extends React.ObjectHTMLAttributes<HTMLImageElement> {
+	extends React.ImgHTMLAttributes<HTMLImageElement> {
 	src: string;
 	fallbackSrc?: string;
 	alt?: string;
@@ -19,35 +19,48 @@ const ImageWithFallback: React.FC<ImageWithFallbackProps> = ({
 	onError,
 	...props
 }) => {
-	const [effectiveSrc, setEffectiveSrc] = useState(src || fallbackSrc);
+	const [hasError, setHasError] = useState(false);
 
-	if (effectiveSrc === fallbackSrc) {
+	// biome-ignore lint/correctness/useExhaustiveDependencies(src): This is a false positive
+	useEffect(() => {
+		// Reset the error state when src changes
+		setHasError(false);
+	}, [src]);
+
+	const handleError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+		setHasError(true);
+		if (onError) {
+			onError(e);
+		}
+	};
+
+	if (hasError || !src) {
+		// Render your custom fallback HTML
 		return (
 			<div
 				className={cn(
-					"flex items-center justify-center border rounded",
+					"flex flex-col items-center justify-center border rounded",
 					className,
 				)}
 			>
 				<img
 					src={fallbackSrc}
 					alt={alt}
-					className="w-8 h-8 md:w-10 md:h-10 filter grayscale"
+					className="w-8 h-8 md:w-10 md:h-10 filter grayscale mt-6"
 				/>
+				<SpinnerGap className="h-4 w-4 mt-2 animate-spin" />
 			</div>
 		);
 	}
 
+	// Render the normal image
 	return (
 		<img
 			{...props}
-			src={effectiveSrc}
+			src={src}
 			alt={alt}
 			className={cn("border-none flex items-center justify-center", className)}
-			onError={(e) => {
-				setEffectiveSrc(fallbackSrc);
-				onError?.(e);
-			}}
+			onError={handleError}
 		/>
 	);
 };
