@@ -1,5 +1,6 @@
 "use client";
 
+import type { DesignData } from "@/lib/actions/designs";
 import { parseAsBoolean, useQueryState } from "nuqs";
 import {
 	createContext,
@@ -39,6 +40,8 @@ type UploadContextType = {
 	setNewDesignIsUploaded: SetState<boolean>;
 	newDesignIsCreatedInDb: boolean;
 	setNewDesignIsCreatedInDb: SetState<boolean>;
+	editDesignDetails: DesignData | undefined;
+	setEditDesignDetails: SetState<DesignData | undefined>;
 	reset: () => void;
 };
 
@@ -62,6 +65,9 @@ export const UploadProvider = ({ children }: { children: React.ReactNode }) => {
 		useState<boolean>(false);
 	const [newDesignIsCreatedInDb, setNewDesignIsCreatedInDb] =
 		useState<boolean>(false);
+	const [editDesignDetails, setEditDesignDetails] = useState<
+		DesignData | undefined
+	>(undefined);
 
 	const [openNewDesignModal, setOpenNewDesignModal] = useQueryState(
 		"new",
@@ -93,6 +99,8 @@ export const UploadProvider = ({ children }: { children: React.ReactNode }) => {
 			setNewDesignIsUploaded,
 			newDesignIsCreatedInDb,
 			setNewDesignIsCreatedInDb,
+			editDesignDetails,
+			setEditDesignDetails,
 			reset,
 		}),
 		[
@@ -101,6 +109,7 @@ export const UploadProvider = ({ children }: { children: React.ReactNode }) => {
 			newDesignDetails,
 			newDesignIsUploaded,
 			newDesignIsCreatedInDb,
+			editDesignDetails,
 			reset,
 		],
 	);

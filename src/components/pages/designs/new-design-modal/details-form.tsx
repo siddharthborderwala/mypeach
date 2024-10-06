@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -48,20 +48,42 @@ export function DetailsForm({
 	>({
 		state: "idle",
 	});
+	const [isEditing, setIsEditing] = useState(false);
 
-	const { newDesignId, newDesignDetails, setNewDesignDetails } =
-		useUploadContext();
+	const {
+		newDesignId,
+		newDesignDetails,
+		setNewDesignDetails,
+		editDesignDetails,
+	} = useUploadContext();
 
 	const refetchDesigns = useRefetchDesigns();
+
+	useEffect(() => {
+		if (editDesignDetails) {
+			setIsEditing(true);
+
+			form.reset({
+				designId: editDesignDetails.id,
+				name: editDesignDetails.name,
+				price: editDesignDetails.price,
+				fileDPI: (editDesignDetails.metadata as { fileDPI: number }).fileDPI,
+				tags: editDesignDetails.tags.join(", "),
+			});
+		}
+	}, [editDesignDetails]);
 
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
 		defaultValues: {
-			designId: newDesignId,
-			name: newDesignDetails?.name ?? "Untitled",
-			price: newDesignDetails?.price ?? 290,
-			fileDPI: newDesignDetails?.fileDPI ?? 300,
-			tags: newDesignDetails?.tags ?? "",
+			designId: editDesignDetails?.id ?? newDesignId,
+			name: editDesignDetails?.name ?? newDesignDetails?.name ?? "Untitled",
+			price: editDesignDetails?.price ?? newDesignDetails?.price ?? 290,
+			fileDPI:
+				(editDesignDetails?.metadata as { fileDPI: number }).fileDPI ??
+				newDesignDetails?.fileDPI ??
+				300,
+			tags: editDesignDetails?.tags.join(", ") ?? newDesignDetails?.tags ?? "",
 		},
 	});
 
@@ -91,6 +113,14 @@ export function DetailsForm({
 		[setNewDesignDetails, refetchDesigns, onSave],
 	);
 
+	const disableForm = () => {
+		if (isEditing) {
+			return formState.state === "loading";
+		}
+
+		return formState.state === "loading" || formState.state === "success";
+	};
+
 	return (
 		<Form {...form}>
 			<form
@@ -100,9 +130,7 @@ export function DetailsForm({
 				<FormField
 					control={form.control}
 					name="name"
-					disabled={
-						formState.state === "loading" || formState.state === "success"
-					}
+					disabled={disableForm()}
 					render={({ field }) => (
 						<FormItem>
 							<FormLabel className="font-bold">Name</FormLabel>
@@ -116,9 +144,7 @@ export function DetailsForm({
 				<FormField
 					control={form.control}
 					name="price"
-					disabled={
-						formState.state === "loading" || formState.state === "success"
-					}
+					disabled={disableForm()}
 					render={({ field }) => (
 						<FormItem>
 							<FormLabel className="font-bold">Price (INR)</FormLabel>
@@ -136,9 +162,7 @@ export function DetailsForm({
 				<FormField
 					control={form.control}
 					name="fileDPI"
-					disabled={
-						formState.state === "loading" || formState.state === "success"
-					}
+					disabled={disableForm()}
 					render={({ field }) => (
 						<FormItem>
 							<FormLabel className="font-bold">File DPI</FormLabel>
@@ -156,9 +180,7 @@ export function DetailsForm({
 				<FormField
 					control={form.control}
 					name="tags"
-					disabled={
-						formState.state === "loading" || formState.state === "success"
-					}
+					disabled={disableForm()}
 					render={({ field }) => (
 						<FormItem>
 							<FormLabel className="font-bold">
@@ -174,13 +196,7 @@ export function DetailsForm({
 				{formState.state === "error" ? (
 					<FormError state={{ error: formState.error }} />
 				) : null}
-				<Button
-					type="submit"
-					disabled={
-						formState.state === "loading" || formState.state === "success"
-					}
-					className="w-full"
-				>
+				<Button type="submit" disabled={disableForm()} className="w-full">
 					{formState.state === "loading" ? <Spinner className="mr-2" /> : null}
 					{formState.state === "loading" ? "Saving..." : null}
 					{formState.state === "idle" ? "Save" : null}
