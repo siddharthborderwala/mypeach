@@ -77,7 +77,7 @@ export function useGetDesigns({
 			outer: for (const page of pages) {
 				for (const design of page.designs || []) {
 					if (design.id === designId) {
-						foundDesign = design;
+						foundDesign = design as DesignData;
 						break outer;
 					}
 				}
