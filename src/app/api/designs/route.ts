@@ -160,6 +160,25 @@ export async function GET(request: Request) {
 	});
 }
 
+export async function DELETE(request: Request) {
+	const { session } = await getUserAuth();
+
+	if (!session) {
+		return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+	}
+
+	const { designId } = await request.json();
+
+	await db.design.delete({
+		where: {
+			id: designId,
+			userId: session.user.id,
+		},
+	});
+
+	return NextResponse.json({ success: true });
+}
+
 export type InfiniteDesignsResponse = {
 	designs: DesignData[];
 	pagination: {

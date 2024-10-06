@@ -1,6 +1,10 @@
 import type { InfiniteDesignsResponse } from "@/app/api/designs/route";
 import type { DesignData, getCurrentUserDesigns } from "@/lib/actions/designs";
-import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
+import {
+	useInfiniteQuery,
+	useMutation,
+	useQueryClient,
+} from "@tanstack/react-query";
 import { useEffect } from "react";
 
 export function useRefetchDesigns() {
@@ -97,4 +101,28 @@ export function useGetDesigns({
 	}, [data, trackDesignIdForPreview, refetch, setTrackDesignIdForPreview]);
 
 	return { data, fetchNextPage, hasNextPage, isFetchingNextPage, status };
+}
+
+export function useDeleteDesign() {
+	const queryClient = useQueryClient();
+
+	const { mutate, isPending } = useMutation({
+		mutationFn: async ({ designId }: { designId: string }) => {
+			const res = await fetch("/api/designs", {
+				method: "DELETE",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({ designId }),
+			});
+			if (!res.ok) {
+				throw new Error("Failed to delete design");
+			}
+		},
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ["designs"] });
+		},
+	});
+
+	return { mutate, isPending };
 }
