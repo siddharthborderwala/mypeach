@@ -18,18 +18,13 @@ type PageProps = {
 const newParser = parseAsBoolean.withDefault(false);
 
 export default async function Designs({ searchParams }: PageProps) {
-	const { designs, pagination } = await getCurrentUserDesigns();
+	const data = await getCurrentUserDesigns();
 	const newDesign = newParser.parseServerSide(searchParams.new);
 
 	return (
 		<UploadProvider>
 			<Dialog defaultOpen={newDesign}>
-				<AllDesigns
-					initialData={{
-						designs,
-						pagination,
-					}}
-				/>
+				<AllDesigns initialData={data} />
 			</Dialog>
 		</UploadProvider>
 	);

@@ -67,7 +67,7 @@ export function DetailsForm({
 				designId: editDesignDetails.id,
 				name: editDesignDetails.name,
 				price: editDesignDetails.price,
-				fileDPI: (editDesignDetails.metadata as { fileDPI: number }).fileDPI,
+				fileDPI: editDesignDetails.metadata.fileDPI,
 				tags: editDesignDetails.tags.join(", "),
 			});
 		}
@@ -80,9 +80,7 @@ export function DetailsForm({
 			name: editDesignDetails?.name ?? newDesignDetails?.name ?? "Untitled",
 			price: editDesignDetails?.price ?? newDesignDetails?.price ?? 290,
 			fileDPI:
-				(editDesignDetails?.metadata as { fileDPI: number }).fileDPI ??
-				newDesignDetails?.fileDPI ??
-				300,
+				editDesignDetails?.metadata.fileDPI ?? newDesignDetails?.fileDPI ?? 300,
 			tags: editDesignDetails?.tags.join(", ") ?? newDesignDetails?.tags ?? "",
 		},
 	});

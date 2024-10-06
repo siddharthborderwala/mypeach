@@ -2,7 +2,7 @@
 
 import { cn } from "@/lib/utils";
 import { useState, useEffect } from "react";
-import { SpinnerGap } from "@phosphor-icons/react/dist/ssr";
+import { Spinner } from "./spinner";
 
 interface ImageWithFallbackProps
 	extends React.ImgHTMLAttributes<HTMLImageElement> {
@@ -48,7 +48,7 @@ const ImageWithFallback: React.FC<ImageWithFallbackProps> = ({
 					alt={alt}
 					className="w-8 h-8 md:w-10 md:h-10 filter grayscale mt-6"
 				/>
-				<SpinnerGap className="h-4 w-4 mt-2 animate-spin" />
+				<Spinner size={16} className="mt-2" />
 			</div>
 		);
 	}

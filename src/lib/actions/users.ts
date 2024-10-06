@@ -13,7 +13,6 @@ import {
 	genericError,
 	setAuthCookie,
 	validateAuthFormData,
-	getUserAuth,
 } from "../auth/utils";
 
 import { generateUsername } from "../username";
@@ -24,6 +23,7 @@ import { generateToken } from "../tokens";
 import { sha256Digest } from "../crypto";
 import { verifyPasswordResetTokenAndGetUserId } from "../auth/verification";
 import { redirectWithFlash } from "../utils.server";
+import { updateBasicUserDetailsSchema, updatePasswordSchema } from "./schema";
 
 interface ActionResult {
 	error: string;
@@ -260,4 +260,217 @@ export async function resetPasswordAction(
 	}
 
 	return genericError;
+}
+
+export async function getBasicUserDetails() {
+	const { session } = await validateRequest();
+	if (!session) {
+		return {
+			error: "Unauthorized",
+		};
+	}
+
+	const user = await db.user.findUnique({
+		where: { id: session.userId },
+		select: { username: true, name: true, email: true },
+	});
+
+	if (!user) {
+		return {
+			error: "User not found",
+		};
+	}
+
+	if (user.name === null) {
+		user.name = "";
+	}
+
+	return user;
+}
+
+type ActionResultDetailed<T> = {
+	fieldErrors?: T;
+	error: string;
+};
+
+export async function updateBasicUserDetails(
+	_: ActionResult,
+	formData: FormData,
+): Promise<
+	ActionResultDetailed<{
+		username?: string[];
+		name?: string[];
+		email?: string[];
+	}> & { success?: boolean }
+> {
+	const { session } = await validateRequest();
+	if (!session) {
+		return {
+			error: "Unauthorized",
+		};
+	}
+
+	const data = {
+		username: formData.get("username"),
+		name: formData.get("name"),
+		email: formData.get("email"),
+	};
+
+	const result = updateBasicUserDetailsSchema.safeParse(data);
+	if (!result.success) {
+		return {
+			error: "",
+			fieldErrors: result.error.flatten().fieldErrors,
+		};
+	}
+
+	const { username, name, email } = result.data;
+
+	try {
+		await db.$transaction(async (tx) => {
+			const user = await tx.user.findUniqueOrThrow({
+				where: { id: session.userId },
+			});
+			if (user.email !== email) {
+				await tx.user.update({
+					where: { id: session.userId },
+					data: { email, emailVerified: false },
+				});
+			}
+			await tx.user.update({
+				where: { id: session.userId },
+				data: { username, name },
+			});
+		});
+
+		return { success: true, error: "" };
+	} catch (e) {
+		if (e instanceof PrismaError) {
+			if (e.code === "P2002") {
+				if (e.message.includes("username")) {
+					return {
+						fieldErrors: { username: ["Username is already taken"] },
+						error: "",
+					};
+				}
+				if (e.message.includes("email")) {
+					return {
+						fieldErrors: { email: ["Email is already taken"] },
+						error: "",
+					};
+				}
+				return { error: "Something went wrong" };
+			}
+			if (e.code === "P2025") {
+				return { error: "User not found" };
+			}
+		}
+		return genericError;
+	}
+}
+
+export async function updatePasswordAction(
+	_: ActionResult,
+	formData: FormData,
+): Promise<
+	ActionResultDetailed<{
+		currentPassword?: string[];
+		newPassword?: string[];
+		confirmNewPassword?: string[];
+	}> & { success?: boolean }
+> {
+	const { session } = await validateRequest();
+	if (!session) {
+		return {
+			error: "Unauthorized",
+		};
+	}
+
+	const data = {
+		currentPassword: formData.get("currentPassword"),
+		newPassword: formData.get("newPassword"),
+		confirmNewPassword: formData.get("confirmNewPassword"),
+	};
+
+	const result = updatePasswordSchema.safeParse(data);
+	if (!result.success) {
+		return {
+			error: "",
+			fieldErrors: result.error.flatten().fieldErrors,
+		};
+	}
+
+	const { currentPassword, newPassword, confirmNewPassword } = result.data;
+
+	if (newPassword !== confirmNewPassword) {
+		return {
+			fieldErrors: { confirmNewPassword: ["Passwords do not match"] },
+			error: "",
+		};
+	}
+
+	try {
+		const user = await db.user.findUniqueOrThrow({
+			where: { id: session.userId },
+		});
+
+		const validPassword = await new Argon2id().verify(
+			user.hashedPassword,
+			currentPassword,
+		);
+		if (!validPassword) {
+			return {
+				fieldErrors: { currentPassword: ["Incorrect current password"] },
+				error: "",
+			};
+		}
+
+		const hashedNewPassword = await new Argon2id().hash(newPassword);
+
+		await db.user.update({
+			where: { id: session.userId },
+			data: { hashedPassword: hashedNewPassword },
+		});
+
+		return { success: true, error: "" };
+	} catch (e) {
+		if (e instanceof PrismaError) {
+			if (e.code === "P2025") {
+				return { error: "User not found" };
+			}
+			return { error: "Something went wrong" };
+		}
+		return genericError;
+	}
+}
+
+export async function deleteAccountAction(
+	_: ActionResult,
+	__: FormData,
+): Promise<ActionResult & { success?: boolean }> {
+	const { session } = await validateRequest();
+	if (!session) {
+		return {
+			error: "Unauthorized",
+		};
+	}
+
+	try {
+		await db.user.delete({
+			where: { id: session.userId },
+		});
+
+		await lucia.invalidateSession(session.id);
+		const sessionCookie = lucia.createBlankSessionCookie();
+		setAuthCookie(sessionCookie);
+		redirect("/");
+	} catch (e) {
+		if (e instanceof PrismaError) {
+			if (e.code === "P2025") {
+				return { error: "User not found" };
+			}
+			return { error: "Something went wrong" };
+		}
+		return genericError;
+	}
 }

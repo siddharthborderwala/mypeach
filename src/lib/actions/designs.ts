@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 
 import { db } from "@/lib/db";
 import { getUserAuth } from "../auth/utils";
+import type { Prettify } from "../type-utils";
 
 export async function getCurrentUserDesigns(page = 1, pageSize = 24) {
 	const { session } = await getUserAuth();
@@ -43,6 +44,12 @@ export async function getCurrentUserDesigns(page = 1, pageSize = 24) {
 	};
 }
 
-export type DesignData = Awaited<
-	ReturnType<typeof getCurrentUserDesigns>
->["designs"][number];
+export type FileMetadata = {
+	fileDPI: number;
+};
+
+export type DesignData = Prettify<
+	Awaited<ReturnType<typeof getCurrentUserDesigns>>["designs"][number] & {
+		metadata: FileMetadata;
+	}
+>;

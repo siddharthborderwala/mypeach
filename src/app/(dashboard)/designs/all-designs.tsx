@@ -6,8 +6,9 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import InfiniteScrollDesigns from "@/components/pages/designs/infinite-scroll-designs-view";
 import type { InfiniteScrollDesignsProps } from "@/hooks/dashboard";
 import { useGetDesigns } from "@/hooks/dashboard";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useUploadContext } from "@/components/pages/designs/upload-context";
+import type { DesignData } from "@/lib/actions/designs";
 
 export function AllDesigns({ initialData }: InfiniteScrollDesignsProps) {
 	const { newDesignIsUploaded, newDesignId } = useUploadContext();
@@ -58,7 +59,7 @@ export function AllDesigns({ initialData }: InfiniteScrollDesignsProps) {
 				<ScrollArea>
 					<div className="pb-4 px-4 md:pb-8 md:px-8">
 						<InfiniteScrollDesigns
-							designs={designs}
+							designs={designs as DesignData[]}
 							fetchNextPage={fetchNextPage}
 							hasNextPage={hasNextPage}
 							isFetchingNextPage={isFetchingNextPage}
