@@ -75,20 +75,32 @@ const faqItems: { question: string; answer: React.ReactNode }[] = [
 			</>
 		),
 	},
+	{
+		question: "What are your terms and conditions?",
+		answer: (
+			<>
+				Please refer to our
+				<Button variant="link" className="p-0 h-auto mx-1" asChild>
+					<Link href="/terms">terms and conditions</Link>
+				</Button>
+				page.
+			</>
+		),
+	},
 ];
 
 export default function SupportPage() {
 	return (
 		<>
 			<CommonHeader />
-			<main className="relative flex h-[calc(100svh-3.5rem)] flex-col gap-4 p-4 md:gap-6 md:p-8 mx-auto max-w-3xl">
+			<main className="relative p-4 md:gap-6 md:p-8 mx-auto max-w-3xl">
 				<div className="space-y-2">
 					<h1 className="text-lg font-semibold md:text-2xl">Support</h1>
 					<p className="text-sm text-muted-foreground">
 						We're here to help you
 					</p>
 				</div>
-				<div className="grid gap-4 md:grid-cols-2">
+				<div className="mt-4 grid gap-4 md:grid-cols-2">
 					<Card>
 						<CardHeader>
 							<CardTitle className="flex items-center gap-2">
