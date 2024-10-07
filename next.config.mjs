@@ -7,6 +7,20 @@ const nextConfig = {
 	experimental: {
 		serverComponentsExternalPackages: ["@node-rs/argon2"],
 	},
+	redirects: async () => {
+		return [
+			{
+				source: "/terms-and-conditions",
+				destination: "/terms",
+				permanent: true,
+			},
+			{
+				source: "/tnc",
+				destination: "/terms",
+				permanent: true,
+			},
+		];
+	},
 };
 
 export default nextConfig;
