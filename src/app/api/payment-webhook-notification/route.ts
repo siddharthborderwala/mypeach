@@ -13,12 +13,6 @@ Cashfree.XEnvironment =
 		? Cashfree.Environment.PRODUCTION
 		: Cashfree.Environment.SANDBOX;
 
-export const config = {
-	api: {
-		bodyParser: false, // Disable the default body parser
-	},
-};
-
 async function updateOrderStatus({
 	order: orderData,
 	payment,

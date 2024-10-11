@@ -10,7 +10,7 @@ export function NavItem({
 	label,
 }: { href: string; icon: React.ReactNode; label: string }) {
 	const pathname = usePathname();
-	const isActive = pathname.startsWith(href);
+	const isActive = pathname?.startsWith(href) ?? false;
 
 	return (
 		<Link
@@ -32,7 +32,7 @@ export function NavItemMobile({
 	label,
 }: { href: string; icon: React.ReactNode; label: string }) {
 	const pathname = usePathname();
-	const isActive = pathname.startsWith(href);
+	const isActive = pathname?.startsWith(href) ?? false;
 
 	return (
 		<Link
