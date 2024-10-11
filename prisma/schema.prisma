@@ -73,7 +73,7 @@ model Design {
   tags     String[]
 
   // price is stored in the smallest unit of the currency
-  price    Int    @default(29000)
+  price    Int    @default(290)
   currency String @default("INR")
 
   userId String

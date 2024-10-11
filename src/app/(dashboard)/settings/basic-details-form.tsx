@@ -27,7 +27,6 @@ export function BasicDetailsForm({
 	useEffect(() => {
 		if (state.success) {
 			toast.success("Details updated successfully");
-			formRef.current?.reset();
 		}
 	}, [state.success]);
 

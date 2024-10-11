@@ -1,11 +1,16 @@
 "use client";
 
-import { SignOut, UserCircle } from "@phosphor-icons/react";
+import {
+	SignOut,
+	House,
+	Gear,
+	Headset,
+	FileDashed,
+} from "@phosphor-icons/react";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
 	DropdownMenuItem,
-	DropdownMenuLabel,
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
@@ -13,6 +18,7 @@ import { Button } from "./ui/button";
 import { signOutAction } from "@/lib/actions/users";
 import { useFormStatus } from "react-dom";
 import Link from "next/link";
+import { Avatar, AvatarImage } from "./ui/avatar";
 
 function LogoutButton() {
 	const { pending } = useFormStatus();
@@ -33,23 +39,50 @@ function LogoutButton() {
 	);
 }
 
-export function UserMenu() {
+export function UserMenu({
+	userId,
+	username,
+}: {
+	userId: string;
+	username: string;
+}) {
 	return (
 		<DropdownMenu>
 			<DropdownMenuTrigger asChild>
-				<Button variant="secondary" size="icon" className="rounded-full">
-					<UserCircle className="h-5 w-5" />
+				<Button variant="outline" size="icon" className="rounded-full h-9 w-9">
+					<Avatar className="h-7 w-7">
+						<AvatarImage
+							src={`https://avatar.vercel.sh/${username}.svg?size=56`}
+						/>
+					</Avatar>
 					<span className="sr-only">Toggle user menu</span>
 				</Button>
 			</DropdownMenuTrigger>
 			<DropdownMenuContent align="end">
-				<DropdownMenuLabel>My Account</DropdownMenuLabel>
-				<DropdownMenuSeparator />
 				<DropdownMenuItem asChild>
-					<Link href="/settings">Settings</Link>
+					<Link href="/home">
+						<House />
+						<span className="ml-2">Dashboard</span>
+					</Link>
 				</DropdownMenuItem>
 				<DropdownMenuItem asChild>
-					<Link href="/support">Support</Link>
+					<Link href="/settings">
+						<Gear />
+						<span className="ml-2">Settings</span>
+					</Link>
+				</DropdownMenuItem>
+				<DropdownMenuSeparator />
+				<DropdownMenuItem asChild>
+					<Link href="/support">
+						<Headset />
+						<span className="ml-2">Support</span>
+					</Link>
+				</DropdownMenuItem>
+				<DropdownMenuItem asChild>
+					<Link href="/terms">
+						<FileDashed />
+						<span className="ml-2">Terms</span>
+					</Link>
 				</DropdownMenuItem>
 				<DropdownMenuSeparator />
 				<LogoutButton />

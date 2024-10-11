@@ -11,15 +11,16 @@ import { RedisAdapter } from "./redis-adapter";
 
 const adapter = new RedisAdapter(process.env.REDIS_URL!);
 
+interface DatabaseUserAttributes {
+	username: string;
+}
+
 declare module "lucia" {
 	interface Register {
 		Lucia: typeof lucia;
 		DatabaseUserAttributes: DatabaseUserAttributes;
 	}
 }
-
-// biome-ignore lint/suspicious/noEmptyInterface: <explanation>
-interface DatabaseUserAttributes {}
 
 export const lucia = new Lucia(adapter, {
 	sessionCookie: {
@@ -28,8 +29,12 @@ export const lucia = new Lucia(adapter, {
 			secure: process.env.NODE_ENV === "production",
 		},
 	},
-	getUserAttributes: () => {
-		return {} satisfies DatabaseUserAttributes;
+	getUserAttributes: (user) => {
+		console.log("USERRRRRR", user);
+
+		return {
+			username: user.username,
+		} satisfies DatabaseUserAttributes;
 	},
 });
 

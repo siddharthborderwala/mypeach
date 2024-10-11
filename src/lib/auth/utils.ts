@@ -13,6 +13,7 @@ export type AuthSession = {
 	session: {
 		user: {
 			id: string;
+			username: string;
 		};
 	} | null;
 };
@@ -24,6 +25,21 @@ export const getUserAuth = async (): Promise<AuthSession> => {
 		session: {
 			user: {
 				id: user.id,
+				username: user.username,
+			},
+		},
+	};
+};
+
+export const getUserAuthV2 = async () => {
+	const { session, user } = await validateRequest();
+	if (!session) return redirect("/login");
+
+	return {
+		session: {
+			user: {
+				id: user.id,
+				username: user.username,
 			},
 		},
 	};

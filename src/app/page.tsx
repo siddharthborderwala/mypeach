@@ -31,6 +31,7 @@ async function CTA() {
 		</form>
 	);
 }
+
 export default function LandingPage() {
 	return (
 		<>

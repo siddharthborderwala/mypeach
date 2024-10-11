@@ -58,7 +58,9 @@ export async function signInAction(
 			};
 		}
 
-		const session = await lucia.createSession(existingUser.id, {});
+		const session = await lucia.createSession(existingUser.id, {
+			username: existingUser.username,
+		});
 		const sessionCookie = lucia.createSessionCookie(session.id);
 		setAuthCookie(sessionCookie);
 
@@ -124,7 +126,9 @@ export async function signUpAction(
 		return genericError;
 	}
 
-	const session = await lucia.createSession(userId, {});
+	const session = await lucia.createSession(userId, {
+		username,
+	});
 	const sessionCookie = lucia.createSessionCookie(session.id);
 	setAuthCookie(sessionCookie);
 	return redirectWithFlash(

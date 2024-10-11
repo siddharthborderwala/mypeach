@@ -12,7 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { checkAuth } from "@/lib/auth/utils";
+import { checkAuth, getUserAuth, getUserAuthV2 } from "@/lib/auth/utils";
 import { NavItem, NavItemMobile } from "./nav";
 import { UserMenu } from "@/components/user-menu";
 import { DashboardProviders } from "@/components/dashboard-providers";
@@ -51,7 +51,9 @@ const secondaryNavItems = [
 export default async function Layout({
 	children,
 }: { children: React.ReactNode }) {
-	await checkAuth();
+	const {
+		session: { user },
+	} = await getUserAuthV2();
 
 	return (
 		<DashboardProviders>
@@ -127,7 +129,7 @@ export default async function Layout({
 								</nav>
 							</SheetContent>
 						</Sheet>
-						<UserMenu />
+						<UserMenu userId={user.id} username={user.username} />
 					</header>
 					{children}
 				</div>

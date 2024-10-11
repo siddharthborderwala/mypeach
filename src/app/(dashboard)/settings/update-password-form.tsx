@@ -26,7 +26,10 @@ export function UpdatePasswordForm() {
 	return (
 		<form ref={formRef} action={formAction} className="space-y-4 max-w-sm">
 			<div>
-				<Label htmlFor="name" className="peer-data-[error=true]:text-red-500">
+				<Label
+					htmlFor="currentPassword"
+					className="peer-data-[error=true]:text-red-500"
+				>
 					Current Password
 				</Label>
 				<Input

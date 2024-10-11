@@ -42,6 +42,9 @@ export async function POST(request: Request) {
 				originalFileName: fileName,
 				originalFileType: fileType,
 				userId,
+				metadata: {
+					fileDPI: 300,
+				},
 			},
 		});
 
@@ -93,7 +96,12 @@ export async function PUT(request: Request) {
 		const { designId, fileDPI, tags, name, ...designData } = result.data;
 
 		const tagsArray =
-			typeof tags === "string" ? tags.split(",").map((t) => t.trim()) : tags;
+			typeof tags === "string"
+				? tags
+						.split(",")
+						.map((t) => t.trim())
+						.filter((t) => t.length > 0)
+				: tags;
 
 		const dbResult = await db.design.update({
 			where: { id: designId, userId: session.user.id },

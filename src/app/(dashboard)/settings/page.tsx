@@ -30,6 +30,11 @@ export default async function Settings() {
 					<UpdatePasswordForm />
 					<hr className="my-8" />
 					<h3 className="text-lg font-semibold mb-4">Danger Zone</h3>
+					<p className="text-sm text-muted-foreground mb-4">
+						Deleting your account is irreversible and will remove all of your
+						data from our systems. Your account cannot be recovered once
+						deleted.
+					</p>
 					<DeleteAccountForm />
 				</div>
 			</ScrollArea>

@@ -3,22 +3,37 @@ import type { DatabaseSession, DatabaseUser, UserId, Adapter } from "lucia";
 
 export class RedisAdapter implements Adapter {
 	private client: ReturnType<typeof createClient>;
+	private connectionPromise: Promise<void>;
 
 	constructor(redisUrl: string) {
 		this.client = createClient({ url: redisUrl });
-		this.client.connect();
+		this.connectionPromise = this.connect();
+	}
+
+	private async connect(): Promise<void> {
+		try {
+			await this.client.connect();
+		} catch (error) {
+			console.error("Failed to connect to Redis:", error);
+			throw error;
+		}
+	}
+
+	private async ensureConnection(): Promise<void> {
+		await this.connectionPromise;
 	}
 
 	async deleteExpiredSessions(): Promise<void> {
-		// This method can be removed entirely
-		return Promise.resolve();
+		await this.ensureConnection();
 	}
 
 	async deleteSession(sessionId: string): Promise<void> {
+		await this.ensureConnection();
 		await this.client.del(`session:${sessionId}`);
 	}
 
 	async deleteUserSessions(userId: UserId): Promise<void> {
+		await this.ensureConnection();
 		const sessionIds = await this.client.sMembers(`user:${userId}:sessions`);
 		if (sessionIds.length === 0) return;
 
@@ -34,6 +49,7 @@ export class RedisAdapter implements Adapter {
 	async getSessionAndUser(
 		sessionId: string,
 	): Promise<[DatabaseSession | null, DatabaseUser | null]> {
+		await this.ensureConnection();
 		const sessionData = await this.client.get(`session:${sessionId}`);
 		if (!sessionData) return [null, null];
 
@@ -48,6 +64,7 @@ export class RedisAdapter implements Adapter {
 	}
 
 	async getUserSessions(userId: UserId): Promise<DatabaseSession[]> {
+		await this.ensureConnection();
 		const sessionIds = await this.client.sMembers(`user:${userId}:sessions`);
 		const sessions = await Promise.all(
 			sessionIds.map(async (sessionId) => {
@@ -63,6 +80,7 @@ export class RedisAdapter implements Adapter {
 	}
 
 	async setSession(session: DatabaseSession): Promise<void> {
+		await this.ensureConnection();
 		const expiresAt = new Date(session.expiresAt);
 		// Store session data with expiration
 		await this.client.set(`session:${session.id}`, JSON.stringify(session), {
@@ -75,9 +93,11 @@ export class RedisAdapter implements Adapter {
 		// Store user data (if not already stored)
 		const userExists = await this.client.exists(`user:${session.userId}`);
 		if (userExists === 0) {
+			// Extract user attributes from session
+			const attributes = session.attributes || {};
 			await this.client.set(
 				`user:${session.userId}`,
-				JSON.stringify({ id: session.userId }),
+				JSON.stringify({ id: session.userId, attributes }),
 			);
 		}
 	}
@@ -86,6 +106,7 @@ export class RedisAdapter implements Adapter {
 		sessionId: string,
 		expiresAt: Date,
 	): Promise<void> {
+		await this.ensureConnection();
 		const sessionData = await this.client.get(`session:${sessionId}`);
 		if (!sessionData) return;
 
