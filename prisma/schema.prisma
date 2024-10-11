@@ -22,6 +22,9 @@ model User {
   VerificationToken  EmailVerificationToken[]
   Design             Design[]
   PasswordResetToken PasswordResetToken[]
+  Orders             Orders[]
+  Collections        Collections[]
+  Vendor             Vendor?
 }
 
 model Session {
@@ -54,7 +57,7 @@ model EmailVerificationToken {
 model Design {
   id               String  @id
   name             String  @default("Untitled")
-  isDraft          Boolean @default(false)
+  isDraft          Boolean @default(true)
   isUploadComplete Boolean @default(false)
 
   // should be different than id for security purposes
@@ -76,9 +79,83 @@ model Design {
   userId String
   user   User   @relation(references: [id], fields: [userId], onDelete: Cascade)
 
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  Orders        Orders[]
+  Collections   Collections? @relation(fields: [collectionsId], references: [id])
+  collectionsId Int?
+
+  @@index([userId])
+  @@index([createdAt])
+}
+
+model Vendor {
+  id            Int      @id @default(autoincrement())
+  name          String
+  phone         String   @unique
+  status        String
+  UPI           UPI[]
+  KYC           KYC?
+  Orders        Orders[]
+  totalEarnings Int      @default(0)
+  userId        String   @unique
+  user          User     @relation(references: [id], fields: [userId], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model UPI {
+  id            Int    @id @default(autoincrement())
+  vpa           String @unique
+  accountHolder String
+  vendorId      Int    @unique
+  vendor        Vendor @relation(references: [id], fields: [vendorId], onDelete: Cascade)
+
+  @@index([vendorId])
+}
+
+model KYC {
+  id  Int    @id @default(autoincrement())
+  pan String @unique
+
+  vendorId Int    @unique
+  vendor   Vendor @relation(references: [id], fields: [vendorId], onDelete: Cascade)
+
+  @@index([vendorId])
+}
+
+model Orders {
+  id                      Int       @id @default(autoincrement())
+  designs                 Design[]
+  userId                  String
+  user                    User      @relation(references: [id], fields: [userId], onDelete: Cascade)
+  vendorId                Int
+  vendor                  Vendor    @relation(references: [id], fields: [vendorId], onDelete: Cascade)
+  status                  String // ACTIVE, PAID, EXPIRED
+  createdAt               DateTime  @default(now())
+  updatedAt               DateTime  @updatedAt
+  price                   Int
+  paymentSessionId        String?
+  cashFreeOrderId         String?
+  percentageSplitToVendor Int?
+  orderExpiryTime         DateTime?
+  bankReference           String?
+  cashFreePaymentId       String?
+  paymentFailed           Boolean   @default(false)
+  failedReason            String?
+
+  @@index([userId])
+  @@index([vendorId])
+}
+
+model Collections {
+  id        Int      @id @default(autoincrement())
+  name      String
+  userId    String
+  user      User     @relation(references: [id], fields: [userId], onDelete: Cascade)
+  designs   Design[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([userId])
-  @@index([createdAt])
 }
