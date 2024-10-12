@@ -6,7 +6,7 @@
 		"dev": "prisma generate && next dev",
 		"build": "prisma generate && next build",
 		"trigger:dev": "pnpm dlx trigger.dev dev",
-		"trigger:deploy": "prisma generate && pnpm dlx trigger.dev deploy",
+		"trigger:deploy": "prisma generate && NODE_ENV=production pnpm dlx trigger.dev deploy",
 		"start": "next start",
 		"lint": "pnpm biome check src",
 		"lint:fix": "pnpm biome check --write src",
