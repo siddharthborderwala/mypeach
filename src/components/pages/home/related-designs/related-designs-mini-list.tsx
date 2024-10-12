@@ -4,20 +4,24 @@ import { getRelatedDesigns } from "@/lib/actions/designs";
 import { getDesignThumbnailURL } from "@/lib/storage/util";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
-import { Suspense } from "react";
 
-async function List({
+export async function List({
 	designId,
 	className,
 }: { designId: string; className?: string }) {
 	const designs = await getRelatedDesigns(designId);
 
 	if (designs.length === 0) {
-		return null;
+		return <div className="h-[15.895625rem] w-full">&nbsp;</div>;
 	}
 
 	return (
-		<div className={cn("mt-4 space-y-2", className)}>
+		<div
+			className={cn(
+				"mt-4 space-y-2 border-t border-dashed border-t-foreground/20 pt-3",
+				className,
+			)}
+		>
 			<p className="text-sm font-medium">Related Designs</p>
 			<ScrollArea className="w-full whitespace-nowrap">
 				<div className="flex w-max gap-4">
@@ -46,9 +50,14 @@ async function List({
 	);
 }
 
-function ListSkeleton({ className }: { className?: string }) {
+export function ListSkeleton({ className }: { className?: string }) {
 	return (
-		<div className={cn("mt-4 space-y-2", className)}>
+		<div
+			className={cn(
+				"mt-4 space-y-2 border-t border-dashed border-t-foreground/20 pt-3",
+				className,
+			)}
+		>
 			<p className="text-sm font-medium">Related Designs</p>
 			<ScrollArea className="w-full whitespace-nowrap">
 				<div className="flex w-max space-x-4">
@@ -59,19 +68,5 @@ function ListSkeleton({ className }: { className?: string }) {
 				</div>
 			</ScrollArea>
 		</div>
-	);
-}
-
-export default function RelatedDesignsMiniList({
-	className,
-	designId,
-}: {
-	className?: string;
-	designId: string;
-}) {
-	return (
-		<Suspense fallback={<ListSkeleton className={className} />}>
-			<List designId={designId} className={className} />
-		</Suspense>
 	);
 }

@@ -35,20 +35,20 @@ export default async function LandingPage({
 	return (
 		<>
 			<header className="sticky top-0 bg-white">
-				{session?.user.id ? (
-					<div className="flex items-center justify-between md:gap-6 p-4">
-						<div className="flex-1">
-							<Link
-								href="/"
-								className="w-min flex items-center gap-1 font-medium"
-							>
-								<img src="/logo.png" alt="Peach" className="h-10 w-10" />
-								<span className="text-xl mt-1">Peach</span>
-							</Link>
-						</div>
-						<div className="flex-1">
-							<SearchBar />
-						</div>
+				<div className="flex items-center justify-between md:gap-6 p-4">
+					<div className="flex-1">
+						<Link
+							href="/"
+							className="w-min flex items-center gap-1 font-medium"
+						>
+							<img src="/logo.png" alt="Peach" className="h-10 w-10" />
+							<span className="text-xl mt-1">Peach</span>
+						</Link>
+					</div>
+					<div className="flex-1">
+						<SearchBar />
+					</div>
+					{session?.user.id ? (
 						<div className="flex-1 flex items-center justify-end gap-4">
 							<Button
 								asChild
@@ -66,20 +66,24 @@ export default async function LandingPage({
 								username={session.user.username}
 							/>
 						</div>
-					</div>
-				) : (
-					<div className="flex items-center justify-between md:gap-6 p-4">
-						<Link href="/" className="flex items-center gap-1 font-semibold">
-							<img src="/logo.png" alt="Peach" className="h-10 w-10" />
-							<span className="text-xl mt-1">Peach</span>
-						</Link>
-						<nav className="flex items-center gap-4">
-							<Link href="/#explore">Explore</Link>
-							<Link href="/login">Login</Link>
-							<Link href="/register">Register</Link>
+					) : (
+						<nav className="flex-1 flex items-center justify-end gap-2">
+							<Button asChild variant="ghost" className="text-base font-normal">
+								<Link href="/#explore">Explore</Link>
+							</Button>
+							<Button asChild variant="ghost" className="text-base font-normal">
+								<Link href="/login">Login</Link>
+							</Button>
+							<Button
+								asChild
+								variant="default"
+								className="text-base font-normal ml-4 rounded-lg"
+							>
+								<Link href="/register">Register</Link>
+							</Button>
 						</nav>
-					</div>
-				)}
+					)}
+				</div>
 			</header>
 			<main className="bg-white w-full px-4 md:py-6 md:px-8">
 				<Suspense fallback={<div>Loading designs...</div>}>

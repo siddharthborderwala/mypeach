@@ -14,7 +14,7 @@ import type { InfiniteScrollDesignsProps } from "./types";
 import { DesignCard } from "./design-card";
 
 const DesignsGrid_ = ({ initialData }: InfiniteScrollDesignsProps) => {
-	const [search, setSearch] = useQueryState("q", parseAsString);
+	const [search] = useQueryState("q", parseAsString);
 
 	const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
 		useInfiniteQuery({

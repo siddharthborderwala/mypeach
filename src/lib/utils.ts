@@ -68,3 +68,9 @@ function formatDistanceToNow(date: Date, arg1: { addSuffix: boolean }) {
 
 	return arg1.addSuffix ? "just now" : "0 seconds";
 }
+
+export function isMobileUA(ua: string) {
+	return /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(
+		ua,
+	);
+}

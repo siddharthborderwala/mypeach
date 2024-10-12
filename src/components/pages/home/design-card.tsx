@@ -1,11 +1,24 @@
-import { memo, Suspense } from "react";
+import { memo } from "react";
 import type { InfiniteScrollDesignsProps } from "./types";
-import { formatPrice, getUserAvatarURL, relativeTime } from "@/lib/utils";
+import {
+	appBaseURL,
+	formatPrice,
+	getUserAvatarURL,
+	isMobileUA,
+	relativeTime,
+} from "@/lib/utils";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { getDesignThumbnailURL } from "@/lib/storage/util";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import RelatedDesignsMiniList from "./related-designs-mini-list";
+import RelatedDesignsMiniList from "./related-designs";
+import { Button } from "@/components/ui/button";
+import {
+	CurrencyInr,
+	ShareFat,
+	ShoppingCartSimple,
+} from "@phosphor-icons/react/dist/ssr";
+import { toast } from "sonner";
 
 const DesignCardDialogContent = ({
 	design,
@@ -36,21 +49,76 @@ const DesignCardDialogContent = ({
 					</span>
 				</div>
 			</div>
-			<div className="mt-4 flex-1">
-				<div className="flex items-center justify-between">
-					<p className="text-lg font-medium">{design.name}</p>
-					<Badge variant="default">{design.fileDPI} DPI</Badge>
+			<div className="mt-6 flex-1 flex flex-col">
+				<div className="flex justify-between">
+					<div className="flex flex-col font-medium">
+						<p className="text-lg">{design.name}</p>
+						<p className="text-2xl text-foreground/90">
+							{formatPrice(design.price)}
+						</p>
+					</div>
+					<Button
+						onClick={function shareUrl() {
+							const designURL = `${appBaseURL}/d/${design.id}`;
+							const isMobile = isMobileUA(navigator.userAgent);
+
+							if (navigator.share && isMobile) {
+								navigator
+									.share({
+										url: designURL,
+									})
+									.then(() => console.log("Successful share"))
+									.catch(() => {
+										navigator.clipboard
+											.writeText(designURL)
+											.then(() => toast.success("Copied URL to clipboard"))
+											.catch(() =>
+												toast.error("Failed to copy URL to clipboard"),
+											);
+									});
+							} else {
+								navigator.clipboard
+									.writeText(designURL)
+									.then(() => toast.success("Copied URL to clipboard"))
+									.catch(() => toast.error("Failed to copy URL to clipboard"));
+							}
+						}}
+						size="sm"
+						variant="outline"
+						className="font-normal text-base"
+					>
+						<ShareFat weight="fill" className="text-muted-foreground" />
+						<span className="ml-2">Share</span>
+					</Button>
 				</div>
-				<div className="flex flex-wrap gap-2 mt-2">
-					{design.tags.map((tag) => (
+				{design.tags.length > 0 ? (
+					<div className="flex flex-wrap gap-2 mt-4">
 						<Badge
 							variant="outline"
-							key={tag}
-							className="font-normal border select-none"
+							className="border-foreground/10 text-sm font-bold"
 						>
-							{tag}
+							{design.fileDPI} DPI
 						</Badge>
-					))}
+						{design.tags.map((tag) => (
+							<Badge
+								variant="outline"
+								key={tag}
+								className="font-normal border select-none text-sm"
+							>
+								{tag}
+							</Badge>
+						))}
+					</div>
+				) : null}
+				<div className="flex flex-col gap-2 mt-auto">
+					<Button variant="outline">
+						<CurrencyInr weight="bold" />
+						<span className="ml-2">Buy Now</span>
+					</Button>
+					<Button variant="default">
+						<ShoppingCartSimple weight="bold" />
+						<span className="ml-2">Add to Cart</span>
+					</Button>
 				</div>
 			</div>
 			<RelatedDesignsMiniList designId={design.id} />
