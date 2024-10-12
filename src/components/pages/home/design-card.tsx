@@ -91,25 +91,42 @@ const DesignCardDialogContent = ({
 						<span className="ml-2">Share</span>
 					</Button>
 				</div>
-				{design.tags.length > 0 ? (
-					<div className="flex flex-wrap gap-2 mt-4">
-						<Badge
-							variant="outline"
-							className="border-foreground/10 text-sm font-bold"
-						>
-							{design.fileDPI} DPI
-						</Badge>
-						{design.tags.map((tag) => (
-							<Badge
-								variant="outline"
-								key={tag}
-								className="font-normal border select-none text-sm"
-							>
-								{tag}
-							</Badge>
-						))}
+				<div className="space-y-3 mt-4">
+					<div className="grid grid-cols-2">
+						<div>
+							<h3 className="text-sm tracking-wider uppercase text-muted-foreground">
+								File Type
+							</h3>
+							<p className="uppercase">
+								{mimeToExtension(design.originalFileType)}
+							</p>
+						</div>
+						<div>
+							<h3 className="text-sm tracking-wider uppercase text-muted-foreground">
+								File Quality
+							</h3>
+							<p>{design.fileDPI} DPI</p>
+						</div>
 					</div>
-				) : null}
+					<div>
+						<h3 className="text-sm tracking-wider uppercase text-muted-foreground">
+							Tags
+						</h3>
+						{design.tags.length > 0 ? (
+							<div className="flex flex-wrap gap-2 mt-1">
+								{design.tags.map((tag) => (
+									<Badge
+										variant="outline"
+										key={tag}
+										className="font-normal border select-none text-sm"
+									>
+										{tag}
+									</Badge>
+								))}
+							</div>
+						) : null}
+					</div>
+				</div>
 				<div className="flex flex-col gap-2 mt-auto">
 					<Button variant="outline">
 						<CurrencyInr weight="bold" />
@@ -126,6 +143,8 @@ const DesignCardDialogContent = ({
 	</DialogContent>
 );
 
+const mimeToExtension = (mime: string) => mime.split("/")[1];
+
 const DesignCard_ = ({
 	design,
 }: {
@@ -133,15 +152,15 @@ const DesignCard_ = ({
 }) => {
 	return (
 		<Dialog>
-			<div>
-				<DialogTrigger className="relative block w-full aspect-[3/4]">
+			<DialogTrigger className="text-left">
+				<div className="relative block w-full aspect-[3/4] rounded-lg overflow-hidden">
 					<img
 						src={getDesignThumbnailURL(design.thumbnailFileStorageKey, 1200)}
 						alt={design.name}
 						className="absolute inset-0 w-full h-full object-cover select-none pointer-events-none"
 						loading="lazy"
 					/>
-				</DialogTrigger>
+				</div>
 				<div className="flex items-center justify-between gap-2 py-2">
 					<div className="flex items-center gap-2">
 						<Avatar className="h-9 w-9 rounded-full">
@@ -151,7 +170,7 @@ const DesignCard_ = ({
 							<p className="font-medium">{design.user.username}</p>
 							<span
 								suppressHydrationWarning
-								className="text-xs text-muted-foreground"
+								className="text-sm text-muted-foreground"
 							>
 								Added {relativeTime(design.createdAt)}
 							</span>
@@ -159,12 +178,16 @@ const DesignCard_ = ({
 					</div>
 					<div className="flex flex-col items-end">
 						<p className="font-medium">{formatPrice(design.price)}</p>
-						<p className="text-xs text-muted-foreground">
-							{design.fileDPI} DPI
+						<p className="text-sm text-muted-foreground">
+							<span className="uppercase text-primary">
+								{mimeToExtension(design.originalFileType)}
+							</span>
+							<span className="mx-2 font-bold">&middot;</span>
+							<span className="text-primary">{design.fileDPI} DPI</span>
 						</p>
 					</div>
 				</div>
-			</div>
+			</DialogTrigger>
 			<DesignCardDialogContent design={design} />
 		</Dialog>
 	);

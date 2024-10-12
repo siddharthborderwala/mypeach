@@ -96,6 +96,7 @@ export async function getDesignsForExplore(
 				price: true,
 				currency: true,
 				tags: true,
+				originalFileType: true,
 				user: {
 					select: {
 						id: true,
