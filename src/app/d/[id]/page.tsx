@@ -3,8 +3,12 @@ import { getDesignSocialImageURL } from "@/lib/storage/util";
 import { formatPrice } from "@/lib/utils";
 import type { Metadata } from "next";
 
-export async function generateMetadata(params: {
-	id: string;
+export async function generateMetadata({
+	params,
+}: {
+	params: {
+		id: string;
+	};
 }): Promise<Metadata> {
 	// read route params
 	const id = params.id;

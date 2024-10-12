@@ -5,10 +5,9 @@ import { parseAsString, useQueryState } from "nuqs";
 import {
 	Sheet,
 	SheetContent,
-	SheetDescription,
 	SheetHeader,
 	SheetTitle,
-} from "../../ui/sheet";
+} from "@/components/ui/sheet";
 import { DetailsForm } from "./new-design-modal/details-form";
 import { useUploadContext } from "./upload-context";
 import { useEffect } from "react";
