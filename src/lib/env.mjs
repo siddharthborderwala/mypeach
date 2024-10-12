@@ -15,6 +15,7 @@ export const env = createEnv({
 		R2_PROTECTED_BUCKET_NAME: z.string().min(1),
 		R2_PUBLIC_BUCKET_NAME: z.string().min(1),
 		USERCONTENT_BASE_URL: z.string().min(1),
+		REDIS_URL: z.string().min(1),
 	},
 	client: {
 		// NEXT_PUBLIC_PUBLISHABLE_KEY: z.string().min(1),
@@ -41,6 +42,7 @@ export const env = createEnv({
 		R2_PROTECTED_BUCKET_NAME: process.env.R2_PROTECTED_BUCKET_NAME,
 		R2_PUBLIC_BUCKET_NAME: process.env.R2_PUBLIC_BUCKET_NAME,
 		USERCONTENT_BASE_URL: process.env.USERCONTENT_BASE_URL,
+		REDIS_URL: process.env.REDIS_URL,
 	},
 	experimental__runtimeEnv: {
 		// NEXT_PUBLIC_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_PUBLISHABLE_KEY,

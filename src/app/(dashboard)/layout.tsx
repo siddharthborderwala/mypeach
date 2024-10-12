@@ -2,7 +2,6 @@ import Link from "next/link";
 import {
 	House,
 	List as Menu,
-	MagnifyingGlass as Search,
 	PaintBrush,
 	Tag,
 	ShoppingCart,
@@ -10,9 +9,8 @@ import {
 } from "@phosphor-icons/react/dist/ssr";
 
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { checkAuth, getUserAuth, getUserAuthV2 } from "@/lib/auth/utils";
+import { getCurrentUser } from "@/lib/auth/utils";
 import { NavItem, NavItemMobile } from "./nav";
 import { UserMenu } from "@/components/user-menu";
 import { DashboardProviders } from "@/components/dashboard-providers";
@@ -51,9 +49,7 @@ const secondaryNavItems = [
 export default async function Layout({
 	children,
 }: { children: React.ReactNode }) {
-	const {
-		session: { user },
-	} = await getUserAuthV2();
+	const { id, username } = await getCurrentUser();
 
 	return (
 		<DashboardProviders>
@@ -129,7 +125,7 @@ export default async function Layout({
 								</nav>
 							</SheetContent>
 						</Sheet>
-						<UserMenu userId={user.id} username={user.username} />
+						<UserMenu userId={id} username={username} />
 					</header>
 					{children}
 				</div>

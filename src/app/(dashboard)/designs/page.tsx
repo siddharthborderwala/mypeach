@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { parseAsBoolean } from "nuqs";
 import { Dialog } from "@/components/ui/dialog";
 import { getCurrentUserDesigns } from "@/lib/actions/designs";
-import { UploadProvider } from "@/components/pages/designs/upload-context";
+import { UploadProvider } from "@/components/pages/dashboard/designs/upload-context";
 import { AllDesigns } from "./all-designs";
 
 export const metadata: Metadata = {

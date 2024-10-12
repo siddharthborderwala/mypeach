@@ -3,11 +3,6 @@ import { cache } from "react";
 
 import { type Session, type User, Lucia } from "lucia";
 import { RedisAdapter } from "./redis-adapter";
-// import { db } from "@/lib/db/index";
-
-// import { PrismaAdapter } from "@lucia-auth/adapter-prisma";
-
-// const adapter = new PrismaAdapter(db.session, db.user);
 
 const adapter = new RedisAdapter(process.env.REDIS_URL!);
 
@@ -29,11 +24,9 @@ export const lucia = new Lucia(adapter, {
 			secure: process.env.NODE_ENV === "production",
 		},
 	},
-	getUserAttributes: (user) => {
-		console.log("USERRRRRR", user);
-
+	getUserAttributes: (sessionAttributes) => {
 		return {
-			username: user.username,
+			username: sessionAttributes.username,
 		} satisfies DatabaseUserAttributes;
 	},
 });

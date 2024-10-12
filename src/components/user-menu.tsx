@@ -6,6 +6,7 @@ import {
 	Gear,
 	Headset,
 	FileDashed,
+	CaretDown,
 } from "@phosphor-icons/react";
 import {
 	DropdownMenu,
@@ -19,6 +20,7 @@ import { signOutAction } from "@/lib/actions/users";
 import { useFormStatus } from "react-dom";
 import Link from "next/link";
 import { Avatar, AvatarImage } from "./ui/avatar";
+import { getUserAvatarURL } from "@/lib/utils";
 
 function LogoutButton() {
 	const { pending } = useFormStatus();
@@ -49,13 +51,16 @@ export function UserMenu({
 	return (
 		<DropdownMenu>
 			<DropdownMenuTrigger asChild>
-				<Button variant="outline" size="icon" className="rounded-full h-9 w-9">
+				<Button variant="ghost" className="rounded-full p-1 group">
 					<Avatar className="h-7 w-7">
-						<AvatarImage
-							src={`https://avatar.vercel.sh/${username}.svg?size=56`}
-						/>
+						<AvatarImage src={getUserAvatarURL(username)} />
 					</Avatar>
 					<span className="sr-only">Toggle user menu</span>
+					<CaretDown
+						weight="bold"
+						size={12}
+						className="ml-1 group-hover:translate-y-[1px] transition-transform"
+					/>
 				</Button>
 			</DropdownMenuTrigger>
 			<DropdownMenuContent align="end">

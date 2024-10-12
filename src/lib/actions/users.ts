@@ -24,6 +24,7 @@ import { sha256Digest } from "../crypto";
 import { verifyPasswordResetTokenAndGetUserId } from "../auth/verification";
 import { redirectWithFlash } from "../utils.server";
 import { updateBasicUserDetailsSchema, updatePasswordSchema } from "./schema";
+import { redis } from "../redis";
 
 interface ActionResult {
 	error: string;
@@ -347,6 +348,15 @@ export async function updateBasicUserDetails(
 			});
 		});
 
+		await redis.connect();
+
+		await redis.set(
+			`user:${session.userId}`,
+			JSON.stringify({ id: session.userId, attributes: { username } }),
+		);
+
+		await redis.disconnect();
+
 		return { success: true, error: "" };
 	} catch (e) {
 		if (e instanceof PrismaError) {
@@ -369,6 +379,7 @@ export async function updateBasicUserDetails(
 				return { error: "User not found" };
 			}
 		}
+		console.log(e);
 		return genericError;
 	}
 }

@@ -1,13 +1,14 @@
 "use client";
-import { NewDesignModal } from "@/components/pages/designs/new-design-modal";
-import EditDesignSheet from "@/components/pages/designs/edit-design-sheet";
-import NewDesignModalTrigger from "@/components/pages/designs/new-design-modal/new-design-modal-trigger";
+
+import { NewDesignModal } from "@/components/pages/dashboard/designs/new-design-modal";
+import EditDesignSheet from "@/components/pages/dashboard/designs/edit-design-sheet";
+import NewDesignModalTrigger from "@/components/pages/dashboard/designs/new-design-modal/new-design-modal-trigger";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import InfiniteScrollDesigns from "@/components/pages/designs/infinite-scroll-designs-view";
+import InfiniteScrollDesigns from "@/components/pages/dashboard/designs/infinite-scroll-designs-view";
 import type { InfiniteScrollDesignsProps } from "@/hooks/dashboard";
 import { useGetDesigns } from "@/hooks/dashboard";
 import { useEffect, useState } from "react";
-import { useUploadContext } from "@/components/pages/designs/upload-context";
+import { useUploadContext } from "@/components/pages/dashboard/designs/upload-context";
 import type { DesignData } from "@/lib/actions/designs";
 
 export function AllDesigns({ initialData }: InfiniteScrollDesignsProps) {

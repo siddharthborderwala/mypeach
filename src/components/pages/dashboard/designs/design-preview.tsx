@@ -2,7 +2,7 @@
 
 import ImageWithFallback from "@/components/image-with-fallback";
 import type { DesignData } from "@/lib/actions/designs";
-import { getUserContentUrl } from "@/lib/storage/util";
+import { getDesignThumbnailURL, getUserContentUrl } from "@/lib/storage/util";
 import { parseAsString, useQueryState } from "nuqs";
 import { Badge } from "@/components/ui/badge";
 import { useUploadContext } from "./upload-context";
@@ -17,13 +17,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { useDeleteDesign } from "@/hooks/dashboard";
-
-function getDesignThumbnailURL(key: string | null, width: 2000 | 1200) {
-	if (!key) {
-		return "";
-	}
-	return getUserContentUrl(`${key}/${width}.webp`);
-}
 
 export default function DesignPreview({
 	design,

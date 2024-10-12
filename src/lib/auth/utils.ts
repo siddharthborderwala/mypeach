@@ -31,17 +31,13 @@ export const getUserAuth = async (): Promise<AuthSession> => {
 	};
 };
 
-export const getUserAuthV2 = async () => {
+export const getCurrentUser = async () => {
 	const { session, user } = await validateRequest();
 	if (!session) return redirect("/login");
 
 	return {
-		session: {
-			user: {
-				id: user.id,
-				username: user.username,
-			},
-		},
+		id: user.id,
+		username: user.username,
 	};
 };
 
