@@ -1,6 +1,5 @@
 import type * as React from "react";
 import type { Metadata } from "next";
-import { CommonHeader } from "@/components/common-header";
 
 export const metadata: Metadata = {
 	title: "Terms and Conditions | Peach",
@@ -88,35 +87,32 @@ const TermsList = () => (
 
 export default function TermsPage() {
 	return (
-		<>
-			<CommonHeader />
-			<main className="relative p-4 md:gap-6 md:p-8 mx-auto max-w-3xl">
-				<h1 className="text-2xl font-semibold">Terms and Conditions</h1>
-				<h2 className="text-sm font-medium text-primary mt-2">
-					Last updated at 7<sup>th</sup> October 2024
-				</h2>
-				<div className="prose mt-8 w-full">
-					<p>
-						These Terms and Conditions, along with privacy policy or other terms
-						("Terms") constitute a binding agreement by and between mypeach.in,
-						("Website Owner" or "we" or "us" or "our") and you ("you" or "your")
-						and relate to your use of our website, goods (as applicable) or
-						services (as applicable) (collectively, "Services").
-					</p>
-					<p>
-						By using our website and availing the Services, you agree that you
-						have read and accepted these Terms (including the Privacy Policy).
-						We reserve the right to modify these Terms at any time and without
-						assigning any reason. It is your responsibility to periodically
-						review these Terms to stay informed of updates.
-					</p>
-					<p>
-						The use of this website or availing of our Services is subject to
-						the following terms of use:
-					</p>
-					<TermsList />
-				</div>
-			</main>
-		</>
+		<main className="relative p-4 md:gap-6 md:p-8 mx-auto max-w-3xl">
+			<h1 className="text-2xl font-semibold">Terms and Conditions</h1>
+			<h2 className="text-sm font-medium text-primary mt-2">
+				Last updated at 7<sup>th</sup> October 2024
+			</h2>
+			<div className="prose mt-8 w-full">
+				<p>
+					These Terms and Conditions, along with privacy policy or other terms
+					("Terms") constitute a binding agreement by and between mypeach.in,
+					("Website Owner" or "we" or "us" or "our") and you ("you" or "your")
+					and relate to your use of our website, goods (as applicable) or
+					services (as applicable) (collectively, "Services").
+				</p>
+				<p>
+					By using our website and availing the Services, you agree that you
+					have read and accepted these Terms (including the Privacy Policy). We
+					reserve the right to modify these Terms at any time and without
+					assigning any reason. It is your responsibility to periodically review
+					these Terms to stay informed of updates.
+				</p>
+				<p>
+					The use of this website or availing of our Services is subject to the
+					following terms of use:
+				</p>
+				<TermsList />
+			</div>
+		</main>
 	);
 }

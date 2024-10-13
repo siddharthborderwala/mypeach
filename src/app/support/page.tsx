@@ -10,7 +10,6 @@ import {
 } from "@/components/ui/accordion";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { CommonHeader } from "@/components/common-header";
 
 export const metadata: Metadata = {
 	title: "Support | Peach",
@@ -91,64 +90,59 @@ const faqItems: { question: string; answer: React.ReactNode }[] = [
 
 export default function SupportPage() {
 	return (
-		<>
-			<CommonHeader />
-			<main className="relative p-4 md:gap-6 md:p-8 mx-auto max-w-3xl">
-				<div className="space-y-2">
-					<h1 className="text-lg font-semibold md:text-2xl">Support</h1>
-					<p className="text-sm text-muted-foreground">
-						We're here to help you
-					</p>
-				</div>
-				<div className="mt-4 grid gap-4 md:grid-cols-2">
-					<Card>
-						<CardHeader>
-							<CardTitle className="flex items-center gap-2">
-								<Envelope className="h-5 w-5" />
-								Email Support
-							</CardTitle>
-						</CardHeader>
-						<CardContent>
-							<p className="text-lg font-medium">support@mypeach.com</p>
-							<p className="text-sm text-muted-foreground mt-2">
-								We typically respond within 24 hours.
-							</p>
-						</CardContent>
-					</Card>
-					<Card>
-						<CardHeader>
-							<CardTitle className="flex items-center gap-2">
-								<Phone className="h-5 w-5" />
-								WhatsApp Support
-							</CardTitle>
-						</CardHeader>
-						<CardContent>
-							<div className="flex">
-								<p className="text-lg font-medium">+91 75678 10000</p>
-							</div>
-							<p className="text-sm text-muted-foreground mt-2">
-								Available Monday to Saturday, 9 AM - 9 PM IST
-							</p>
-						</CardContent>
-					</Card>
-				</div>
-				<div className="mt-8">
-					<h2 className="text-xl font-semibold mb-4">
-						Frequently Asked Questions
-					</h2>
-					<Accordion type="single" collapsible className="w-full">
-						{faqItems.map((item, index) => (
-							<AccordionItem
-								key={`item-${index + 1}`}
-								value={`item-${index + 1}`}
-							>
-								<AccordionTrigger>{item.question}</AccordionTrigger>
-								<AccordionContent>{item.answer}</AccordionContent>
-							</AccordionItem>
-						))}
-					</Accordion>
-				</div>
-			</main>
-		</>
+		<main className="relative p-4 md:gap-6 md:p-8 mx-auto max-w-3xl">
+			<div className="space-y-2">
+				<h1 className="text-lg font-semibold md:text-2xl">Support</h1>
+				<p className="text-sm text-muted-foreground">We're here to help you</p>
+			</div>
+			<div className="mt-4 grid gap-4 md:grid-cols-2">
+				<Card>
+					<CardHeader>
+						<CardTitle className="flex items-center gap-2">
+							<Envelope className="h-5 w-5" />
+							Email Support
+						</CardTitle>
+					</CardHeader>
+					<CardContent>
+						<p className="text-lg font-medium">support@mypeach.com</p>
+						<p className="text-sm text-muted-foreground mt-2">
+							We typically respond within 24 hours.
+						</p>
+					</CardContent>
+				</Card>
+				<Card>
+					<CardHeader>
+						<CardTitle className="flex items-center gap-2">
+							<Phone className="h-5 w-5" />
+							WhatsApp Support
+						</CardTitle>
+					</CardHeader>
+					<CardContent>
+						<div className="flex">
+							<p className="text-lg font-medium">+91 75678 10000</p>
+						</div>
+						<p className="text-sm text-muted-foreground mt-2">
+							Available Monday to Saturday, 9 AM - 9 PM IST
+						</p>
+					</CardContent>
+				</Card>
+			</div>
+			<div className="mt-8">
+				<h2 className="text-xl font-semibold mb-4">
+					Frequently Asked Questions
+				</h2>
+				<Accordion type="single" collapsible className="w-full">
+					{faqItems.map((item, index) => (
+						<AccordionItem
+							key={`item-${index + 1}`}
+							value={`item-${index + 1}`}
+						>
+							<AccordionTrigger>{item.question}</AccordionTrigger>
+							<AccordionContent>{item.answer}</AccordionContent>
+						</AccordionItem>
+					))}
+				</Accordion>
+			</div>
+		</main>
 	);
 }
