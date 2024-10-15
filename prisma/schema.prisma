@@ -12,19 +12,19 @@ datasource db {
 }
 
 model User {
-  id                 String                   @id
-  email              String                   @unique
-  username           String                   @unique
-  hashedPassword     String
-  emailVerified      Boolean                  @default(false)
-  name               String?
-  VerificationToken  EmailVerificationToken[]
-  Design             Design[]
-  PasswordResetToken PasswordResetToken[]
-  Order              Order[]
-  Collection         Collection[]
-  Vendor             Vendor?
-  Cart               Cart[]
+  id                      String                   @id
+  email                   String                   @unique
+  username                String                   @unique
+  hashedPassword          String
+  emailVerified           Boolean                  @default(false)
+  name                    String?
+  emailVerificationTokens EmailVerificationToken[]
+  designs                 Design[]
+  passwordResetTokens     PasswordResetToken[]
+  orders                  Order[]
+  collections             Collection[]
+  vendor                  Vendor?
+  carts                   Cart[]
 }
 
 model PasswordResetToken {
@@ -72,8 +72,8 @@ model Design {
   userId String
   user   User   @relation(references: [id], fields: [userId], onDelete: Cascade)
 
-  Order      Order[]
-  Collection Collection[]
+  orders      Order[]
+  collections Collection[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -87,9 +87,9 @@ model Vendor {
   name          String
   phone         String  @unique
   status        String
-  UPI           UPI[]
+  UPIs          UPI[]
   KYC           KYC?
-  Order         Order[]
+  orders        Order[]
   totalEarnings Int     @default(0)
   userId        String  @unique
   user          User    @relation(references: [id], fields: [userId], onDelete: Cascade)
@@ -122,8 +122,7 @@ model Order {
   designs                 Design[]
   userId                  String
   user                    User      @relation(references: [id], fields: [userId], onDelete: Cascade)
-  vendorId                Int
-  vendor                  Vendor    @relation(references: [id], fields: [vendorId], onDelete: Cascade)
+  vendors                 Vendor[]
   status                  String // ACTIVE, PAID, EXPIRED
   createdAt               DateTime  @default(now())
   updatedAt               DateTime  @updatedAt
@@ -139,7 +138,6 @@ model Order {
   failedReason            String?
 
   @@index([userId])
-  @@index([vendorId])
 }
 
 model Collection {
