@@ -33,7 +33,7 @@ async function updateOrderStatus({
 			}
 
 			// Create the Vendor
-			const order = await tx.orders.update({
+			const order = await tx.order.update({
 				where: {
 					id: Number.parseInt(orderData.order_id),
 				},

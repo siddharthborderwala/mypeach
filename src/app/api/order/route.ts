@@ -47,7 +47,7 @@ async function createOrderWithDetails(orderData: {
 			}
 
 			// Create the Vendor
-			const order = await db.orders.create({
+			const order = await db.order.create({
 				data: {
 					designs: {
 						connect: orderData.designIds.map((id) => ({ id })),
@@ -86,7 +86,7 @@ async function updateOrderWithDetails(orderData: {
 }) {
 	try {
 		const result = await db.$transaction(async (tx) => {
-			const order = await tx.orders.update({
+			const order = await tx.order.update({
 				where: { id: orderData.id },
 				data: {
 					cashFreeOrderId: orderData.cashFreeOrderId,
