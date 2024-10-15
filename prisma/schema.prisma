@@ -22,7 +22,7 @@ model User {
   VerificationToken  EmailVerificationToken[]
   Design             Design[]
   PasswordResetToken PasswordResetToken[]
-  Orders             Orders[]
+  Order              Order[]
   Collections        Collections[]
   Vendor             Vendor?
 }
@@ -81,7 +81,7 @@ model Design {
 
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt
-  Orders        Orders[]
+  Order         Order[]
   Collections   Collections? @relation(fields: [collectionsId], references: [id])
   collectionsId Int?
 
@@ -90,16 +90,16 @@ model Design {
 }
 
 model Vendor {
-  id            Int      @id @default(autoincrement())
+  id            Int     @id @default(autoincrement())
   name          String
-  phone         String   @unique
+  phone         String  @unique
   status        String
   UPI           UPI[]
   KYC           KYC?
-  Orders        Orders[]
-  totalEarnings Int      @default(0)
-  userId        String   @unique
-  user          User     @relation(references: [id], fields: [userId], onDelete: Cascade)
+  Order         Order[]
+  totalEarnings Int     @default(0)
+  userId        String  @unique
+  user          User    @relation(references: [id], fields: [userId], onDelete: Cascade)
 
   @@index([userId])
 }
@@ -124,7 +124,7 @@ model KYC {
   @@index([vendorId])
 }
 
-model Orders {
+model Order {
   id                      Int       @id @default(autoincrement())
   designs                 Design[]
   userId                  String
