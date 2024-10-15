@@ -60,14 +60,12 @@ export async function getDesignsForExplore(
 		search?: string | null;
 	},
 	pagination?: {
-		page?: number;
-		pageSize?: number;
+		cursor?: string;
+		take?: number;
 	},
 ) {
-	const page = pagination?.page ?? 1;
-	const pageSize = pagination?.pageSize ?? 24;
-
-	const skip = (page - 1) * pageSize;
+	const cursor = pagination?.cursor;
+	const take = pagination?.take ?? 24;
 
 	const searchTerms = options?.search
 		?.split(" ")
@@ -84,47 +82,44 @@ export async function getDesignsForExplore(
 		],
 	};
 
-	const [designs, totalCount] = await db.$transaction([
-		db.design.findMany({
-			where,
-			select: {
-				id: true,
-				name: true,
-				thumbnailFileStorageKey: true,
-				metadata: true,
-				createdAt: true,
-				price: true,
-				currency: true,
-				tags: true,
-				originalFileType: true,
-				user: {
-					select: {
-						id: true,
-						username: true,
-					},
+	const designs = await db.design.findMany({
+		where,
+		select: {
+			id: true,
+			name: true,
+			thumbnailFileStorageKey: true,
+			metadata: true,
+			createdAt: true,
+			price: true,
+			currency: true,
+			tags: true,
+			originalFileType: true,
+			user: {
+				select: {
+					id: true,
+					username: true,
 				},
 			},
-			skip,
-			take: pageSize,
-			orderBy: {
-				createdAt: "desc",
-			},
-		}),
-		db.design.count({
-			where,
-		}),
-	]);
+		},
+		cursor: cursor ? { id: cursor } : undefined,
+		take: take + 1,
+		orderBy: {
+			createdAt: "desc",
+		},
+	});
+
+	const hasNextPage = designs.length > take;
+	const items = designs.slice(0, take);
+	const nextCursor = hasNextPage ? items[items.length - 1].id : undefined;
 
 	return {
-		designs: designs.map((d) => ({
+		designs: items.map((d) => ({
 			...d,
 			fileDPI: (d.metadata as FileMetadata).fileDPI,
 		})),
 		pagination: {
-			currentPage: page,
-			pageSize,
-			totalCount,
-			totalPages: Math.ceil(totalCount / pageSize),
+			hasNextPage,
+			nextCursor,
 		},
 	};
 }

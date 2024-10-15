@@ -19,17 +19,14 @@ const DesignsGrid_ = ({ initialData }: InfiniteScrollDesignsProps) => {
 	const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
 		useInfiniteQuery({
 			queryKey: ["designs-for-explore", search],
-			initialPageParam: 1,
-			queryFn: ({ pageParam = 1 }) => {
-				return getDesignsForExplore({ search }, { page: pageParam });
+			initialPageParam: "",
+			queryFn: ({ pageParam = "" }) => {
+				return getDesignsForExplore({ search }, { cursor: pageParam });
 			},
-			getNextPageParam: (lastPage) =>
-				lastPage.pagination.currentPage < lastPage.pagination.totalPages
-					? lastPage.pagination.currentPage + 1
-					: undefined,
+			getNextPageParam: (lastPage) => lastPage.pagination.nextCursor,
 			initialData: {
 				pages: [initialData],
-				pageParams: [1],
+				pageParams: [""],
 			},
 		});
 
