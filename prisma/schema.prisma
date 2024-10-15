@@ -18,20 +18,13 @@ model User {
   hashedPassword     String
   emailVerified      Boolean                  @default(false)
   name               String?
-  sessions           Session[]
   VerificationToken  EmailVerificationToken[]
   Design             Design[]
   PasswordResetToken PasswordResetToken[]
   Order              Order[]
   Collection         Collection[]
   Vendor             Vendor?
-}
-
-model Session {
-  id        String   @id
-  userId    String
-  expiresAt DateTime
-  user      User     @relation(references: [id], fields: [userId], onDelete: Cascade)
+  Cart               Cart[]
 }
 
 model PasswordResetToken {
@@ -155,6 +148,17 @@ model Collection {
   userId    String
   user      User     @relation(references: [id], fields: [userId], onDelete: Cascade)
   designs   Design[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model Cart {
+  id     Int    @id @default(autoincrement())
+  userId String
+  user   User   @relation(references: [id], fields: [userId], onDelete: Cascade)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
