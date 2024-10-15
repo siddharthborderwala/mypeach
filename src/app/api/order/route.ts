@@ -53,7 +53,9 @@ async function createOrderWithDetails(orderData: {
 						connect: orderData.designIds.map((id) => ({ id })),
 					},
 					userId: orderData.userId,
-					vendorId: vendor?.id,
+					vendors: {
+						connect: { id: vendor.id },
+					},
 					price: orderData.price,
 					status: orderData.status,
 				},

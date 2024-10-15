@@ -44,12 +44,19 @@ async function updateOrderStatus({
 					paymentFailed: payment.payment_status === "FAILED",
 					failedReason: error_details?.error_description,
 				},
+				include: {
+					vendors: {
+						select: {
+							id: true,
+						},
+					},
+				},
 			});
 
 			if (payment.payment_status === "SUCCESS") {
 				await tx.vendor.update({
 					where: {
-						id: order.vendorId,
+						id: order.vendors[0].id,
 					},
 					data: {
 						totalEarnings: {
