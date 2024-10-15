@@ -7,8 +7,8 @@ import type { DesignData } from "@/lib/actions/designs";
 
 const bodyValidator = z.object({
 	name: z.string().optional().default("Untitled"),
-	designId: z.string().length(24),
-	fileId: z.string().length(24),
+	designId: z.string().length(36),
+	fileId: z.string().length(36),
 	fileName: z.string(),
 	fileType: z.string(),
 });
@@ -65,7 +65,7 @@ export async function POST(request: Request) {
 
 const putValidator = z.object({
 	name: z.string().optional(),
-	designId: z.string().length(24),
+	designId: z.string().length(36),
 	isDraft: z.boolean().optional(),
 	thumbnailFileStorageKey: z.string().optional(),
 	thumbnailFileType: z.string().optional(),

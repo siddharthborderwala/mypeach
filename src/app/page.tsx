@@ -1,13 +1,8 @@
 import type { Metadata } from "next";
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
-import { getUserAuth } from "@/lib/auth/utils";
-import { UserMenu } from "@/components/user-menu";
-import { Plus } from "@phosphor-icons/react/dist/ssr";
-import { SearchBar } from "@/components/pages/home/search-bar";
 import { DesignsGrid } from "@/components/pages/home/designs-grid";
 import { getDesignsForExplore } from "@/lib/actions/designs";
 import { Suspense } from "react";
+import { Header } from "@/components/misc";
 
 export const metadata: Metadata = {
 	title: "Peach",
@@ -32,6 +27,7 @@ export default async function LandingPage({
 }) {
 	return (
 		<>
+			<Header />
 			<main className="bg-white w-full px-4 md:py-6 md:px-8">
 				<Suspense fallback={<div>Loading designs...</div>}>
 					<Explore search={searchParams.q} />

@@ -72,8 +72,8 @@ export function NewDesignModal() {
 				return;
 			}
 
-			const newDesignId = generateId(24);
-			const newDesignFileId = generateId(24);
+			const newDesignId = generateId(36);
+			const newDesignFileId = generateId(36);
 
 			setNewDesignId(newDesignId);
 

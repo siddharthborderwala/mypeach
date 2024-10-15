@@ -7,7 +7,12 @@ import {
 	isMobileUA,
 	relativeTime,
 } from "@/lib/utils";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import {
+	Dialog,
+	DialogContent,
+	DialogTitle,
+	DialogTrigger,
+} from "@/components/ui/dialog";
 import { getDesignThumbnailURL } from "@/lib/storage/util";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -51,12 +56,12 @@ const DesignCardDialogContent = ({
 			</div>
 			<div className="mt-6 flex-1 flex flex-col">
 				<div className="flex justify-between">
-					<div className="flex flex-col font-medium">
-						<p className="text-lg">{design.name}</p>
-						<p className="text-2xl text-foreground/90">
+					<DialogTitle className="flex flex-col font-medium">
+						<span className="text-lg">{design.name}</span>
+						<span className="text-2xl text-foreground/90">
 							{formatPrice(design.price)}
-						</p>
-					</div>
+						</span>
+					</DialogTitle>
 					<Button
 						onClick={function shareUrl() {
 							const designURL = `${appBaseURL}/d/${design.id}`;

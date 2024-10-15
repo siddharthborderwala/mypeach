@@ -6,7 +6,7 @@ import { db } from "@/lib/db";
 import { generateThumbnailTask } from "@/trigger/generate-thumbnail";
 
 const putValidator = z.object({
-	designId: z.string().length(24),
+	designId: z.string().length(36),
 	isUploadComplete: z.boolean().optional(),
 });
 

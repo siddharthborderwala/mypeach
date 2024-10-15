@@ -8,10 +8,10 @@ import { Argon2id } from "oslo/password";
 import { generateId } from "lucia";
 import { z } from "zod";
 
-import { lucia, validateRequest } from "../auth/lucia";
+import { isAuthSession, lucia, validateRequest } from "../auth/lucia";
 import {
-	genericError,
-	setAuthCookie,
+	clearSessionCookie,
+	setCookie,
 	validateAuthFormData,
 } from "../auth/utils";
 
@@ -25,6 +25,8 @@ import { verifyPasswordResetTokenAndGetUserId } from "../auth/verification";
 import { redirectWithFlash } from "../utils.server";
 import { updateBasicUserDetailsSchema, updatePasswordSchema } from "./schema";
 import { redis } from "../redis";
+
+const genericError = { error: "Error, please try again." };
 
 interface ActionResult {
 	error: string;
@@ -58,13 +60,12 @@ export async function signInAction(
 				error: "Incorrect username or password",
 			};
 		}
-
 		const session = await lucia.createSession(existingUser.id, {
 			username: existingUser.username,
 		});
 		const sessionCookie = lucia.createSessionCookie(session.id);
-		setAuthCookie(sessionCookie);
-
+		setCookie(sessionCookie);
+		clearSessionCookie();
 		return redirect(redirectTo);
 	} catch (e) {
 		return genericError;
@@ -81,7 +82,7 @@ export async function signUpAction(
 	const redirectTo = getSafeRedirect(formData);
 
 	const hashedPassword = await new Argon2id().hash(data.password);
-	const userId = generateId(15);
+	const userId = generateId(36);
 
 	const username: string = generateUsername();
 
@@ -131,7 +132,9 @@ export async function signUpAction(
 		username,
 	});
 	const sessionCookie = lucia.createSessionCookie(session.id);
-	setAuthCookie(sessionCookie);
+	setCookie(sessionCookie);
+	clearSessionCookie();
+
 	return redirectWithFlash(
 		redirectTo,
 		"Please check your email for a verification link",
@@ -140,17 +143,19 @@ export async function signUpAction(
 }
 
 export async function signOutAction(): Promise<ActionResult> {
-	const { session } = await validateRequest();
-	if (!session) {
+	const auth = await validateRequest();
+	if (!isAuthSession(auth)) {
 		return {
 			error: "Unauthorized",
 		};
 	}
+	const session = auth.authSession;
 
 	await lucia.invalidateSession(session.id);
 
 	const sessionCookie = lucia.createBlankSessionCookie();
-	setAuthCookie(sessionCookie);
+	setCookie(sessionCookie);
+	clearSessionCookie();
 	redirect("/");
 }
 
@@ -268,12 +273,13 @@ export async function resetPasswordAction(
 }
 
 export async function getBasicUserDetails() {
-	const { session } = await validateRequest();
-	if (!session) {
+	const auth = await validateRequest();
+	if (!isAuthSession(auth)) {
 		return {
 			error: "Unauthorized",
 		};
 	}
+	const session = auth.authSession;
 
 	const user = await db.user.findUnique({
 		where: { id: session.userId },
@@ -308,12 +314,14 @@ export async function updateBasicUserDetails(
 		email?: string[];
 	}> & { success?: boolean }
 > {
-	const { session } = await validateRequest();
-	if (!session) {
+	const auth = await validateRequest();
+	if (!isAuthSession(auth)) {
 		return {
 			error: "Unauthorized",
 		};
 	}
+
+	const session = auth.authSession;
 
 	const data = {
 		username: formData.get("username"),
@@ -394,12 +402,13 @@ export async function updatePasswordAction(
 		confirmNewPassword?: string[];
 	}> & { success?: boolean }
 > {
-	const { session } = await validateRequest();
-	if (!session) {
+	const auth = await validateRequest();
+	if (!isAuthSession(auth)) {
 		return {
 			error: "Unauthorized",
 		};
 	}
+	const session = auth.authSession;
 
 	const data = {
 		currentPassword: formData.get("currentPassword"),
@@ -463,12 +472,13 @@ export async function deleteAccountAction(
 	_: ActionResult,
 	__: FormData,
 ): Promise<ActionResult & { success?: boolean }> {
-	const { session } = await validateRequest();
-	if (!session) {
+	const auth = await validateRequest();
+	if (!isAuthSession(auth)) {
 		return {
 			error: "Unauthorized",
 		};
 	}
+	const session = auth.authSession;
 
 	try {
 		await db.user.delete({
@@ -477,7 +487,8 @@ export async function deleteAccountAction(
 
 		await lucia.invalidateSession(session.id);
 		const sessionCookie = lucia.createBlankSessionCookie();
-		setAuthCookie(sessionCookie);
+		setCookie(sessionCookie);
+		clearSessionCookie();
 		redirect("/");
 	} catch (e) {
 		if (e instanceof PrismaError) {

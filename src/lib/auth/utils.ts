@@ -3,11 +3,12 @@ import { cookies } from "next/headers";
 
 import type { Cookie } from "lucia";
 
-import { validateRequest } from "./lucia";
+import { isAuthSession, validateRequest } from "./lucia";
 import {
 	type UsernameAndPassword,
 	authenticationSchema,
 } from "../db/schema/auth";
+import { SESSION } from "../sessions";
 
 export type AuthSession = {
 	session: {
@@ -18,22 +19,34 @@ export type AuthSession = {
 	} | null;
 };
 
+/**
+ * Returns the current user if authenticated, otherwise returns null session
+ */
 export const getUserAuth = async (): Promise<AuthSession> => {
-	const { session, user } = await validateRequest();
-	if (!session) return { session: null };
+	const auth = await validateRequest();
+	if (!isAuthSession(auth)) {
+		return {
+			session: null,
+		};
+	}
 	return {
 		session: {
 			user: {
-				id: user.id,
-				username: user.username,
+				id: auth.user.id,
+				username: auth.user.username,
 			},
 		},
 	};
 };
 
+/**
+ * Returns the current user if authenticated, otherwise redirects to login
+ */
 export const getCurrentUser = async () => {
-	const { session, user } = await validateRequest();
-	if (!session) return redirect("/login");
+	const auth = await validateRequest();
+	if (!isAuthSession(auth)) return redirect("/login");
+
+	const user = auth.user;
 
 	return {
 		id: user.id,
@@ -41,16 +54,21 @@ export const getCurrentUser = async () => {
 	};
 };
 
+/**
+ * Checks if the user is authenticated, otherwise redirects to login
+ */
 export const checkAuth = async () => {
-	const { session } = await validateRequest();
-	if (!session) redirect("/login");
+	const auth = await validateRequest();
+	if (!isAuthSession(auth)) redirect("/login");
 };
 
-export const genericError = { error: "Error, please try again." };
-
-export const setAuthCookie = (cookie: Cookie) => {
+export const setCookie = (cookie: Cookie) => {
 	// cookies().set(cookie.name, cookie.value, cookie.attributes); // <- suggested approach from the docs, but does not work with `next build` locally
 	cookies().set(cookie);
+};
+
+export const clearSessionCookie = () => {
+	cookies().delete(SESSION);
 };
 
 const getErrorMessage = (errors: {

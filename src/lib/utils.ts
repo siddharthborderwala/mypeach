@@ -74,3 +74,11 @@ export function isMobileUA(ua: string) {
 		ua,
 	);
 }
+
+export function fromBase64(value: string) {
+	return new TextDecoder().decode(Buffer.from(value, "base64"));
+}
+
+export function toBase64(value: string) {
+	return Buffer.from(value).toString("base64");
+}
