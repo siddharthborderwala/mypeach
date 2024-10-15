@@ -23,7 +23,7 @@ model User {
   Design             Design[]
   PasswordResetToken PasswordResetToken[]
   Order              Order[]
-  Collections        Collections[]
+  Collection         Collection[]
   Vendor             Vendor?
 }
 
@@ -79,11 +79,11 @@ model Design {
   userId String
   user   User   @relation(references: [id], fields: [userId], onDelete: Cascade)
 
-  createdAt     DateTime     @default(now())
-  updatedAt     DateTime     @updatedAt
-  Order         Order[]
-  Collections   Collections? @relation(fields: [collectionsId], references: [id])
-  collectionsId Int?
+  Order       Order[]
+  Collections Collection[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([userId])
   @@index([createdAt])
@@ -148,7 +148,7 @@ model Order {
   @@index([vendorId])
 }
 
-model Collections {
+model Collection {
   id        Int      @id @default(autoincrement())
   name      String
   userId    String
