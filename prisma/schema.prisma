@@ -72,8 +72,8 @@ model Design {
   userId String
   user   User   @relation(references: [id], fields: [userId], onDelete: Cascade)
 
-  orders      Order[]
-  collections Collection[]
+  collections  Collection[]
+  cartProducts CartProduct[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -119,7 +119,6 @@ model KYC {
 
 model Order {
   id                      Int       @id @default(autoincrement())
-  designs                 Design[]
   userId                  String
   user                    User      @relation(references: [id], fields: [userId], onDelete: Cascade)
   vendors                 Vendor[]
@@ -137,7 +136,11 @@ model Order {
   paymentFailed           Boolean   @default(false)
   failedReason            String?
 
+  cartId Int  @unique
+  cart   Cart @relation(references: [id], fields: [cartId], onDelete: Cascade)
+
   @@index([userId])
+  @@index([cartId])
 }
 
 model Collection {
@@ -153,12 +156,30 @@ model Collection {
 }
 
 model Cart {
-  id     Int    @id @default(autoincrement())
+  id Int @id @default(autoincrement())
+
   userId String
   user   User   @relation(references: [id], fields: [userId], onDelete: Cascade)
+
+  products CartProduct[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  order Order?
+
   @@index([userId])
+}
+
+model CartProduct {
+  cartId Int
+  cart   Cart @relation(references: [id], fields: [cartId], onDelete: Cascade)
+
+  designId String
+  design   Design @relation(references: [id], fields: [designId], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([cartId, designId])
 }
