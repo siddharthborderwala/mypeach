@@ -19,6 +19,16 @@ const nextConfig = {
 				destination: "/terms",
 				permanent: true,
 			},
+			{
+				source: "/refund",
+				destination: "/refunds",
+				permanent: true,
+			},
+			{
+				source: "/refund-policy",
+				destination: "/refunds",
+				permanent: true,
+			},
 		];
 	},
 };
