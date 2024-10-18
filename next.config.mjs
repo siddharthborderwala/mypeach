@@ -29,6 +29,11 @@ const nextConfig = {
 				destination: "/refunds",
 				permanent: true,
 			},
+			{
+				source: "/contact",
+				destination: "/support",
+				permanent: true,
+			},
 		];
 	},
 };

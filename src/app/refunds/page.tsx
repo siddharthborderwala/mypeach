@@ -120,7 +120,7 @@ const PolicyList = () => (
 				If you have any questions or concerns about this Refund Policy, please
 				refer to the{" "}
 				<Button variant="link" className="p-0 h-auto w-auto !text-primary">
-					<Link href="/contact">contact page</Link>
+					<Link href="/support">support page</Link>
 				</Button>
 				.
 			</p>
