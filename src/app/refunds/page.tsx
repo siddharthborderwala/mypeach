@@ -48,8 +48,11 @@ const PolicyList = () => (
 				</li>
 				<li>
 					To request a refund before downloading the file, please contact our
-					customer support team at [contact information] within 14 days of
-					purchase.
+					customer support team at{" "}
+					<Button variant="link" className="p-0 h-auto w-auto !text-primary">
+						<Link href="/support">support page</Link>
+					</Button>{" "}
+					within 14 days of purchase.
 				</li>
 				<li>Refund requests will be reviewed on a case-by-case basis.</li>
 			</ul>
