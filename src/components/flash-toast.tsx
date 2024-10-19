@@ -14,6 +14,7 @@ export function FlashToast() {
 			.find((row) => row.startsWith("flash="));
 
 		if (toastData) {
+			document.cookie = "toast=; Max-Age=0; path=/; SameSite=lax";
 			// get message and type
 			const { message, type } = JSON.parse(
 				decodeURIComponent(toastData.split("=")[1]),
@@ -22,7 +23,6 @@ export function FlashToast() {
 			toast[toastType](message, {
 				duration: 5000,
 			});
-			document.cookie = "toast=; Max-Age=0; path=/; SameSite=strict";
 		}
 	}, [pathname]);
 

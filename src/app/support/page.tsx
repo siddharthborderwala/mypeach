@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/accordion";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Header } from "@/components/misc";
+import { Header } from "@/components/header";
 
 export const metadata: Metadata = {
 	title: "Support | Peach",

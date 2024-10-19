@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { DesignsGrid } from "@/components/pages/home/designs-grid";
 import { getDesignsForExplore } from "@/lib/actions/designs";
 import { Suspense } from "react";
-import { Header } from "@/components/misc";
+import { Header } from "@/components/header";
 
 export const metadata: Metadata = {
 	title: "Peach",

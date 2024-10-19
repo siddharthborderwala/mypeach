@@ -42,6 +42,10 @@ body {
 		--chart-3: 197 37% 24%;
 		--chart-4: 43 74% 66%;
 		--chart-5: 27 87% 67%;
+		--success: 160 84.1% 39.4%;
+		--success-foreground: 0 0% 100%;
+		--warning: 37.7 92.1% 50.2%;
+		--warning-foreground: 0 0% 100%;
 	}
 
 	.dark {

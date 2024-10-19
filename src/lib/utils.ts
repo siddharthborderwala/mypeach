@@ -82,3 +82,7 @@ export function fromBase64(value: string) {
 export function toBase64(value: string) {
 	return Buffer.from(value).toString("base64");
 }
+
+export function mimeToExtension(mime: string) {
+	return mime.split("/")[1];
+}

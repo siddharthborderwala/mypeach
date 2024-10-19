@@ -15,10 +15,10 @@ import {
 	DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { memo, useState } from "react";
 import { useDeleteDesign } from "@/hooks/dashboard";
 
-export default function DesignPreview({
+function DesignPreview_({
 	design,
 }: {
 	design: DesignData;
@@ -52,8 +52,10 @@ export default function DesignPreview({
 					</p>
 				</div>
 				<Separator />
-				<div className="mt-3 flex">
-					<PencilSimple className="mr-2" size={18} weight="regular" />
+				<div className="mt-3 flex justify-between">
+					<Badge variant={design.isDraft ? "warning" : "success"}>
+						{design.isDraft ? "Draft" : "Published"}
+					</Badge>
 					<Trash
 						size={18}
 						weight="regular"
@@ -103,3 +105,7 @@ export default function DesignPreview({
 		</>
 	);
 }
+
+const DesignPreview = memo(DesignPreview_);
+
+export default DesignPreview;

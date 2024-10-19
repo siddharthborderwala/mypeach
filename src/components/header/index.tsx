@@ -4,6 +4,14 @@ import { getUserAuth } from "@/lib/auth/utils";
 import { Button } from "@/components/ui/button";
 import { Plus } from "@phosphor-icons/react/dist/ssr";
 import { UserMenu } from "@/components/user-menu";
+import { getCartAndProducts } from "@/lib/actions/cart";
+import { SidebarCart } from "./sidebar-cart";
+
+async function HeaderCartButton() {
+	const initialData = await getCartAndProducts();
+
+	return <SidebarCart initialData={initialData} />;
+}
 
 export async function Header() {
 	const { session } = await getUserAuth();
@@ -33,27 +41,31 @@ export async function Header() {
 								<Plus weight="bold" />
 							</Link>
 						</Button>
+						<HeaderCartButton />
 						<UserMenu
 							userId={session.user.id}
 							username={session.user.username}
 						/>
 					</div>
 				) : (
-					<nav className="flex-1 flex items-center justify-end gap-2">
-						<Button asChild variant="ghost" className="text-base font-normal">
-							<Link href="/#explore">Explore</Link>
-						</Button>
-						<Button asChild variant="ghost" className="text-base font-normal">
-							<Link href="/login">Login</Link>
-						</Button>
-						<Button
-							asChild
-							variant="default"
-							className="text-base font-normal ml-4 rounded-lg"
-						>
-							<Link href="/register">Register</Link>
-						</Button>
-					</nav>
+					<>
+						<nav className="flex-1 flex items-center justify-end gap-2">
+							<HeaderCartButton />
+							<Button asChild variant="ghost" className="text-base font-normal">
+								<Link href="/#explore">Explore</Link>
+							</Button>
+							<Button asChild variant="ghost" className="text-base font-normal">
+								<Link href="/login">Login</Link>
+							</Button>
+							<Button
+								asChild
+								variant="default"
+								className="text-base font-normal ml-3 rounded-lg"
+							>
+								<Link href="/register">Register</Link>
+							</Button>
+						</nav>
+					</>
 				)}
 			</div>
 		</header>

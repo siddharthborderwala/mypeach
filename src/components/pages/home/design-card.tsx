@@ -1,10 +1,11 @@
-import { memo } from "react";
+import { memo, useState } from "react";
 import type { InfiniteScrollDesignsProps } from "./types";
 import {
 	appBaseURL,
 	formatPrice,
 	getUserAvatarURL,
 	isMobileUA,
+	mimeToExtension,
 	relativeTime,
 } from "@/lib/utils";
 import {
@@ -24,11 +25,60 @@ import {
 	ShoppingCartSimple,
 } from "@phosphor-icons/react/dist/ssr";
 import { toast } from "sonner";
+import { useMutation } from "@tanstack/react-query";
+import { addToCart, type CartAndProducts } from "@/lib/actions/cart";
+import { Spinner } from "@/components/spinner";
+import { queryClient } from "@/app/global-query-client";
+
+const AddToCartButton = ({
+	designId,
+	setIsModalOpen,
+}: {
+	designId: string;
+	setIsModalOpen: (isModalOpen: boolean) => void;
+}) => {
+	const data = queryClient.getQueryData<CartAndProducts>(["cart"]);
+
+	const isInCart = data?.products.some(
+		(product) => product.designId === designId,
+	);
+
+	const { mutate, isPending } = useMutation({
+		mutationKey: ["add-to-cart", designId],
+		mutationFn: () => addToCart(designId),
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ["cart"] });
+			toast.success("Added to cart");
+			setIsModalOpen(false);
+		},
+		onError: () => {
+			toast.error("Failed to add to cart");
+		},
+	});
+
+	if (isInCart) {
+		return (
+			<Button disabled className="gap-2">
+				<ShoppingCartSimple weight="bold" />
+				<span>Added to Cart</span>
+			</Button>
+		);
+	}
+
+	return (
+		<Button disabled={isPending} onClick={() => mutate()} className="gap-2">
+			{isPending ? <Spinner /> : <ShoppingCartSimple weight="bold" />}
+			<span>Add to Cart</span>
+		</Button>
+	);
+};
 
 const DesignCardDialogContent = ({
 	design,
+	setIsModalOpen,
 }: {
 	design: InfiniteScrollDesignsProps["initialData"]["designs"][number];
+	setIsModalOpen: (isModalOpen: boolean) => void;
 }) => (
 	<DialogContent className="flex flex-row items-start w-fit max-w-[unset] h-[90svh] gap-6">
 		<div className="relative block h-full aspect-[3/4] rounded-lg overflow-hidden">
@@ -137,10 +187,10 @@ const DesignCardDialogContent = ({
 						<CurrencyInr weight="bold" />
 						<span className="ml-2">Buy Now</span>
 					</Button>
-					<Button variant="default">
-						<ShoppingCartSimple weight="bold" />
-						<span className="ml-2">Add to Cart</span>
-					</Button>
+					<AddToCartButton
+						designId={design.id}
+						setIsModalOpen={setIsModalOpen}
+					/>
 				</div>
 			</div>
 			<RelatedDesignsMiniList designId={design.id} />
@@ -148,15 +198,15 @@ const DesignCardDialogContent = ({
 	</DialogContent>
 );
 
-const mimeToExtension = (mime: string) => mime.split("/")[1];
-
 const DesignCard_ = ({
 	design,
 }: {
 	design: InfiniteScrollDesignsProps["initialData"]["designs"][number];
 }) => {
+	const [isModalOpen, setIsModalOpen] = useState(false);
+
 	return (
-		<Dialog>
+		<Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
 			<DialogTrigger className="text-left">
 				<div className="relative block w-full aspect-[3/4] rounded-lg overflow-hidden">
 					<img
@@ -193,7 +243,10 @@ const DesignCard_ = ({
 					</div>
 				</div>
 			</DialogTrigger>
-			<DesignCardDialogContent design={design} />
+			<DesignCardDialogContent
+				design={design}
+				setIsModalOpen={setIsModalOpen}
+			/>
 		</Dialog>
 	);
 };

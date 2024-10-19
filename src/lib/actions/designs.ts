@@ -3,7 +3,7 @@
 import { notFound, redirect } from "next/navigation";
 import type { Prisma } from "@prisma/client";
 
-import { db } from "@/lib/db";
+import { db, PrismaError, TxError } from "@/lib/db";
 import { getUserAuth } from "../auth/utils";
 import type { Prettify } from "../type-utils";
 
@@ -179,4 +179,60 @@ export async function getRelatedDesigns(designId: string, count = 8) {
 	});
 
 	return relatedDesigns;
+}
+
+export async function toggleDesignPublish(designId: string) {
+	const { session } = await getUserAuth();
+
+	if (!session) {
+		redirect("/login");
+	}
+
+	try {
+		const published = await db.$transaction(async (tx) => {
+			// check if user has KYC and a vendor
+			const user = await tx.user.findUniqueOrThrow({
+				where: { id: session.user.id },
+				select: {
+					vendor: {
+						select: {
+							id: true,
+						},
+					},
+				},
+			});
+
+			// if (!user.vendor) {
+			// 	throw new TxError(
+			// 		"Please complete your KYC and add banking details to publish designs and start selling",
+			// 	);
+			// }
+
+			const design = await tx.design.findUniqueOrThrow({
+				where: { id: designId },
+			});
+
+			return tx.design.update({
+				where: { id: designId },
+				data: { isDraft: !design.isDraft },
+			});
+		});
+
+		return {
+			...published,
+			metadata: {
+				fileDPI: (published.metadata as FileMetadata).fileDPI,
+			},
+		};
+	} catch (error) {
+		if (error instanceof PrismaError) {
+			if (error.code === "P2025") {
+				throw new TxError("Design not found");
+			}
+		}
+		if (error instanceof TxError) {
+			throw error;
+		}
+		throw error;
+	}
 }

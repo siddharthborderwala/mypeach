@@ -81,8 +81,8 @@ importers:
         specifier: 5.59.0
         version: 5.59.0(react@18.3.1)
       '@trigger.dev/sdk':
-        specifier: 3.0.12
-        version: 3.0.12
+        specifier: 3.0.13
+        version: 3.0.13
       cashfree-pg:
         specifier: ^4.2.3
         version: 4.2.3
@@ -155,6 +155,9 @@ importers:
       tailwindcss-animate:
         specifier: 1.0.7
         version: 1.0.7(tailwindcss@3.4.11)
+      tiny-invariant:
+        specifier: 1.3.3
+        version: 1.3.3
       utif:
         specifier: 3.1.0
         version: 3.1.0
@@ -169,8 +172,8 @@ importers:
         specifier: 0.5.15
         version: 0.5.15(tailwindcss@3.4.11)
       '@trigger.dev/build':
-        specifier: 3.0.12
-        version: 3.0.12(typescript@5.6.2)
+        specifier: 3.0.13
+        version: 3.0.13(typescript@5.6.2)
       '@types/node':
         specifier: ^20
         version: 20.16.5
@@ -2354,12 +2357,20 @@ packages:
     resolution: {integrity: sha512-tI0Y1bDntETHy30L3UKHWfJR2bvQ67Mvpum80kF34UwuPY/gMG5Zn9jkgWBW/vKAsYNn335KAwuEL2gDV2Z8bg==}
     engines: {node: '>=18.20.0'}
 
+  '@trigger.dev/build@3.0.13':
+    resolution: {integrity: sha512-4pN3KDl4Cn3qqTo5ZsV14NESjBzCV6h0Q9ZFBurq6BeposFflVyBtRQMCh5oUD+3YyGfq4RRlTP5Qz7iu00YXQ==}
+    engines: {node: '>=18.20.0'}
+
   '@trigger.dev/core@3.0.12':
     resolution: {integrity: sha512-ErN70xGBLSXLEdjn/Q2BVKSqy5FMpue+7B1MT2ZCGD3jMu1vYnlDzVp847Au47cdQ5GoFSv3n1DteBLd3eDiBg==}
     engines: {node: '>=18.20.0'}
 
-  '@trigger.dev/sdk@3.0.12':
-    resolution: {integrity: sha512-1PU2yvmvKgk3dsbEpcmjHt6pBtmWtxRpqlb2U87g2ScZ2pJAZ01bx7iifXPp33HI86enj3TyFhGlba0MQDcCAQ==}
+  '@trigger.dev/core@3.0.13':
+    resolution: {integrity: sha512-BK4Yd+LrxA5cxAsO66yOm8UvBGdSplzfSqFGo6OpxhWZqZBsUMADAYBXhjb7ujl/F/BrN47qhLSuyaaybBiHcw==}
+    engines: {node: '>=18.20.0'}
+
+  '@trigger.dev/sdk@3.0.13':
+    resolution: {integrity: sha512-Ju+NDhwGJgnYuiotEWwcsG4dmN69XYjpkLLCPTMhMeGZgECUvXoduNC5avEIt6FyUqii3M67k/4jDgUIfa7UJg==}
     engines: {node: '>=18.20.0'}
 
   '@tybys/wasm-util@0.8.3':
@@ -6251,6 +6262,18 @@ snapshots:
       - typescript
       - utf-8-validate
 
+  '@trigger.dev/build@3.0.13(typescript@5.6.2)':
+    dependencies:
+      '@trigger.dev/core': 3.0.13
+      pkg-types: 1.2.0
+      tinyglobby: 0.2.6
+      tsconfck: 3.1.3(typescript@5.6.2)
+    transitivePeerDependencies:
+      - bufferutil
+      - supports-color
+      - typescript
+      - utf-8-validate
+
   '@trigger.dev/core@3.0.12':
     dependencies:
       '@google-cloud/precise-date': 4.0.0
@@ -6278,12 +6301,39 @@ snapshots:
       - supports-color
       - utf-8-validate
 
-  '@trigger.dev/sdk@3.0.12':
+  '@trigger.dev/core@3.0.13':
+    dependencies:
+      '@google-cloud/precise-date': 4.0.0
+      '@opentelemetry/api': 1.9.0
+      '@opentelemetry/api-logs': 0.52.1
+      '@opentelemetry/exporter-logs-otlp-http': 0.52.1(@opentelemetry/api@1.9.0)
+      '@opentelemetry/exporter-trace-otlp-http': 0.52.1(@opentelemetry/api@1.9.0)
+      '@opentelemetry/instrumentation': 0.52.1(@opentelemetry/api@1.9.0)
+      '@opentelemetry/resources': 1.25.1(@opentelemetry/api@1.9.0)
+      '@opentelemetry/sdk-logs': 0.52.1(@opentelemetry/api@1.9.0)
+      '@opentelemetry/sdk-node': 0.52.1(@opentelemetry/api@1.9.0)
+      '@opentelemetry/sdk-trace-base': 1.25.1(@opentelemetry/api@1.9.0)
+      '@opentelemetry/sdk-trace-node': 1.25.1(@opentelemetry/api@1.9.0)
+      '@opentelemetry/semantic-conventions': 1.25.1
+      execa: 8.0.1
+      humanize-duration: 3.32.1
+      nanoid: 3.3.7
+      socket.io-client: 4.7.5
+      superjson: 2.2.1
+      zod: 3.22.3
+      zod-error: 1.5.0
+      zod-validation-error: 1.5.0(zod@3.22.3)
+    transitivePeerDependencies:
+      - bufferutil
+      - supports-color
+      - utf-8-validate
+
+  '@trigger.dev/sdk@3.0.13':
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/api-logs': 0.52.1
       '@opentelemetry/semantic-conventions': 1.25.1
-      '@trigger.dev/core': 3.0.12
+      '@trigger.dev/core': 3.0.13
       chalk: 5.3.0
       cronstrue: 2.50.0
       debug: 4.3.7

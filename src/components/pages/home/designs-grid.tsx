@@ -2,18 +2,14 @@
 
 import { useEffect, useMemo } from "react";
 import { parseAsString, useQueryState } from "nuqs";
-import {
-	QueryClient,
-	QueryClientProvider,
-	useInfiniteQuery,
-} from "@tanstack/react-query";
 
 import { getDesignsForExplore } from "@/lib/actions/designs";
 import { useInView } from "react-intersection-observer";
 import type { InfiniteScrollDesignsProps } from "./types";
 import { DesignCard } from "./design-card";
+import { useInfiniteQuery } from "@tanstack/react-query";
 
-const DesignsGrid_ = ({ initialData }: InfiniteScrollDesignsProps) => {
+export const DesignsGrid = ({ initialData }: InfiniteScrollDesignsProps) => {
 	const [search] = useQueryState("q", parseAsString);
 
 	const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
@@ -64,15 +60,5 @@ const DesignsGrid_ = ({ initialData }: InfiniteScrollDesignsProps) => {
 				)}
 			</div>
 		</>
-	);
-};
-
-const queryClient = new QueryClient();
-
-export const DesignsGrid = (props: InfiniteScrollDesignsProps) => {
-	return (
-		<QueryClientProvider client={queryClient}>
-			<DesignsGrid_ {...props} />
-		</QueryClientProvider>
 	);
 };

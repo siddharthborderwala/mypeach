@@ -24,7 +24,6 @@ model User {
   orders                  Order[]
   collections             Collection[]
   vendor                  Vendor?
-  carts                   Cart[]
 }
 
 model PasswordResetToken {
@@ -159,7 +158,6 @@ model Cart {
   id Int @id @default(autoincrement())
 
   userId String
-  user   User   @relation(references: [id], fields: [userId], onDelete: Cascade)
 
   products CartProduct[]
 

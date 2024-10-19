@@ -98,3 +98,18 @@ export const validateAuthFormData = (
 
 	return { data: result.data, error: null };
 };
+
+/**
+ * Returns the current user id if authenticated, otherwise returns the anonymous user id
+ */
+export const getUserId = async () => {
+	const auth = await validateRequest();
+
+	if ("anonymousUser" in auth) {
+		return auth.anonymousUser.id;
+	}
+	if (!auth.user) {
+		throw new Error("No session found");
+	}
+	return auth.user.id;
+};
