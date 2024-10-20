@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { toggleDesignPublish } from "@/lib/actions/designs";
 import { queryClient } from "@/app/global-query-client";
+import { Spinner } from "@/components/spinner";
 
 const formatDate = (date: Date | string) => {
 	return new Date(date).toLocaleDateString("en", {
@@ -32,7 +33,7 @@ const OtherDetails = ({
 }) => {
 	const { setEditDesignDetails } = useUploadContext();
 
-	const { mutate: togglePublish } = useMutation({
+	const { mutate: togglePublish, isPending } = useMutation({
 		mutationKey: ["togglePublish", editDesignDetails.id],
 		mutationFn: async () => {
 			return await toggleDesignPublish(editDesignDetails.id);
@@ -57,11 +58,25 @@ const OtherDetails = ({
 				</p>
 			</div>
 			{editDesignDetails.isDraft ? (
-				<Button variant="success" size="sm" onClick={() => togglePublish()}>
+				<Button
+					variant="success"
+					size="sm"
+					onClick={() => togglePublish()}
+					disabled={isPending}
+					className="gap-2"
+				>
+					{isPending ? <Spinner size={14} className="animate-spin" /> : null}
 					Publish
 				</Button>
 			) : (
-				<Button variant="destructive" size="sm" onClick={() => togglePublish()}>
+				<Button
+					variant="destructive"
+					size="sm"
+					onClick={() => togglePublish()}
+					disabled={isPending}
+					className="gap-2"
+				>
+					{isPending ? <Spinner size={14} className="animate-spin" /> : null}
 					Unpublish
 				</Button>
 			)}
