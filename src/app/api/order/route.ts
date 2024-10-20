@@ -20,168 +20,171 @@ const createOrderValidator = z.object({
 	designIds: z.array(z.string()),
 });
 
+// FIXME: according to the new db schema
 // Function to create order and retrieve vendor details
-async function createOrderWithDetails(orderData: {
-	designIds: string[];
-	userId: string;
-	price: number;
-	status: string;
-}) {
-	try {
-		const result = await db.$transaction(async (tx) => {
-			const user = await tx.user.findUnique({
-				where: { id: orderData.userId },
-			});
+// async function createOrderWithDetails(orderData: {
+// 	designIds: string[];
+// 	userId: string;
+// 	price: number;
+// 	status: string;
+// }) {
+// 	try {
+// 		const result = await db.$transaction(async (tx) => {
+// 			const user = await tx.user.findUnique({
+// 				where: { id: orderData.userId },
+// 			});
 
-			if (!user) {
-				throw new Error("User not found");
-			}
+// 			if (!user) {
+// 				throw new Error("User not found");
+// 			}
 
-			// Retrieve the Vendor details with the Vendor ID
-			const vendor = await tx.vendor.findUnique({
-				where: { userId: orderData.userId },
-			});
+// 			// Retrieve the Vendor details with the Vendor ID
+// 			const vendor = await tx.vendor.findUnique({
+// 				where: { userId: orderData.userId },
+// 			});
 
-			if (!vendor) {
-				throw new Error("Vendor not found");
-			}
+// 			if (!vendor) {
+// 				throw new Error("Vendor not found");
+// 			}
 
-			// Create the Vendor
-			const order = await db.order.create({
-				data: {
-					designs: {
-						connect: orderData.designIds.map((id) => ({ id })),
-					},
-					userId: orderData.userId,
-					vendors: {
-						connect: { id: vendor.id },
-					},
-					price: orderData.price,
-					status: orderData.status,
-				},
-			});
+// 			// Create the Vendor
+// 			const order = await db.order.create({
+// 				data: {
+// 					designs: {
+// 						connect: orderData.designIds.map((id) => ({ id })),
+// 					},
+// 					userId: orderData.userId,
+// 					vendors: {
+// 						connect: { id: vendor.id },
+// 					},
+// 					price: orderData.price,
+// 					status: orderData.status,
+// 				},
+// 			});
 
-			// Optionally, return all created records
-			return { order, vendor, user };
-		});
+// 			// Optionally, return all created records
+// 			return { order, vendor, user };
+// 		});
 
-		// Handle the result as needed
-		console.log("Transaction successful:", result);
-		return result;
-	} catch (error) {
-		if (error instanceof PrismaClientKnownRequestError) {
-			// Handle known Prisma errors
-			console.error("Prisma error:", error.message);
-		} else {
-			// Handle other types of errors
-			console.error("Unexpected error:", error);
-		}
-		throw error; // Re-throw the error after logging
-	}
-}
+// 		// Handle the result as needed
+// 		console.log("Transaction successful:", result);
+// 		return result;
+// 	} catch (error) {
+// 		if (error instanceof PrismaClientKnownRequestError) {
+// 			// Handle known Prisma errors
+// 			console.error("Prisma error:", error.message);
+// 		} else {
+// 			// Handle other types of errors
+// 			console.error("Unexpected error:", error);
+// 		}
+// 		throw error; // Re-throw the error after logging
+// 	}
+// }
 
-async function updateOrderWithDetails(orderData: {
-	id: number;
-	cashFreeOrderId: string;
-	paymentSessionId: string;
-	percentageSplitToVendor: number;
-}) {
-	try {
-		const result = await db.$transaction(async (tx) => {
-			const order = await tx.order.update({
-				where: { id: orderData.id },
-				data: {
-					cashFreeOrderId: orderData.cashFreeOrderId,
-					paymentSessionId: orderData.paymentSessionId,
-					percentageSplitToVendor: orderData.percentageSplitToVendor,
-				},
-			});
+// FIXME: according to the new db schema
+// async function updateOrderWithDetails(orderData: {
+// 	id: number;
+// 	cashFreeOrderId: string;
+// 	paymentSessionId: string;
+// 	percentageSplitToVendor: number;
+// }) {
+// 	try {
+// 		const result = await db.$transaction(async (tx) => {
+// 			const order = await tx.order.update({
+// 				where: { id: orderData.id },
+// 				data: {
+// 					cashFreeOrderId: orderData.cashFreeOrderId,
+// 					paymentSessionId: orderData.paymentSessionId,
+// 					percentageSplitToVendor: orderData.percentageSplitToVendor,
+// 				},
+// 			});
 
-			// Optionally, return all created records
-			return { order };
-		});
+// 			// Optionally, return all created records
+// 			return { order };
+// 		});
 
-		// Handle the result as needed
-		console.log("Transaction successful:", result);
-		return result;
-	} catch (error) {
-		if (error instanceof PrismaClientKnownRequestError) {
-			// Handle known Prisma errors
-			console.error("Prisma error:", error.message);
-		} else {
-			// Handle other types of errors
-			console.error("Unexpected error:", error);
-		}
-		throw error; // Re-throw the error after logging
-	}
-}
+// 		// Handle the result as needed
+// 		console.log("Transaction successful:", result);
+// 		return result;
+// 	} catch (error) {
+// 		if (error instanceof PrismaClientKnownRequestError) {
+// 			// Handle known Prisma errors
+// 			console.error("Prisma error:", error.message);
+// 		} else {
+// 			// Handle other types of errors
+// 			console.error("Unexpected error:", error);
+// 		}
+// 		throw error; // Re-throw the error after logging
+// 	}
+// }
 
-export async function POST(request: Request) {
-	const { session } = await getUserAuth();
-	if (!session) {
-		return NextResponse.json({ error: "Unauthorised" }, { status: 401 });
-	}
+// FIXME: according to the new db schema
+// export async function POST(request: Request) {
+// 	const { session } = await getUserAuth();
+// 	if (!session) {
+// 		return NextResponse.json({ error: "Unauthorised" }, { status: 401 });
+// 	}
 
-	const body = await request.json();
+// 	const body = await request.json();
 
-	const result = createOrderValidator.safeParse(body);
+// 	const result = createOrderValidator.safeParse(body);
 
-	if (!result.success) {
-		return NextResponse.json({ error: result.error.message }, { status: 400 });
-	}
+// 	if (!result.success) {
+// 		return NextResponse.json({ error: result.error.message }, { status: 400 });
+// 	}
 
-	try {
-		const { order, vendor, user } = await createOrderWithDetails({
-			designIds: result.data.designIds,
-			userId: session.user.id,
-			price: result.data.price,
-			status: "ACTIVE",
-		});
+// 	try {
+// 		const { order, vendor, user } = await createOrderWithDetails({
+// 			designIds: result.data.designIds,
+// 			userId: session.user.id,
+// 			price: result.data.price,
+// 			status: "ACTIVE",
+// 		});
 
-		const option: CreateOrderRequest = {
-			order_id: order.id.toString(),
-			order_amount: result.data.price,
-			order_currency: "INR",
-			customer_details: {
-				customer_id: user.id,
-				customer_email: user.email,
-				customer_phone: "9999999999",
-			},
-			order_meta: {
-				return_url: `${process.env.CASHFREE_RETURN_URL}?order_id=${order.id}`,
-				payment_methods: "cc,dc,upi",
-			},
-			order_splits: [
-				{
-					vendor_id: vendor.id.toString(),
-					percentage: 80,
-				},
-			],
-		};
+// 		const option: CreateOrderRequest = {
+// 			order_id: order.id.toString(),
+// 			order_amount: result.data.price,
+// 			order_currency: "INR",
+// 			customer_details: {
+// 				customer_id: user.id,
+// 				customer_email: user.email,
+// 				customer_phone: "9999999999",
+// 			},
+// 			order_meta: {
+// 				return_url: `${process.env.CASHFREE_RETURN_URL}?order_id=${order.id}`,
+// 				payment_methods: "cc,dc,upi",
+// 			},
+// 			order_splits: [
+// 				{
+// 					vendor_id: vendor.id.toString(),
+// 					percentage: 80,
+// 				},
+// 			],
+// 		};
 
-		const response = await Cashfree.PGCreateOrder("2023-08-01", option);
+// 		const response = await Cashfree.PGCreateOrder("2023-08-01", option);
 
-		if (
-			!response.data.cf_order_id ||
-			!response.data.payment_session_id ||
-			!response.data.order_expiry_time
-		) {
-			throw new Error("Invalid response from Cashfree");
-		}
+// 		if (
+// 			!response.data.cf_order_id ||
+// 			!response.data.payment_session_id ||
+// 			!response.data.order_expiry_time
+// 		) {
+// 			throw new Error("Invalid response from Cashfree");
+// 		}
 
-		await updateOrderWithDetails({
-			id: order.id,
-			cashFreeOrderId: response.data.cf_order_id,
-			paymentSessionId: response.data.payment_session_id,
-			percentageSplitToVendor: 80,
-		});
+// 		await updateOrderWithDetails({
+// 			id: order.id,
+// 			cashFreeOrderId: response.data.cf_order_id,
+// 			paymentSessionId: response.data.payment_session_id,
+// 			percentageSplitToVendor: 80,
+// 		});
 
-		return NextResponse.json({ data: response.data });
-	} catch (error) {
-		console.error(error);
-		return NextResponse.json(
-			{ error: "Failed to generate signed URL" },
-			{ status: 500 },
-		);
-	}
-}
+// 		return NextResponse.json({ data: response.data });
+// 	} catch (error) {
+// 		console.error(error);
+// 		return NextResponse.json(
+// 			{ error: "Failed to generate signed URL" },
+// 			{ status: 500 },
+// 		);
+// 	}
+// }
