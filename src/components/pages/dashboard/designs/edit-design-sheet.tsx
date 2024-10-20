@@ -11,11 +11,11 @@ import { DetailsForm } from "./new-design-modal/details-form";
 import { useUploadContext } from "./upload-context";
 import { useEffect } from "react";
 import { useMutation, type InfiniteData } from "@tanstack/react-query";
-import { queryClient } from "@/components/dashboard-providers";
 import type { InfiniteDesignsResponse } from "@/app/api/designs/route";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { toggleDesignPublish } from "@/lib/actions/designs";
+import { queryClient } from "@/app/global-query-client";
 
 const formatDate = (date: Date | string) => {
 	return new Date(date).toLocaleDateString("en", {
