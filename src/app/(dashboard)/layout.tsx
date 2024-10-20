@@ -13,7 +13,6 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { getCurrentUser } from "@/lib/auth/utils";
 import { NavItem, NavItemMobile } from "./nav";
 import { UserMenu } from "@/components/user-menu";
-import { DashboardProviders } from "@/components/dashboard-providers";
 
 const navItems = [
 	{
@@ -52,28 +51,64 @@ export default async function Layout({
 	const { id, username } = await getCurrentUser();
 
 	return (
-		<DashboardProviders>
-			<div className="grid h-[100svh] w-[100svw] overflow-hidden md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
-				<style>
-					{`
+		<div className="grid h-[100svh] w-[100svw] overflow-hidden md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
+			<style>
+				{`
           body {
             overflow: hidden;
           }
         `}
-				</style>
-				<div className="hidden border-r bg-background md:block">
-					<div className="flex h-full max-h-screen flex-col gap-2">
-						<div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
-							<Link href="/" className="flex items-center gap-1 font-semibold">
+			</style>
+			<div className="hidden border-r bg-background md:block">
+				<div className="flex h-full max-h-screen flex-col gap-2">
+					<div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
+						<Link href="/" className="flex items-center gap-1 font-semibold">
+							<img src="/logo.png" alt="Peach" className="h-8 w-8" />
+							<span className="text-lg mt-1">Peach</span>
+						</Link>
+					</div>
+					<div className="flex-1">
+						<nav className="grid items-start py-4 px-2 text-sm font-medium lg:px-4">
+							<section>
+								{navItems.map((item) => (
+									<NavItem key={item.href} {...item} />
+								))}
+							</section>
+							<hr className="my-4" />
+							<section>
+								{secondaryNavItems.map((item) => (
+									<NavItem key={item.href} {...item} />
+								))}
+							</section>
+						</nav>
+					</div>
+				</div>
+			</div>
+			<div className="flex flex-col">
+				<header className="flex h-14 items-center gap-4 border-b bg-background px-4 lg:h-[60px] lg:px-6 lg:justify-end">
+					<Sheet>
+						<SheetTrigger asChild>
+							<Button
+								variant="outline"
+								size="icon"
+								className="shrink-0 md:hidden"
+							>
+								<Menu className="h-5 w-5" />
+								<span className="sr-only">Toggle navigation menu</span>
+							</Button>
+						</SheetTrigger>
+						<SheetContent
+							side="left"
+							className="flex flex-col bg-background max-sm:w-full"
+						>
+							<Link href="/" className="flex items-center gap-2 font-semibold">
 								<img src="/logo.png" alt="Peach" className="h-8 w-8" />
 								<span className="text-lg mt-1">Peach</span>
 							</Link>
-						</div>
-						<div className="flex-1">
-							<nav className="grid items-start py-4 px-2 text-sm font-medium lg:px-4">
+							<nav className="grid gap-2 mt-4 text-base font-medium">
 								<section>
 									{navItems.map((item) => (
-										<NavItem key={item.href} {...item} />
+										<NavItemMobile key={item.href} {...item} />
 									))}
 								</section>
 								<hr className="my-4" />
@@ -83,53 +118,12 @@ export default async function Layout({
 									))}
 								</section>
 							</nav>
-						</div>
-					</div>
-				</div>
-				<div className="flex flex-col">
-					<header className="flex h-14 items-center gap-4 border-b bg-background px-4 lg:h-[60px] lg:px-6 lg:justify-end">
-						<Sheet>
-							<SheetTrigger asChild>
-								<Button
-									variant="outline"
-									size="icon"
-									className="shrink-0 md:hidden"
-								>
-									<Menu className="h-5 w-5" />
-									<span className="sr-only">Toggle navigation menu</span>
-								</Button>
-							</SheetTrigger>
-							<SheetContent
-								side="left"
-								className="flex flex-col bg-background max-sm:w-full"
-							>
-								<Link
-									href="/"
-									className="flex items-center gap-2 font-semibold"
-								>
-									<img src="/logo.png" alt="Peach" className="h-8 w-8" />
-									<span className="text-lg mt-1">Peach</span>
-								</Link>
-								<nav className="grid gap-2 mt-4 text-base font-medium">
-									<section>
-										{navItems.map((item) => (
-											<NavItemMobile key={item.href} {...item} />
-										))}
-									</section>
-									<hr className="my-4" />
-									<section>
-										{secondaryNavItems.map((item) => (
-											<NavItem key={item.href} {...item} />
-										))}
-									</section>
-								</nav>
-							</SheetContent>
-						</Sheet>
-						<UserMenu userId={id} username={username} />
-					</header>
-					{children}
-				</div>
+						</SheetContent>
+					</Sheet>
+					<UserMenu userId={id} username={username} />
+				</header>
+				{children}
 			</div>
-		</DashboardProviders>
+		</div>
 	);
 }

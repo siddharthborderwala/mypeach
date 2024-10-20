@@ -5,13 +5,9 @@ import { db } from "@/lib/db";
  * This task is used to check if a design has been uploaded completely.
  * If it has, it will be deleted.
  */
-export const checkDesignUploadAfterADayTask = task({
-	id: "check-design-upload-after-a-day",
+export const checkDesignUploaded = task({
+	id: "check-design-uploaded",
 	run: async (payload: { designId: string; userId: string }) => {
-		logger.info("Scheduling check for design upload", { payload });
-
-		await wait.for({ days: 1 });
-
 		logger.info("Checking design upload", { payload });
 
 		await retry.onThrow(

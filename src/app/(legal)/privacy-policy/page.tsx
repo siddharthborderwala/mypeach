@@ -1,8 +1,8 @@
 import type * as React from "react";
 import type { Metadata } from "next";
-import { Header } from "@/components/misc";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { Header } from "@/components/header";
 
 export const metadata: Metadata = {
 	title: "Privacy Policy | Peach",

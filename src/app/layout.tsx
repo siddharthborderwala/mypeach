@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { FlashToast } from "@/components/flash-toast";
 
 import "./globals.css";
+import { GlobalQueryClient } from "./global-query-client";
 
 const manrope = Manrope({
 	subsets: ["latin"],
@@ -24,7 +25,7 @@ export default function RootLayout({
 	return (
 		<html lang="en">
 			<body className={`${manrope.variable} font-sans`}>
-				{children}
+				<GlobalQueryClient>{children}</GlobalQueryClient>
 				<Toaster richColors theme="light" className="font-sans" />
 				<FlashToast />
 			</body>

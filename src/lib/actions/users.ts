@@ -8,7 +8,12 @@ import { Argon2id } from "oslo/password";
 import { generateId } from "lucia";
 import { z } from "zod";
 
-import { isAuthSession, lucia, validateRequest } from "../auth/lucia";
+import {
+	isAnonymousSession,
+	isAuthSession,
+	lucia,
+	validateRequest,
+} from "../auth/lucia";
 import {
 	clearSessionCookie,
 	setCookie,
@@ -32,6 +37,40 @@ interface ActionResult {
 	error: string;
 }
 
+async function migrateCart(anonUserId: string, userId: string) {
+	await db.$transaction(async (tx) => {
+		const anonCart = await tx.cart.findFirst({
+			where: { userId: anonUserId },
+		});
+		if (!anonCart) return;
+
+		// delete userId's carts
+		await tx.cart.deleteMany({
+			where: { userId: userId },
+		});
+
+		// create new cart for userId
+		const newCart = await tx.cart.create({
+			data: {
+				userId: userId,
+			},
+		});
+
+		// copy over products from anonCart to userId's cart
+		await tx.cartProduct.updateMany({
+			where: { cartId: anonCart.id },
+			data: {
+				cartId: newCart.id,
+			},
+		});
+
+		// delete anonCart
+		await tx.cart.delete({
+			where: { id: anonCart.id },
+		});
+	});
+}
+
 export async function signInAction(
 	_: ActionResult,
 	formData: FormData,
@@ -40,6 +79,12 @@ export async function signInAction(
 	if (error !== null) return { error };
 
 	const redirectTo = getSafeRedirect(formData);
+
+	let anonUserId: string | null = null;
+	const auth = await validateRequest();
+	if (isAnonymousSession(auth)) {
+		anonUserId = auth.anonymousUser.id;
+	}
 
 	try {
 		const existingUser = await db.user.findUnique({
@@ -66,6 +111,11 @@ export async function signInAction(
 		const sessionCookie = lucia.createSessionCookie(session.id);
 		setCookie(sessionCookie);
 		clearSessionCookie();
+
+		if (anonUserId) {
+			await migrateCart(anonUserId, existingUser.id);
+		}
+
 		return redirect(redirectTo);
 	} catch (e) {
 		return genericError;
@@ -80,6 +130,12 @@ export async function signUpAction(
 	if (error !== null) return { error };
 
 	const redirectTo = getSafeRedirect(formData);
+
+	let anonUserId: string | null = null;
+	const auth = await validateRequest();
+	if (isAnonymousSession(auth)) {
+		anonUserId = auth.anonymousUser.id;
+	}
 
 	const hashedPassword = await new Argon2id().hash(data.password);
 	const userId = generateId(36);
@@ -112,6 +168,10 @@ export async function signUpAction(
 				},
 			}),
 		]);
+
+		if (anonUserId) {
+			await migrateCart(anonUserId, userId);
+		}
 
 		await emailVerificationTask.trigger({
 			userId,

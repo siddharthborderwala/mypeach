@@ -17,3 +17,10 @@ export const db =
 if (process.env.NODE_ENV !== "production") global.db = db;
 
 export { PrismaClientKnownRequestError as PrismaError };
+
+export class TxError extends Error {
+	constructor(message: string) {
+		super(message);
+		this.name = "TxError";
+	}
+}
