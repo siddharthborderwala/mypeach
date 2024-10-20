@@ -3,8 +3,9 @@
 import { db } from "@/lib/db";
 import { getUserId } from "../auth/utils";
 import type { FileMetadata } from "./designs";
+import { CartStatus } from "../db/schema/cart";
 
-export async function addToCart(designId: string) {
+export async function addToActiveCart(designId: string) {
 	const userId = await getUserId();
 
 	await db.$transaction(async (tx) => {
@@ -39,7 +40,7 @@ export async function addToCart(designId: string) {
 	});
 }
 
-export async function removeFromCart(designId: string) {
+export async function removeFromActiveCart(designId: string) {
 	const userId = await getUserId();
 
 	await db.$transaction(async (tx) => {
@@ -62,12 +63,13 @@ export async function removeFromCart(designId: string) {
 	});
 }
 
-export async function getCartAndProducts() {
+export async function getActiveCartAndProducts() {
 	const userId = await getUserId();
 
 	const cart = await db.cart.findFirst({
 		where: {
 			userId,
+			status: CartStatus.ACTIVE,
 		},
 	});
 
@@ -119,4 +121,6 @@ export async function getCartAndProducts() {
 	};
 }
 
-export type CartAndProducts = Awaited<ReturnType<typeof getCartAndProducts>>;
+export type ActiveCartAndProducts = Awaited<
+	ReturnType<typeof getActiveCartAndProducts>
+>;

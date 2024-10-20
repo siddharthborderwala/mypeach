@@ -11,9 +11,9 @@ import {
 	SheetTrigger,
 } from "@/components/ui/sheet";
 import {
-	type CartAndProducts,
-	getCartAndProducts,
-	removeFromCart,
+	type ActiveCartAndProducts,
+	getActiveCartAndProducts,
+	removeFromActiveCart,
 } from "@/lib/actions/cart";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { formatPrice, mimeToExtension } from "@/lib/utils";
@@ -24,9 +24,9 @@ import { queryClient } from "@/app/global-query-client";
 
 function CartItem_({
 	product,
-}: { product: CartAndProducts["products"][number] }) {
+}: { product: ActiveCartAndProducts["products"][number] }) {
 	const { mutate, isPending } = useMutation({
-		mutationFn: () => removeFromCart(product.designId),
+		mutationFn: () => removeFromActiveCart(product.designId),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ["cart"] });
 		},
@@ -86,11 +86,11 @@ const CartItem = memo(CartItem_);
 export function SidebarCart({
 	initialData,
 }: {
-	initialData: CartAndProducts;
+	initialData: ActiveCartAndProducts;
 }) {
 	const { data } = useQuery({
 		queryKey: ["cart"],
-		queryFn: () => getCartAndProducts(),
+		queryFn: () => getActiveCartAndProducts(),
 		initialData,
 	});
 

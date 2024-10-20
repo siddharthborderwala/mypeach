@@ -158,6 +158,7 @@ model Cart {
   id Int @id @default(autoincrement())
 
   userId String
+  status String @default("ACTIVE") // ACTIVE, ORDERED, EXPIRED
 
   products CartProduct[]
 

@@ -57,7 +57,14 @@ export function LoginForm() {
 			<FormError state={state} />
 			<div className="mt-4 text-center text-sm">
 				Don&apos;t have an account?
-				<Link href="/register" className="underline ml-1">
+				<Link
+					href={
+						redirectTo
+							? `/register?redirectTo=${encodeURIComponent(redirectTo)}`
+							: "/register"
+					}
+					className="underline ml-1"
+				>
 					Register
 				</Link>
 			</div>

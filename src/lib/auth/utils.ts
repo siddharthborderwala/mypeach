@@ -1,4 +1,3 @@
-import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 
 import type { Cookie } from "lucia";
@@ -9,6 +8,7 @@ import {
 	authenticationSchema,
 } from "../db/schema/auth";
 import { SESSION } from "../sessions";
+import { redirect } from "next/navigation";
 
 export type AuthSession = {
 	session: {
@@ -44,13 +44,13 @@ export const getUserAuth = async (): Promise<AuthSession> => {
  */
 export const getCurrentUser = async () => {
 	const auth = await validateRequest();
-	if (!isAuthSession(auth)) return redirect("/login");
-
-	const user = auth.user;
+	if (!isAuthSession(auth)) {
+		redirect("/login");
+	}
 
 	return {
-		id: user.id,
-		username: user.username,
+		id: auth.user.id,
+		username: auth.user.username,
 	};
 };
 
@@ -59,7 +59,9 @@ export const getCurrentUser = async () => {
  */
 export const checkAuth = async () => {
 	const auth = await validateRequest();
-	if (!isAuthSession(auth)) redirect("/login");
+	if (!isAuthSession(auth)) {
+		redirect("/login");
+	}
 };
 
 export const setCookie = (cookie: Cookie) => {

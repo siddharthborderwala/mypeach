@@ -22,11 +22,14 @@ import { Button } from "@/components/ui/button";
 import {
 	CurrencyInr,
 	ShareFat,
-	ShoppingCartSimple,
+	ShoppingBag,
 } from "@phosphor-icons/react/dist/ssr";
 import { toast } from "sonner";
 import { useMutation } from "@tanstack/react-query";
-import { addToCart, type CartAndProducts } from "@/lib/actions/cart";
+import {
+	addToActiveCart,
+	type ActiveCartAndProducts,
+} from "@/lib/actions/cart";
 import { Spinner } from "@/components/spinner";
 import { queryClient } from "@/app/global-query-client";
 
@@ -37,7 +40,7 @@ const AddToCartButton = ({
 	designId: string;
 	setIsModalOpen: (isModalOpen: boolean) => void;
 }) => {
-	const data = queryClient.getQueryData<CartAndProducts>(["cart"]);
+	const data = queryClient.getQueryData<ActiveCartAndProducts>(["cart"]);
 
 	const isInCart = data?.products.some(
 		(product) => product.designId === designId,
@@ -45,7 +48,7 @@ const AddToCartButton = ({
 
 	const { mutate, isPending } = useMutation({
 		mutationKey: ["add-to-cart", designId],
-		mutationFn: () => addToCart(designId),
+		mutationFn: () => addToActiveCart(designId),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ["cart"] });
 			toast.success("Added to cart");
@@ -59,7 +62,7 @@ const AddToCartButton = ({
 	if (isInCart) {
 		return (
 			<Button disabled className="gap-2">
-				<ShoppingCartSimple weight="bold" />
+				<ShoppingBag weight="bold" />
 				<span>Added to Cart</span>
 			</Button>
 		);
@@ -67,7 +70,7 @@ const AddToCartButton = ({
 
 	return (
 		<Button disabled={isPending} onClick={() => mutate()} className="gap-2">
-			{isPending ? <Spinner /> : <ShoppingCartSimple weight="bold" />}
+			{isPending ? <Spinner /> : <ShoppingBag weight="bold" />}
 			<span>Add to Cart</span>
 		</Button>
 	);
@@ -163,11 +166,11 @@ const DesignCardDialogContent = ({
 							<p>{design.fileDPI} DPI</p>
 						</div>
 					</div>
-					<div>
-						<h3 className="text-sm tracking-wider uppercase text-muted-foreground">
-							Tags
-						</h3>
-						{design.tags.length > 0 ? (
+					{design.tags.length > 0 ? (
+						<div>
+							<h3 className="text-sm tracking-wider uppercase text-muted-foreground">
+								Tags
+							</h3>
 							<div className="flex flex-wrap gap-2 mt-1">
 								{design.tags.map((tag) => (
 									<Badge
@@ -179,8 +182,8 @@ const DesignCardDialogContent = ({
 									</Badge>
 								))}
 							</div>
-						) : null}
-					</div>
+						</div>
+					) : null}
 				</div>
 				<div className="flex flex-col gap-2 mt-auto">
 					<Button variant="outline">
