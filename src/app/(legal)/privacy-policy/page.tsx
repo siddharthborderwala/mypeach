@@ -33,12 +33,28 @@ const PolicyList = () => {
 				<h3>Definitions</h3>
 				<ul>
 					<li>
-						Personal Data: Define what constitutes personal data in the context
-						of your services.
+						Personal Data: In the context of our services, personal data
+						includes:
+						<ol>
+							<li>Name</li>
+							<li>Email address</li>
+							<li>Username</li>
+							<li>Password (stored securely using encryption)</li>
+							<li>
+								Payment information (processed securely by third-party payment
+								processors)
+							</li>
+							<li>IP address</li>
+							<li>Website usage data</li>
+						</ol>
+						This information is collected directly from users or automatically
+						through their use of our website.
 					</li>
 					<li>
-						Sensitive Personal Data: Highlight any sensitive personal data you
-						might collect, such as financial information.
+						Sensitive Personal Data: We do not store any payment card data. All
+						payment processing is handled by our third-party payment processor.
+						For vendors, we securely store necessary payout information (e.g.,
+						bank account details) to process payments for their sales.
 					</li>
 				</ul>
 			</li>
