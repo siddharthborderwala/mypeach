@@ -1,6 +1,6 @@
 import type * as React from "react";
 import type { Metadata } from "next";
-import { Envelope, Phone } from "@phosphor-icons/react/dist/ssr";
+import { Envelope, Phone, MapPinLine } from "@phosphor-icons/react/dist/ssr";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
 	Accordion,
@@ -100,19 +100,7 @@ const faqItems: { question: string; answer: React.ReactNode }[] = [
 		),
 	},
 	{
-		question: "What information do we collect?",
-		answer: (
-			<>
-				Please refer to our
-				<Button variant="link" className="p-0 h-auto mx-1" asChild>
-					<Link href="/privacy-policy">privacy policy</Link>
-				</Button>
-				page.
-			</>
-		),
-	},
-	{
-		question: "What is your privacy policy?",
+		question: "What information do we collect? (Privacy Policy)",
 		answer: (
 			<>
 				Please refer to our
@@ -129,14 +117,14 @@ export default function SupportPage() {
 	return (
 		<>
 			<Header />
-			<main className="relative p-4 md:gap-6 md:p-8 mx-auto max-w-3xl">
+			<main className="relative p-4 md:gap-6 md:p-8 mx-auto max-w-5xl">
 				<div className="space-y-2">
 					<h1 className="text-lg font-semibold md:text-2xl">Support</h1>
 					<p className="text-sm text-muted-foreground">
 						We're here to help you
 					</p>
 				</div>
-				<div className="mt-4 grid gap-4 md:grid-cols-2">
+				<div className="mt-4 grid gap-4 md:grid-cols-3">
 					<Card>
 						<CardHeader>
 							<CardTitle className="flex items-center gap-2">
@@ -167,8 +155,21 @@ export default function SupportPage() {
 							</p>
 						</CardContent>
 					</Card>
+					<Card>
+						<CardHeader>
+							<CardTitle className="flex items-center gap-2">
+								<MapPinLine className="h-5 w-5" />
+								Office Address
+							</CardTitle>
+						</CardHeader>
+						<CardContent>
+							<p>
+								B-1103, Rajhans Zion, Canal Road, Vesu, Surat, Gujarat - 395007
+							</p>
+						</CardContent>
+					</Card>
 				</div>
-				<div className="mt-8">
+				<div className="mt-8 max-w-lg">
 					<h2 className="text-xl font-semibold mb-4">
 						Frequently Asked Questions
 					</h2>

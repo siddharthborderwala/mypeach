@@ -27,11 +27,11 @@ function LogoutButton() {
 
 	return (
 		<form action={signOutAction} className="w-full text-left">
-			<DropdownMenuItem>
+			<DropdownMenuItem className="p-0">
 				<Button
 					type="submit"
 					variant="ghost"
-					className="w-full gap-2 items-center justify-start h-auto p-0 font-normal"
+					className="w-full gap-2 items-center justify-start h-auto p-2 font-normal"
 				>
 					<SignOut />
 					<span>Log{pending ? "ing" : ""} out</span>
