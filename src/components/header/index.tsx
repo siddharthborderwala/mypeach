@@ -52,7 +52,7 @@ export async function Header() {
 						<nav className="flex-1 flex items-center justify-end gap-2">
 							<HeaderCartButton />
 							<Button asChild variant="ghost" className="text-base font-normal">
-								<Link href="/#explore">Explore</Link>
+								<Link href="/support">Support</Link>
 							</Button>
 							<Button asChild variant="ghost" className="text-base font-normal">
 								<Link href="/login">Login</Link>
