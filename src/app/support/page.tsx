@@ -87,6 +87,42 @@ const faqItems: { question: string; answer: React.ReactNode }[] = [
 			</>
 		),
 	},
+	{
+		question: "Can I get a refund?",
+		answer: (
+			<>
+				Please refer to our
+				<Button variant="link" className="p-0 h-auto mx-1" asChild>
+					<Link href="/refunds">refunds</Link>
+				</Button>
+				page.
+			</>
+		),
+	},
+	{
+		question: "What information do we collect?",
+		answer: (
+			<>
+				Please refer to our
+				<Button variant="link" className="p-0 h-auto mx-1" asChild>
+					<Link href="/privacy-policy">privacy policy</Link>
+				</Button>
+				page.
+			</>
+		),
+	},
+	{
+		question: "What is your privacy policy?",
+		answer: (
+			<>
+				Please refer to our
+				<Button variant="link" className="p-0 h-auto mx-1" asChild>
+					<Link href="/privacy-policy">privacy policy</Link>
+				</Button>
+				page.
+			</>
+		),
+	},
 ];
 
 export default function SupportPage() {
