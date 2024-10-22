@@ -76,31 +76,7 @@ const faqItems: { question: string; answer: React.ReactNode }[] = [
 		),
 	},
 	{
-		question: "What are your terms and conditions?",
-		answer: (
-			<>
-				Please refer to our
-				<Button variant="link" className="p-0 h-auto mx-1" asChild>
-					<Link href="/terms">terms and conditions</Link>
-				</Button>
-				page.
-			</>
-		),
-	},
-	{
-		question: "Can I get a refund?",
-		answer: (
-			<>
-				Please refer to our
-				<Button variant="link" className="p-0 h-auto mx-1" asChild>
-					<Link href="/refunds">refunds</Link>
-				</Button>
-				page.
-			</>
-		),
-	},
-	{
-		question: "What information do we collect? (Privacy Policy)",
+		question: "What information do we collect?",
 		answer: (
 			<>
 				Please refer to our
@@ -169,21 +145,43 @@ export default function SupportPage() {
 						</CardContent>
 					</Card>
 				</div>
-				<div className="mt-8 max-w-lg">
-					<h2 className="text-xl font-semibold mb-4">
-						Frequently Asked Questions
-					</h2>
-					<Accordion type="single" collapsible className="w-full">
-						{faqItems.map((item, index) => (
-							<AccordionItem
-								key={`item-${index + 1}`}
-								value={`item-${index + 1}`}
-							>
-								<AccordionTrigger>{item.question}</AccordionTrigger>
-								<AccordionContent>{item.answer}</AccordionContent>
-							</AccordionItem>
-						))}
-					</Accordion>
+				<div className="flex flex-col md:flex-row gap-12 mt-12">
+					<div className="flex-[3]">
+						<h2 className="text-xl font-semibold mb-4">
+							Frequently Asked Questions
+						</h2>
+						<Accordion type="single" collapsible className="w-full">
+							{faqItems.map((item, index) => (
+								<AccordionItem
+									key={`item-${index + 1}`}
+									value={`item-${index + 1}`}
+								>
+									<AccordionTrigger>{item.question}</AccordionTrigger>
+									<AccordionContent>{item.answer}</AccordionContent>
+								</AccordionItem>
+							))}
+						</Accordion>
+					</div>
+					<div className="flex-[2]">
+						<h2 className="text-xl font-semibold mb-4">Other Links</h2>
+						<ul className="flex flex-col items-start gap-2 list-inside list-disc">
+							<li>
+								<Button variant="link" className="p-0 h-auto w-fit" asChild>
+									<Link href="/terms">Terms and Conditions</Link>
+								</Button>
+							</li>
+							<li>
+								<Button variant="link" className="p-0 h-auto w-fit" asChild>
+									<Link href="/refunds">Refund Policy</Link>
+								</Button>
+							</li>
+							<li>
+								<Button variant="link" className="p-0 h-auto w-fit" asChild>
+									<Link href="/privacy-policy">Privacy Policy</Link>
+								</Button>
+							</li>
+						</ul>
+					</div>
 				</div>
 			</main>
 		</>

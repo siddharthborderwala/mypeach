@@ -99,10 +99,11 @@ export default function TermsPage() {
 					<p>
 						These Terms and Conditions, along with privacy policy or other terms
 						("Terms") constitute a binding agreement by and between mypeach.in,
-						("Website Owner" or "we" or "us" or "our") and you ("you" or "your")
-						and relate to your use of our website, goods (as applicable) or
-						services (as applicable) (collectively, "Services").
+						("Website Owner" or "we" or "us" or "our" or "Peach") and you ("you"
+						or "your") and relate to your use of our website, goods (as
+						applicable) or services (as applicable) (collectively, "Services").
 					</p>
+					<p>Peach is owned and operated by Pritesh Kadiwala.</p>
 					<p>
 						By using our website and availing the Services, you agree that you
 						have read and accepted these Terms (including the Privacy Policy).
