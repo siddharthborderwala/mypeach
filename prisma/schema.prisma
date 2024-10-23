@@ -79,6 +79,8 @@ model Design {
 
   @@index([userId])
   @@index([createdAt])
+  @@index([isDraft])
+  @@index([isUploadComplete])
 }
 
 model Vendor {
