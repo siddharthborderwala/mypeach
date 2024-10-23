@@ -6,6 +6,7 @@ import {
 	Tag,
 	ShoppingCart,
 	CurrencyCircleDollar,
+	Bookmark,
 } from "@phosphor-icons/react/dist/ssr";
 
 import { Button } from "@/components/ui/button";
@@ -24,6 +25,11 @@ const navItems = [
 		label: "Designs",
 		href: "/designs",
 		icon: <PaintBrush className="h-4 w-4" />,
+	},
+	{
+		label: "Collections",
+		href: "/collections",
+		icon: <Bookmark className="h-4 w-4" />,
 	},
 	{
 		label: "Sales",

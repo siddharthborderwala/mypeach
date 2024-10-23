@@ -126,3 +126,30 @@ export function useDeleteDesign() {
 
 	return { mutate, isPending };
 }
+
+export function useAddDesignToCollection() {
+	const queryClient = useQueryClient();
+
+	const { mutate, isPending } = useMutation({
+		mutationFn: async ({
+			designId,
+			collections,
+		}: { designId: string; collections: string[] }) => {
+			const res = await fetch("/api/designs", {
+				method: "DELETE",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({ designId }),
+			});
+			if (!res.ok) {
+				throw new Error("Failed to delete design");
+			}
+		},
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ["designs"] });
+		},
+	});
+
+	return { mutate, isPending };
+}

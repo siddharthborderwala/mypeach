@@ -7,6 +7,7 @@ import { db, PrismaError } from "@/lib/db/index";
 import { Argon2id } from "oslo/password";
 import { generateId } from "lucia";
 import { z } from "zod";
+import { cookies } from "next/headers";
 
 import {
 	isAnonymousSession,
@@ -30,6 +31,7 @@ import { verifyPasswordResetTokenAndGetUserId } from "../auth/verification";
 import { redirectWithFlash } from "../utils.server";
 import { updateBasicUserDetailsSchema, updatePasswordSchema } from "./schema";
 import { redis } from "../redis";
+import { createAnonymousSessionCookie } from "../sessions";
 
 const genericError = { error: "Error, please try again." };
 
@@ -216,6 +218,8 @@ export async function signOutAction(): Promise<ActionResult> {
 	const sessionCookie = lucia.createBlankSessionCookie();
 	setCookie(sessionCookie);
 	clearSessionCookie();
+	const c = createAnonymousSessionCookie();
+	cookies().set(c.name, c.value, c.attributes);
 	redirect("/");
 }
 
@@ -549,6 +553,8 @@ export async function deleteAccountAction(
 		const sessionCookie = lucia.createBlankSessionCookie();
 		setCookie(sessionCookie);
 		clearSessionCookie();
+		const c = createAnonymousSessionCookie();
+		cookies().set(c.name, c.value, c.attributes);
 		redirect("/");
 	} catch (e) {
 		if (e instanceof PrismaError) {
