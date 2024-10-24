@@ -1,4 +1,4 @@
-import { memo, useState } from "react";
+import { memo, useCallback, useState } from "react";
 import type { InfiniteScrollDesignsProps } from "./types";
 import {
 	appBaseURL,
@@ -25,13 +25,21 @@ import {
 	ShoppingBag,
 } from "@phosphor-icons/react/dist/ssr";
 import { toast } from "sonner";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useMutationState } from "@tanstack/react-query";
 import {
 	addToActiveCart,
 	type ActiveCartAndProducts,
 } from "@/lib/actions/cart";
 import { Spinner } from "@/components/spinner";
 import { queryClient } from "@/app/global-query-client";
+import { CaretDown, Export } from "@phosphor-icons/react";
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { CollectionsModal } from "@/components/collections-popover";
+import type { AddDesignToCollectionData } from "@/lib/actions/collections";
 
 const AddToCartButton = ({
 	designId,
@@ -76,6 +84,87 @@ const AddToCartButton = ({
 	);
 };
 
+const Actions = ({
+	designId,
+}: {
+	designId: string;
+}) => {
+	const [isCollectionsModalOpen, setIsCollectionsModalOpen] = useState(false);
+
+	const mutations = useMutationState({
+		filters: {
+			mutationKey: ["add-design-to-collection", designId],
+		},
+		select: (mutation) => ({
+			status: mutation.state.status,
+			error: mutation.state.error,
+			data: mutation.state.data as AddDesignToCollectionData,
+		}),
+	});
+
+	const handleShare = useCallback(() => {
+		const designURL = `${appBaseURL}/d/${designId}`;
+		const isMobile = isMobileUA(navigator.userAgent);
+
+		if (navigator.share && isMobile) {
+			navigator
+				.share({
+					url: designURL,
+				})
+				.then(() => console.log("Successful share"))
+				.catch(() => {
+					navigator.clipboard
+						.writeText(designURL)
+						.then(() => toast.success("Copied URL to clipboard"))
+						.catch(() => toast.error("Failed to copy URL to clipboard"));
+				});
+		} else {
+			navigator.clipboard
+				.writeText(designURL)
+				.then(() => toast.success("Copied URL to clipboard"))
+				.catch(() => toast.error("Failed to copy URL to clipboard"));
+		}
+	}, [designId]);
+
+	return (
+		<div className="flex items-center">
+			<Tooltip>
+				<TooltipTrigger asChild>
+					<Button
+						onClick={handleShare}
+						size="sm"
+						variant="outline"
+						className="font-normal h-8 w-8 p-0 rounded-r-none border-r-0"
+					>
+						<Export weight="bold" className="w-4 h-4 text-muted-foreground" />
+					</Button>
+				</TooltipTrigger>
+				<TooltipContent>Share</TooltipContent>
+			</Tooltip>
+			<Button
+				variant="outline"
+				size="sm"
+				className="font-medium h-8 p-0 px-2 rounded-l-none gap-2 text-muted-foreground hover:text-muted-foreground"
+				onClick={() => setIsCollectionsModalOpen(true)}
+			>
+				<span>Save</span>
+				<CaretDown weight="bold" className="w-3 h-3" />
+			</Button>
+			<CollectionsModal
+				open={isCollectionsModalOpen}
+				onOpenChange={(open) => {
+					if (!open && mutations[0]?.status === "pending") {
+						// do nothing
+					} else {
+						setIsCollectionsModalOpen(open);
+					}
+				}}
+				designToAdd={designId}
+			/>
+		</div>
+	);
+};
+
 const DesignCardDialogContent = ({
 	design,
 	setIsModalOpen,
@@ -115,39 +204,7 @@ const DesignCardDialogContent = ({
 							{formatPrice(design.price)}
 						</span>
 					</DialogTitle>
-					<Button
-						onClick={function shareUrl() {
-							const designURL = `${appBaseURL}/d/${design.id}`;
-							const isMobile = isMobileUA(navigator.userAgent);
-
-							if (navigator.share && isMobile) {
-								navigator
-									.share({
-										url: designURL,
-									})
-									.then(() => console.log("Successful share"))
-									.catch(() => {
-										navigator.clipboard
-											.writeText(designURL)
-											.then(() => toast.success("Copied URL to clipboard"))
-											.catch(() =>
-												toast.error("Failed to copy URL to clipboard"),
-											);
-									});
-							} else {
-								navigator.clipboard
-									.writeText(designURL)
-									.then(() => toast.success("Copied URL to clipboard"))
-									.catch(() => toast.error("Failed to copy URL to clipboard"));
-							}
-						}}
-						size="sm"
-						variant="outline"
-						className="font-normal text-base"
-					>
-						<ShareFat weight="fill" className="text-muted-foreground" />
-						<span className="ml-2">Share</span>
-					</Button>
+					<Actions designId={design.id} />
 				</div>
 				<div className="space-y-3 mt-4">
 					<div className="grid grid-cols-2">

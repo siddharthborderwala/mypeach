@@ -110,7 +110,7 @@ export async function getDesignsForExplore(
 
 	const hasNextPage = designs.length > take;
 	const items = designs.slice(0, take);
-	const nextCursor = hasNextPage ? items[items.length - 1].id : undefined;
+	const nextCursor = hasNextPage ? items[items.length - 1]?.id : undefined;
 
 	return {
 		designs: items.map((d) => ({

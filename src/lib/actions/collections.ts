@@ -1,6 +1,6 @@
 "use server";
 
-import { db } from "@/lib/db";
+import { db, PrismaError } from "@/lib/db";
 import type { Prisma } from "@prisma/client";
 import { redirect } from "next/navigation";
 import { getUserAuth } from "../auth/utils";
@@ -26,21 +26,21 @@ export async function getCurrentUserCollectionsList(
 	const cursor = pagination?.cursor;
 	const take = pagination?.take ?? 24;
 
-	const searchTerms = options?.search;
+	const search = options?.search;
 
 	const where: Prisma.CollectionWhereInput = {
 		AND: [
 			{
 				userId: userId,
 			},
-			...(searchTerms ? [{ name: { contains: searchTerms } }] : []),
+			...(search ? [{ name: { contains: search } }] : []),
 		],
 	};
 
 	const collections = await db.collection.findMany({
 		where,
 		orderBy: {
-			createdAt: "desc",
+			updatedAt: "desc",
 		},
 		include: {
 			collectionItems: {
@@ -64,13 +64,13 @@ export async function getCurrentUserCollectionsList(
 
 	const hasNextPage = collections.length > take;
 	const items = collections.slice(0, take);
-	const nextCursor = hasNextPage ? items[items.length - 1].id : undefined;
+	const nextCursor = hasNextPage ? items[items.length - 1]?.id : undefined;
 
 	return {
 		collections: items,
 		pagination: {
 			hasNextPage,
-			nextCursor: nextCursor?.toString(),
+			nextCursor,
 		},
 	};
 }
@@ -82,7 +82,7 @@ export type UserCollectionsListData = Awaited<
 export type UserCollectionsList = UserCollectionsListData["collections"];
 
 export async function getCollectionById(id: string) {
-	const collection = await db.collection.findUniqueOrThrow({
+	const collection = await db.collection.findUnique({
 		where: { id },
 		include: {
 			collectionItems: false,
@@ -143,7 +143,9 @@ export async function getCollectionDesigns(
 
 	const hasNextPage = designs.length > take;
 	const items = designs.slice(0, take);
-	const nextCursor = hasNextPage ? items[items.length - 1].designId : undefined;
+	const nextCursor = hasNextPage
+		? items[items.length - 1]?.designId
+		: undefined;
 
 	return {
 		designs: items.map((c) => ({
@@ -159,3 +161,68 @@ export async function getCollectionDesigns(
 		},
 	};
 }
+
+export async function addDesignToCollection(
+	designId: string,
+	collectionId: string,
+) {
+	const { session } = await getUserAuth();
+
+	if (!session) {
+		redirect("/login");
+	}
+
+	const userId = session.user.id;
+
+	try {
+		const collectionItem = await db.$transaction(async (tx) => {
+			// Check if the collection belongs to the user
+			const collection = await tx.collection.findFirst({
+				where: {
+					id: collectionId,
+					userId: userId,
+				},
+			});
+
+			if (!collection) {
+				throw new Error("Collection not found or unauthorized");
+			}
+
+			// Check if the design exists
+			const design = await tx.design.findUnique({
+				where: { id: designId },
+			});
+
+			if (!design) {
+				throw new Error("Design not found");
+			}
+
+			// Add the design to the collection
+			const collectionItem = await tx.collectionItem.create({
+				data: {
+					collectionId,
+					designId,
+				},
+			});
+
+			return {
+				...collectionItem,
+				collectionName: collection.name,
+			};
+		});
+
+		return collectionItem;
+	} catch (error) {
+		if (error instanceof PrismaError) {
+			// Handle unique constraint violation
+			if (error.code === "P2002") {
+				throw new Error("Design is already in the collection");
+			}
+		}
+		throw error;
+	}
+}
+
+export type AddDesignToCollectionData = Awaited<
+	ReturnType<typeof addDesignToCollection>
+>;

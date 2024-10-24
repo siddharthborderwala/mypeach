@@ -56,7 +56,7 @@ async function updateOrderStatus({
 			if (payment.payment_status === "SUCCESS") {
 				await tx.vendor.update({
 					where: {
-						id: order.vendors[0].id,
+						id: order.vendors[0]?.id,
 					},
 					data: {
 						totalEarnings: {

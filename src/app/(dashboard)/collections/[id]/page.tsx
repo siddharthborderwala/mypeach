@@ -3,6 +3,7 @@ import {
 	getCollectionDesigns,
 } from "@/lib/actions/collections";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { notFound } from "next/navigation";
 
 export default async function CollectionPage({
 	params,
@@ -10,6 +11,11 @@ export default async function CollectionPage({
 	params: { id: string };
 }) {
 	const collection = await getCollectionById(params.id);
+
+	if (!collection) {
+		notFound();
+	}
+
 	const collectionDesigns = await getCollectionDesigns(params.id);
 
 	return (
