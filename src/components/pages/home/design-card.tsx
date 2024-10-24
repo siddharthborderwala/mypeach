@@ -38,7 +38,7 @@ import {
 	TooltipContent,
 	TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { CollectionsModal } from "@/components/collections-popover";
+import { CollectionsPopover } from "@/components/collections-popover";
 import type { AddDesignToCollectionData } from "@/lib/actions/collections";
 
 const AddToCartButton = ({
@@ -136,31 +136,26 @@ const Actions = ({
 						variant="outline"
 						className="font-normal h-8 w-8 p-0 rounded-r-none border-r-0"
 					>
-						<Export weight="bold" className="w-4 h-4 text-muted-foreground" />
+						<Export className="w-4 h-4" />
 					</Button>
 				</TooltipTrigger>
 				<TooltipContent>Share</TooltipContent>
 			</Tooltip>
-			<Button
-				variant="outline"
-				size="sm"
-				className="font-medium h-8 p-0 px-2 rounded-l-none gap-2 text-muted-foreground hover:text-muted-foreground"
-				onClick={() => setIsCollectionsModalOpen(true)}
-			>
-				<span>Save</span>
-				<CaretDown weight="bold" className="w-3 h-3" />
-			</Button>
-			<CollectionsModal
+			<CollectionsPopover
 				open={isCollectionsModalOpen}
-				onOpenChange={(open) => {
-					if (!open && mutations[0]?.status === "pending") {
-						// do nothing
-					} else {
-						setIsCollectionsModalOpen(open);
-					}
-				}}
+				onOpenChange={setIsCollectionsModalOpen}
 				designToAdd={designId}
-			/>
+			>
+				<Button
+					variant="outline"
+					size="sm"
+					className="font-normal h-8 p-0 px-2 rounded-l-none gap-2"
+					onClick={() => setIsCollectionsModalOpen(true)}
+				>
+					<span>Save</span>
+					<CaretDown className="w-3 h-3" />
+				</Button>
+			</CollectionsPopover>
 		</div>
 	);
 };
@@ -172,7 +167,10 @@ const DesignCardDialogContent = ({
 	design: InfiniteScrollDesignsProps["initialData"]["designs"][number];
 	setIsModalOpen: (isModalOpen: boolean) => void;
 }) => (
-	<DialogContent className="flex flex-row items-start w-fit max-w-[unset] h-[90svh] gap-6">
+	<DialogContent
+		onOpenAutoFocus={(e) => e.preventDefault()}
+		className="flex flex-row items-start w-fit max-w-[unset] h-[90svh] gap-6"
+	>
 		<div className="relative block h-full aspect-[3/4] rounded-lg overflow-hidden">
 			<img
 				src={getDesignThumbnailURL(design.thumbnailFileStorageKey, 1200)}

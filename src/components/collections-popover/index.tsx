@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useInfiniteQuery, useMutation } from "@tanstack/react-query";
 import { useInView } from "react-intersection-observer";
 import {
@@ -9,27 +9,26 @@ import {
 } from "@/lib/actions/collections";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import {
-	Dialog,
-	DialogContent,
-	DialogHeader,
-	DialogTitle,
-} from "@/components/ui/dialog";
 import { Spinner } from "@/components/spinner";
 import { CollectionListItem } from "./collection-list-item";
 import { SmileyXEyes } from "@phosphor-icons/react";
 import { toast } from "sonner";
-import { Popover, PopoverContent } from "../ui/popover";
+import {
+	Popover,
+	PopoverContent,
+	PopoverTrigger,
+} from "@/components/ui/popover";
 
-export function CollectionsModal({
+export function CollectionsPopover({
 	open,
 	onOpenChange,
 	designToAdd,
-}: {
+	children,
+}: React.PropsWithChildren<{
 	open: boolean;
 	onOpenChange: (open: boolean) => void;
 	designToAdd: string;
-}) {
+}>) {
 	const [search, setSearch] = useState("");
 	const cleanSearch = search.trim().toLowerCase();
 
@@ -93,11 +92,9 @@ export function CollectionsModal({
 	const collections = data?.pages.flatMap((page) => page.collections);
 
 	return (
-		<Popover open={open} onOpenChange={onOpenChange}>
-			<PopoverContent>
-				{/* <DialogHeader>
-					<DialogTitle>Save to a Collection</DialogTitle>
-				</DialogHeader> */}
+		<Popover modal={true} open={open} onOpenChange={onOpenChange}>
+			<PopoverTrigger asChild>{children}</PopoverTrigger>
+			<PopoverContent className="h-[24rem]">
 				<div className="space-y-2">
 					<Input
 						value={search}
@@ -124,7 +121,7 @@ export function CollectionsModal({
 								))}
 								<div
 									ref={ref}
-									className="flex flex-col items-center justify-center mt-4 mb-2 w-full text-sm text-muted-foreground"
+									className="flex flex-col items-center justify-center !mt-8 !mb-4 w-full text-sm text-muted-foreground"
 								>
 									{isFetchingNextPage ? (
 										<>

@@ -14,9 +14,9 @@ export function CollectionListItem({
 	return (
 		<Button
 			variant="ghost"
-			className="flex items-center justify-between"
 			onClick={() => onClick(collection.id)}
 			disabled={disabled}
+			className="flex items-center justify-start gap-2 p-2 h-auto w-full overflow-hidden"
 		>
 			<img
 				src={getDesignThumbnailURL(
@@ -24,10 +24,13 @@ export function CollectionListItem({
 					1200,
 				)}
 				alt={collection.name}
+				height={40}
+				width={40}
+				className="rounded"
 			/>
-			<div>
+			<div className="text-left">
 				<h3 className="font-semibold">{collection.name}</h3>
-				<p className="text-sm text-muted-foreground">
+				<p className="text-sm text-muted-foreground font-normal">
 					{collection.collectionItems.length} designs
 				</p>
 			</div>
