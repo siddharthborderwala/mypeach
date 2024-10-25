@@ -1,5 +1,5 @@
 import { memo, useCallback, useState } from "react";
-import type { InfiniteScrollDesignsProps } from "./types";
+import type { ExploreDesign, InfiniteScrollDesignsProps } from "./types";
 import {
 	appBaseURL,
 	formatPrice,
@@ -40,6 +40,7 @@ import {
 } from "@/components/ui/tooltip";
 import { CollectionsPopover } from "@/components/collections-popover";
 import type { AddDesignToCollectionData } from "@/lib/actions/collections";
+import { NewCollectionModal } from "@/components/new-collection-modal";
 
 const AddToCartButton = ({
 	designId,
@@ -85,11 +86,16 @@ const AddToCartButton = ({
 };
 
 const Actions = ({
-	designId,
+	design,
 }: {
-	designId: string;
+	design: ExploreDesign;
 }) => {
-	const [isCollectionsModalOpen, setIsCollectionsModalOpen] = useState(false);
+	const [isCollectionsPopoverOpen, setIsCollectionsPopoverOpen] =
+		useState(false);
+	const [isNewCollectionModalOpen, setIsNewCollectionModalOpen] =
+		useState(false);
+
+	const designId = design.id;
 
 	const mutations = useMutationState({
 		filters: {
@@ -142,20 +148,31 @@ const Actions = ({
 				<TooltipContent>Share</TooltipContent>
 			</Tooltip>
 			<CollectionsPopover
-				open={isCollectionsModalOpen}
-				onOpenChange={setIsCollectionsModalOpen}
-				designToAdd={designId}
+				open={isCollectionsPopoverOpen}
+				onOpenChange={setIsCollectionsPopoverOpen}
+				designToAdd={design.id}
+				onCreateNewCollection={() => {
+					setIsCollectionsPopoverOpen(false);
+					setIsNewCollectionModalOpen(true);
+				}}
 			>
-				<Button
-					variant="outline"
-					size="sm"
-					className="font-normal h-8 p-0 px-2 rounded-l-none gap-2"
-					onClick={() => setIsCollectionsModalOpen(true)}
-				>
-					<span>Save</span>
-					<CaretDown className="w-3 h-3" />
-				</Button>
+				{({ collectionsInWhichDesignIs }) => (
+					<Button
+						variant="outline"
+						size="sm"
+						className="font-normal h-8 p-0 px-2 rounded-l-none gap-2"
+						onClick={() => setIsCollectionsPopoverOpen(true)}
+					>
+						<span>{collectionsInWhichDesignIs ? "Saved" : "Save"}</span>
+						<CaretDown className="w-3 h-3" />
+					</Button>
+				)}
 			</CollectionsPopover>
+			<NewCollectionModal
+				firstDesign={design}
+				open={isNewCollectionModalOpen}
+				onOpenChange={setIsNewCollectionModalOpen}
+			/>
 		</div>
 	);
 };
@@ -164,7 +181,7 @@ const DesignCardDialogContent = ({
 	design,
 	setIsModalOpen,
 }: {
-	design: InfiniteScrollDesignsProps["initialData"]["designs"][number];
+	design: ExploreDesign;
 	setIsModalOpen: (isModalOpen: boolean) => void;
 }) => (
 	<DialogContent
@@ -202,7 +219,7 @@ const DesignCardDialogContent = ({
 							{formatPrice(design.price)}
 						</span>
 					</DialogTitle>
-					<Actions designId={design.id} />
+					<Actions design={design} />
 				</div>
 				<div className="space-y-3 mt-4">
 					<div className="grid grid-cols-2">
@@ -259,7 +276,7 @@ const DesignCardDialogContent = ({
 const DesignCard_ = ({
 	design,
 }: {
-	design: InfiniteScrollDesignsProps["initialData"]["designs"][number];
+	design: ExploreDesign;
 }) => {
 	const [isModalOpen, setIsModalOpen] = useState(false);
 

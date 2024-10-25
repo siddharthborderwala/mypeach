@@ -64,6 +64,8 @@ export async function getDesignsForExplore(
 		take?: number;
 	},
 ) {
+	const { session } = await getUserAuth();
+
 	const cursor = pagination?.cursor;
 	const take = pagination?.take ?? 24;
 

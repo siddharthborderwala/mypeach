@@ -5,6 +5,8 @@ import type { Prisma } from "@prisma/client";
 import { redirect } from "next/navigation";
 import { getUserAuth } from "../auth/utils";
 import type { FileMetadata } from "./designs";
+import { generateId } from "lucia";
+import { z } from "zod";
 
 export async function getCurrentUserCollectionsList(
 	options?: {
@@ -33,7 +35,14 @@ export async function getCurrentUserCollectionsList(
 			{
 				userId: userId,
 			},
-			...(search ? [{ name: { contains: search } }] : []),
+			search
+				? {
+						name: {
+							contains: search,
+							mode: "insensitive",
+						},
+					}
+				: {},
 		],
 	};
 
@@ -225,4 +234,129 @@ export async function addDesignToCollection(
 
 export type AddDesignToCollectionData = Awaited<
 	ReturnType<typeof addDesignToCollection>
+>;
+
+export async function getCollectionsInWhichDesignIs(designId: string) {
+	const collections = await db.collectionItem.findMany({
+		where: { designId },
+		select: {
+			collection: true,
+		},
+	});
+
+	return collections.map((c) => c.collection);
+}
+
+export type CollectionInWhichDesignIsData = Awaited<
+	ReturnType<typeof getCollectionsInWhichDesignIs>
+>;
+
+const createCollectionSchema = z.object({
+	name: z
+		.string()
+		.min(3, { message: "Name must be at least 3 characters long" }),
+	designId: z.string(),
+});
+
+const formatFlattenedErrors = <T>(errors: z.typeToFlattenedError<T>) => {
+	return Object.entries(errors.fieldErrors ?? {})
+		.map(([, errors]) => (errors as string[])?.join(", ") ?? "")
+		.join(", ");
+};
+
+export async function createCollection(name: string, designId: string) {
+	const { session } = await getUserAuth();
+
+	if (!session) {
+		redirect("/login");
+	}
+
+	const validatedData = createCollectionSchema.safeParse({
+		name,
+		designId,
+	});
+
+	if (!validatedData.success) {
+		throw new Error(formatFlattenedErrors(validatedData.error.flatten()));
+	}
+
+	const userId = session.user.id;
+
+	try {
+		const collection = await db.collection.create({
+			data: {
+				id: generateId(24),
+				userId,
+				name: validatedData.data.name,
+				collectionItems: {
+					create: {
+						designId: validatedData.data.designId,
+					},
+				},
+			},
+		});
+
+		return collection;
+	} catch (error) {
+		if (error instanceof PrismaError) {
+			if (error.code === "P2002") {
+				throw new Error("Please try again");
+			}
+		}
+		throw error;
+	}
+}
+
+const removeDesignFromCollectionSchema = z.object({
+	designId: z.string(),
+	collectionId: z.string(),
+});
+
+export async function removeDesignFromCollection(
+	designId: string,
+	collectionId: string,
+) {
+	const { session } = await getUserAuth();
+
+	if (!session) {
+		redirect("/login");
+	}
+
+	const userId = session.user.id;
+
+	const validatedData = removeDesignFromCollectionSchema.safeParse({
+		designId,
+		collectionId,
+	});
+
+	if (!validatedData.success) {
+		throw new Error(formatFlattenedErrors(validatedData.error.flatten()));
+	}
+
+	// Delete the collection item
+	const collectionItem = await db.collectionItem.delete({
+		where: {
+			collection: {
+				userId,
+			},
+			collectionId_designId: {
+				collectionId: validatedData.data.collectionId,
+				designId: validatedData.data.designId,
+			},
+		},
+		select: {
+			collection: {
+				select: {
+					name: true,
+				},
+			},
+		},
+	});
+
+	return collectionItem.collection;
+}
+
+// Update the return type to reflect the possibility of null
+export type RemoveDesignFromCollectionResult = Awaited<
+	ReturnType<typeof removeDesignFromCollection>
 >;
