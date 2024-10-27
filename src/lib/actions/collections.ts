@@ -244,8 +244,21 @@ export type AddDesignToCollectionData = Awaited<
 >;
 
 export async function getCollectionsInWhichDesignIs(designId: string) {
+	const { session } = await getUserAuth();
+
+	if (!session) {
+		redirect("/login");
+	}
+
+	const userId = session.user.id;
+
 	const collections = await db.collectionItem.findMany({
-		where: { designId },
+		where: {
+			designId,
+			collection: {
+				userId,
+			},
+		},
 		select: {
 			collection: true,
 		},
