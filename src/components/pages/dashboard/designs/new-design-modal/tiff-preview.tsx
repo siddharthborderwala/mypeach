@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { Spinner } from "@/components/spinner";
 
 interface TiffPreviewProps {
-	file: File | null;
+	file: File | null | undefined;
 }
 
 export function TiffPreview({ file }: TiffPreviewProps) {

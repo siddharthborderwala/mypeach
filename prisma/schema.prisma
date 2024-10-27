@@ -71,14 +71,16 @@ model Design {
   userId String
   user   User   @relation(references: [id], fields: [userId], onDelete: Cascade)
 
-  collections  Collection[]
   cartProducts CartProduct[]
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  collectionItems CollectionItem[]
 
   @@index([userId])
   @@index([createdAt])
+  @@index([isDraft])
+  @@index([isUploadComplete])
 }
 
 model Vendor {
@@ -142,15 +144,28 @@ model Order {
 }
 
 model Collection {
-  id        Int      @id @default(autoincrement())
+  id        String   @id
   name      String
   userId    String
   user      User     @relation(references: [id], fields: [userId], onDelete: Cascade)
-  designs   Design[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  collectionItems CollectionItem[]
+
   @@index([userId])
+}
+
+model CollectionItem {
+  collectionId String
+  collection   Collection @relation(references: [id], fields: [collectionId], onDelete: Cascade)
+
+  designId String
+  design   Design @relation(references: [id], fields: [designId], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([collectionId, designId])
 }
 
 model Cart {

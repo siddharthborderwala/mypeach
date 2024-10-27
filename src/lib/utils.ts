@@ -57,7 +57,7 @@ function formatDistanceToNow(date: Date, arg1: { addSuffix: boolean }) {
 	];
 
 	for (let i = 0; i < intervals.length; i++) {
-		const interval = intervals[i];
+		const interval = intervals[i]!;
 		const count = Math.floor(diffInSeconds / interval.seconds);
 		if (count >= 1) {
 			const plural = count > 1 ? "s" : "";

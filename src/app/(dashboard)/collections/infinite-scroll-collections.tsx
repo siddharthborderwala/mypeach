@@ -1,19 +1,19 @@
 "use client";
 
+import type { UserCollectionsList } from "@/lib/actions/collections";
 import { useEffect } from "react";
 import { useInView } from "react-intersection-observer";
-import DesignPreview from "./design-preview";
-import type { DesignData } from "@/lib/actions/designs";
+import { CollectionPreview } from "./collection-preview";
 import { InfiniteQueryBottom } from "@/components/infinite-query-bottom";
 
-export default function InfiniteScrollDesigns({
-	designs,
+export default function InfiniteScrollCollections({
+	collections,
 	fetchNextPage,
 	hasNextPage,
 	isFetchingNextPage,
 	status,
 }: {
-	designs: DesignData[];
+	collections: UserCollectionsList;
 	fetchNextPage: () => void;
 	hasNextPage: boolean;
 	isFetchingNextPage: boolean;
@@ -27,18 +27,18 @@ export default function InfiniteScrollDesigns({
 		}
 	}, [inView, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
-	if (status === "error") return <div>Error loading designs</div>;
+	if (status === "error") return <div>Error loading collections</div>;
 
 	return (
 		<>
-			<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-				{designs.map((design) => (
-					<DesignPreview key={design.id} design={design} />
+			<div className="grid gap-4 grid-cols-[repeat(auto-fill,minmax(18rem,1fr))]">
+				{collections.map((collection) => (
+					<CollectionPreview key={collection.id} collection={collection} />
 				))}
 			</div>
 			<InfiniteQueryBottom
 				ref={ref}
-				label="designs"
+				label="collections"
 				isFetchingNextPage={isFetchingNextPage}
 				hasNextPage={hasNextPage}
 			/>

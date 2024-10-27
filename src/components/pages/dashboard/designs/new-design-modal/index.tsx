@@ -206,10 +206,10 @@ export function NewDesignModal() {
 		accept: { "image/tiff": [".tif", ".tiff"] },
 		disabled: uploadState.state !== "idle",
 		onDropRejected: (fileRejections) => {
-			const error = fileRejections[0].errors[0];
-			if (error.code === ErrorCode.FileInvalidType) {
+			const error = fileRejections[0]?.errors[0];
+			if (error?.code === ErrorCode.FileInvalidType) {
 				toast.error("You can only upload TIFF files.");
-			} else {
+			} else if (error) {
 				toast.error(error.message);
 			}
 		},

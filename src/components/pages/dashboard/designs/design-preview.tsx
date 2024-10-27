@@ -2,12 +2,12 @@
 
 import ImageWithFallback from "@/components/image-with-fallback";
 import type { DesignData } from "@/lib/actions/designs";
-import { getDesignThumbnailURL, getUserContentUrl } from "@/lib/storage/util";
+import { getDesignThumbnailURL } from "@/lib/storage/util";
 import { parseAsString, useQueryState } from "nuqs";
 import { Badge } from "@/components/ui/badge";
 import { useUploadContext } from "./upload-context";
 import Separator from "@/components/ui/separator";
-import { PencilSimple, Trash } from "@phosphor-icons/react/dist/ssr";
+import { Trash } from "@phosphor-icons/react/dist/ssr";
 import {
 	Dialog,
 	DialogContent,
@@ -40,7 +40,7 @@ function DesignPreview_({
 					suppressHydrationWarning
 					src={getDesignThumbnailURL(design.thumbnailFileStorageKey, 1200)}
 					width="100%"
-					className="aspect-square flex items-center justify-center select-none pointer-events-none object-cover"
+					className="aspect-square rounded flex items-center justify-center select-none pointer-events-none object-cover"
 				/>
 				<div className="flex flex-col mt-2 text-left">
 					<div className="flex items-center justify-between">

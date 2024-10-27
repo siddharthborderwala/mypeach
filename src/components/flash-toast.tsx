@@ -9,20 +9,21 @@ export function FlashToast() {
 
 	// biome-ignore lint/correctness: we want to run this on pathname change
 	useEffect(() => {
-		const toastData = document.cookie
+		const toastDataStr = document.cookie
 			.split("; ")
 			.find((row) => row.startsWith("flash="));
 
-		if (toastData) {
+		if (toastDataStr) {
 			document.cookie = "toast=; Max-Age=0; path=/; SameSite=lax";
-			// get message and type
-			const { message, type } = JSON.parse(
-				decodeURIComponent(toastData.split("=")[1]),
-			);
-			const toastType = type as "success" | "error" | "info" | "warning";
-			toast[toastType](message, {
-				duration: 5000,
-			});
+			const toastData = toastDataStr.split("=")[1];
+			if (toastData) {
+				// get message and type
+				const { message, type } = JSON.parse(decodeURIComponent(toastData));
+				const toastType = type as "success" | "error" | "info" | "warning";
+				toast[toastType](message, {
+					duration: 5000,
+				});
+			}
 		}
 	}, [pathname]);
 

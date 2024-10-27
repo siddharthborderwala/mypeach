@@ -6,6 +6,7 @@ import { FlashToast } from "@/components/flash-toast";
 
 import "./globals.css";
 import { GlobalQueryClient } from "./global-query-client";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 const manrope = Manrope({
 	subsets: ["latin"],
@@ -25,9 +26,11 @@ export default function RootLayout({
 	return (
 		<html lang="en">
 			<body className={`${manrope.variable} font-sans`}>
-				<GlobalQueryClient>{children}</GlobalQueryClient>
-				<Toaster richColors theme="light" className="font-sans" />
-				<FlashToast />
+				<TooltipProvider delayDuration={150} skipDelayDuration={750}>
+					<GlobalQueryClient>{children}</GlobalQueryClient>
+					<Toaster richColors theme="light" className="font-sans" />
+					<FlashToast />
+				</TooltipProvider>
 			</body>
 		</html>
 	);

@@ -54,7 +54,7 @@ const OtherDetails = ({
 		<div className="flex justify-between my-4">
 			<div className="space-y-1">
 				<p className="text-muted-foreground text-sm">
-					Created At: {formatDate(editDesignDetails.createdAt)}
+					Added on {formatDate(editDesignDetails.createdAt)}
 				</p>
 			</div>
 			{editDesignDetails.isDraft ? (

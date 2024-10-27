@@ -10,8 +10,40 @@ import { useGetDesigns } from "@/hooks/dashboard";
 import { useEffect, useState } from "react";
 import { useUploadContext } from "@/components/pages/dashboard/designs/upload-context";
 import type { DesignData } from "@/lib/actions/designs";
+import { parseAsString, useQueryState } from "nuqs";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { MagnifyingGlass, PaintBrush, SmileyMeh } from "@phosphor-icons/react";
+import { useDebounce } from "@/hooks/use-debounce";
+
+function SearchInput() {
+	const [search, setSearch] = useQueryState("q", parseAsString);
+
+	return (
+		<div className="w-full max-w-sm relative">
+			<Input
+				name="q"
+				placeholder="Enter design name or tags..."
+				className="pl-10"
+				value={search ?? ""}
+				onChange={(e) => {
+					if (e.target.value === "") {
+						setSearch(null);
+					} else {
+						setSearch(e.target.value);
+					}
+				}}
+			/>
+			<MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+		</div>
+	);
+}
 
 export function AllDesigns({ initialData }: InfiniteScrollDesignsProps) {
+	const [search, setSearch] = useQueryState("q", parseAsString);
+
+	const debouncedSearch = useDebounce(search, 250);
+
 	const { newDesignIsUploaded, newDesignId } = useUploadContext();
 
 	const [trackDesignIdForPreview, setTrackDesignIdForPreview] = useState<
@@ -34,6 +66,7 @@ export function AllDesigns({ initialData }: InfiniteScrollDesignsProps) {
 		initialData,
 		trackDesignIdForPreview,
 		setTrackDesignIdForPreview,
+		search: debouncedSearch,
 	});
 
 	const designs = allDesigns.pages.flatMap((page) => page.designs);
@@ -42,18 +75,38 @@ export function AllDesigns({ initialData }: InfiniteScrollDesignsProps) {
 		<main className="relative flex h-[calc(100svh-3.5rem)] flex-col gap-4 md:gap-6">
 			<div className="flex items-center justify-between pt-4 px-4 md:pt-8 md:px-8">
 				<h1 className="text-lg font-semibold md:text-2xl">Your Designs</h1>
-				{designs.length > 0 ? <NewDesignModalTrigger /> : null}
+				<div className="flex items-center gap-2">
+					<SearchInput />
+					<NewDesignModalTrigger />
+				</div>
 			</div>
 			{designs.length === 0 ? (
 				<div className="mb-4 mx-4 md:mb-8 md:mx-8 flex flex-1 items-center justify-center rounded-lg border border-dashed shadow-sm">
 					<div className="flex flex-col items-center gap-1 text-center">
-						<h3 className="text-2xl font-bold tracking-tight">
-							You have no designs
+						{debouncedSearch ? (
+							<SmileyMeh className="text-muted-foreground" size={48} />
+						) : (
+							<PaintBrush className="text-muted-foreground" size={48} />
+						)}
+						<h3 className="text-2xl font-bold tracking-tight mt-4">
+							{debouncedSearch ? "Oops" : "You have no designs"}
 						</h3>
 						<p className="text-sm text-muted-foreground">
-							You can start selling as soon as you add a design.
+							{debouncedSearch
+								? "No designs found for your search!"
+								: "You can start selling as soon as you add a design."}
 						</p>
-						<NewDesignModalTrigger className="mt-4" />
+						{debouncedSearch ? (
+							<Button
+								variant="outline"
+								className="mt-4"
+								onClick={() => setSearch(null)}
+							>
+								View All
+							</Button>
+						) : (
+							<NewDesignModalTrigger className="mt-4" />
+						)}
 					</div>
 				</div>
 			) : (

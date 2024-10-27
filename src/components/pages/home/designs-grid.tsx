@@ -8,6 +8,7 @@ import { useInView } from "react-intersection-observer";
 import type { InfiniteScrollDesignsProps } from "./types";
 import { DesignCard } from "./design-card";
 import { useInfiniteQuery } from "@tanstack/react-query";
+import { InfiniteQueryBottom } from "@/components/infinite-query-bottom";
 
 export const DesignsGrid = ({ initialData }: InfiniteScrollDesignsProps) => {
 	const [search] = useQueryState("q", parseAsString);
@@ -45,20 +46,12 @@ export const DesignsGrid = ({ initialData }: InfiniteScrollDesignsProps) => {
 					<DesignCard key={design.id} design={design} />
 				))}
 			</div>
-			<div
+			<InfiniteQueryBottom
 				ref={ref}
-				className="flex items-center justify-center mt-24 mb-12 w-full"
-			>
-				{isFetchingNextPage ? (
-					<p className="text-sm text-muted-foreground">
-						Loading more designs...
-					</p>
-				) : hasNextPage ? null : (
-					<p className="text-sm text-muted-foreground">
-						That's all of the designs
-					</p>
-				)}
-			</div>
+				label="designs"
+				isFetchingNextPage={isFetchingNextPage}
+				hasNextPage={hasNextPage}
+			/>
 		</>
 	);
 };

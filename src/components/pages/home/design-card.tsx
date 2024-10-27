@@ -1,5 +1,5 @@
-import { memo, useState } from "react";
-import type { InfiniteScrollDesignsProps } from "./types";
+import { memo, useCallback, useState } from "react";
+import type { ExploreDesign } from "./types";
 import {
 	appBaseURL,
 	formatPrice,
@@ -19,11 +19,7 @@ import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import RelatedDesignsMiniList from "./related-designs";
 import { Button } from "@/components/ui/button";
-import {
-	CurrencyInr,
-	ShareFat,
-	ShoppingBag,
-} from "@phosphor-icons/react/dist/ssr";
+import { CurrencyInr, ShoppingBag } from "@phosphor-icons/react/dist/ssr";
 import { toast } from "sonner";
 import { useMutation } from "@tanstack/react-query";
 import {
@@ -32,6 +28,15 @@ import {
 } from "@/lib/actions/cart";
 import { Spinner } from "@/components/spinner";
 import { queryClient } from "@/app/global-query-client";
+import { CaretDown, Export } from "@phosphor-icons/react";
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { CollectionsPopover } from "@/components/collections-popover";
+import { NewCollectionModal } from "@/components/new-collection-modal";
+import { DesignCardView } from "./design-card-view";
 
 const AddToCartButton = ({
 	designId,
@@ -76,14 +81,98 @@ const AddToCartButton = ({
 	);
 };
 
+const Actions = ({
+	design,
+}: {
+	design: ExploreDesign;
+}) => {
+	const [isCollectionsPopoverOpen, setIsCollectionsPopoverOpen] =
+		useState(false);
+	const [isNewCollectionModalOpen, setIsNewCollectionModalOpen] =
+		useState(false);
+
+	const designId = design.id;
+
+	const handleShare = useCallback(() => {
+		const designURL = `${appBaseURL}/d/${designId}`;
+		const isMobile = isMobileUA(navigator.userAgent);
+
+		if (navigator.share && isMobile) {
+			navigator
+				.share({
+					url: designURL,
+				})
+				.then(() => console.log("Successful share"))
+				.catch(() => {
+					navigator.clipboard
+						.writeText(designURL)
+						.then(() => toast.success("Copied URL to clipboard"))
+						.catch(() => toast.error("Failed to copy URL to clipboard"));
+				});
+		} else {
+			navigator.clipboard
+				.writeText(designURL)
+				.then(() => toast.success("Copied URL to clipboard"))
+				.catch(() => toast.error("Failed to copy URL to clipboard"));
+		}
+	}, [designId]);
+
+	return (
+		<div className="flex items-center">
+			<Tooltip>
+				<TooltipTrigger asChild>
+					<Button
+						onClick={handleShare}
+						size="sm"
+						variant="outline"
+						className="font-normal h-8 w-8 p-0 rounded-r-none border-r-0"
+					>
+						<Export className="w-4 h-4" />
+					</Button>
+				</TooltipTrigger>
+				<TooltipContent>Share</TooltipContent>
+			</Tooltip>
+			<CollectionsPopover
+				open={isCollectionsPopoverOpen}
+				onOpenChange={setIsCollectionsPopoverOpen}
+				designToAdd={design.id}
+				onCreateNewCollection={() => {
+					setIsCollectionsPopoverOpen(false);
+					setIsNewCollectionModalOpen(true);
+				}}
+			>
+				{({ collectionsInWhichDesignIs }) => (
+					<Button
+						variant="outline"
+						size="sm"
+						className="font-normal h-8 p-0 px-2 rounded-l-none gap-2"
+						onClick={() => setIsCollectionsPopoverOpen(true)}
+					>
+						<span>{collectionsInWhichDesignIs ? "Saved" : "Save"}</span>
+						<CaretDown className="w-3 h-3" />
+					</Button>
+				)}
+			</CollectionsPopover>
+			<NewCollectionModal
+				firstDesign={design}
+				open={isNewCollectionModalOpen}
+				onOpenChange={setIsNewCollectionModalOpen}
+			/>
+		</div>
+	);
+};
+
 const DesignCardDialogContent = ({
 	design,
 	setIsModalOpen,
 }: {
-	design: InfiniteScrollDesignsProps["initialData"]["designs"][number];
+	design: ExploreDesign;
 	setIsModalOpen: (isModalOpen: boolean) => void;
 }) => (
-	<DialogContent className="flex flex-row items-start w-fit max-w-[unset] h-[90svh] gap-6">
+	<DialogContent
+		onOpenAutoFocus={(e) => e.preventDefault()}
+		className="flex flex-row items-start w-fit max-w-[unset] h-[90svh] gap-6"
+	>
 		<div className="relative block h-full aspect-[3/4] rounded-lg overflow-hidden">
 			<img
 				src={getDesignThumbnailURL(design.thumbnailFileStorageKey, 1200)}
@@ -115,39 +204,7 @@ const DesignCardDialogContent = ({
 							{formatPrice(design.price)}
 						</span>
 					</DialogTitle>
-					<Button
-						onClick={function shareUrl() {
-							const designURL = `${appBaseURL}/d/${design.id}`;
-							const isMobile = isMobileUA(navigator.userAgent);
-
-							if (navigator.share && isMobile) {
-								navigator
-									.share({
-										url: designURL,
-									})
-									.then(() => console.log("Successful share"))
-									.catch(() => {
-										navigator.clipboard
-											.writeText(designURL)
-											.then(() => toast.success("Copied URL to clipboard"))
-											.catch(() =>
-												toast.error("Failed to copy URL to clipboard"),
-											);
-									});
-							} else {
-								navigator.clipboard
-									.writeText(designURL)
-									.then(() => toast.success("Copied URL to clipboard"))
-									.catch(() => toast.error("Failed to copy URL to clipboard"));
-							}
-						}}
-						size="sm"
-						variant="outline"
-						className="font-normal text-base"
-					>
-						<ShareFat weight="fill" className="text-muted-foreground" />
-						<span className="ml-2">Share</span>
-					</Button>
+					<Actions design={design} />
 				</div>
 				<div className="space-y-3 mt-4">
 					<div className="grid grid-cols-2">
@@ -204,47 +261,14 @@ const DesignCardDialogContent = ({
 const DesignCard_ = ({
 	design,
 }: {
-	design: InfiniteScrollDesignsProps["initialData"]["designs"][number];
+	design: ExploreDesign;
 }) => {
 	const [isModalOpen, setIsModalOpen] = useState(false);
 
 	return (
 		<Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
 			<DialogTrigger className="text-left">
-				<div className="relative block w-full aspect-[3/4] rounded-lg overflow-hidden">
-					<img
-						src={getDesignThumbnailURL(design.thumbnailFileStorageKey, 1200)}
-						alt={design.name}
-						className="absolute inset-0 w-full h-full object-cover select-none pointer-events-none"
-						loading="lazy"
-					/>
-				</div>
-				<div className="flex items-center justify-between gap-2 py-2">
-					<div className="flex items-center gap-2">
-						<Avatar className="h-9 w-9 rounded-full">
-							<AvatarImage src={getUserAvatarURL(design.user.username, 72)} />
-						</Avatar>
-						<div className="flex flex-col">
-							<p className="font-medium">{design.user.username}</p>
-							<span
-								suppressHydrationWarning
-								className="text-sm text-muted-foreground"
-							>
-								Added {relativeTime(design.createdAt)}
-							</span>
-						</div>
-					</div>
-					<div className="flex flex-col items-end">
-						<p className="font-medium">{formatPrice(design.price)}</p>
-						<p className="text-sm text-muted-foreground">
-							<span className="uppercase text-primary">
-								{mimeToExtension(design.originalFileType)}
-							</span>
-							<span className="mx-2 font-bold">&middot;</span>
-							<span className="text-primary">{design.fileDPI} DPI</span>
-						</p>
-					</div>
-				</div>
+				<DesignCardView design={design} />
 			</DialogTrigger>
 			<DesignCardDialogContent
 				design={design}
