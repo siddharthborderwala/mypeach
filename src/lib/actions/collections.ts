@@ -374,3 +374,62 @@ export async function removeDesignFromCollection(
 export type RemoveDesignFromCollectionResult = Awaited<
 	ReturnType<typeof removeDesignFromCollection>
 >;
+
+const removeManyDesignsFromCollectionSchema = z.object({
+	designIds: z.array(z.string()).min(1),
+	collectionId: z.string(),
+});
+
+export async function removeManyDesignsFromCollection(
+	designIds: string[],
+	collectionId: string,
+) {
+	const { session } = await getUserAuth();
+
+	if (!session) {
+		redirect("/login");
+	}
+
+	const userId = session.user.id;
+
+	const validatedData = removeManyDesignsFromCollectionSchema.safeParse({
+		designIds,
+		collectionId,
+	});
+
+	if (!validatedData.success) {
+		throw new Error(formatFlattenedErrors(validatedData.error.flatten()));
+	}
+
+	// Delete multiple collection items
+	const result = await db.collectionItem.deleteMany({
+		where: {
+			collection: {
+				userId,
+			},
+			collectionId: validatedData.data.collectionId,
+			designId: {
+				in: validatedData.data.designIds,
+			},
+		},
+	});
+
+	// Get the collection name
+	const collection = await db.collection.findUnique({
+		where: {
+			id: validatedData.data.collectionId,
+		},
+		select: {
+			name: true,
+		},
+	});
+
+	return {
+		count: result.count,
+		collection,
+	};
+}
+
+export type RemoveManyDesignsFromCollectionResult = Awaited<
+	ReturnType<typeof removeManyDesignsFromCollection>
+>;
