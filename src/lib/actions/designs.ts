@@ -32,13 +32,22 @@ export async function getCurrentUserDesigns(
 
 	const where: Prisma.DesignWhereInput = {
 		userId: session.user.id,
-		name: options?.search
-			? {
-					contains: options.search,
-					mode: "insensitive",
-				}
-			: undefined,
-		tags: searchTerms ? { hasSome: searchTerms } : undefined,
+		OR:
+			options?.search || searchTerms
+				? [
+						{
+							name: options?.search
+								? {
+										contains: options.search,
+										mode: "insensitive",
+									}
+								: undefined,
+						},
+						{
+							tags: searchTerms ? { hasSome: searchTerms } : undefined,
+						},
+					]
+				: undefined,
 	};
 
 	const designs = await db.design.findMany({
@@ -91,17 +100,26 @@ export async function getDesignsForExplore(
 	const where: Prisma.DesignWhereInput = {
 		isDraft: false,
 		isUploadComplete: true,
-		name: options?.search
-			? {
-					contains: options.search,
-					mode: "insensitive",
-				}
-			: undefined,
-		tags: searchTerms
-			? {
-					hasSome: searchTerms,
-				}
-			: undefined,
+		OR:
+			options?.search || searchTerms
+				? [
+						{
+							name: options?.search
+								? {
+										contains: options.search,
+										mode: "insensitive",
+									}
+								: undefined,
+						},
+						{
+							tags: searchTerms
+								? {
+										hasSome: searchTerms,
+									}
+								: undefined,
+						},
+					]
+				: undefined,
 	};
 
 	const designs = await db.design.findMany({

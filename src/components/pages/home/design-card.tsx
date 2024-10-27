@@ -148,7 +148,12 @@ const Actions = ({
 						className="font-normal h-8 p-0 px-2 rounded-l-none gap-2"
 						onClick={() => setIsCollectionsPopoverOpen(true)}
 					>
-						<span>{collectionsInWhichDesignIs ? "Saved" : "Save"}</span>
+						<span>
+							{collectionsInWhichDesignIs &&
+							collectionsInWhichDesignIs.length > 0
+								? "Saved"
+								: "Save"}
+						</span>
 						<CaretDown className="w-3 h-3" />
 					</Button>
 				)}

@@ -31,19 +31,13 @@ export async function getCurrentUserCollectionsList(
 	const search = options?.search;
 
 	const where: Prisma.CollectionWhereInput = {
-		AND: [
-			{
-				userId: userId,
-			},
-			search
-				? {
-						name: {
-							contains: search,
-							mode: "insensitive",
-						},
-					}
-				: {},
-		],
+		userId,
+		name: search
+			? {
+					contains: search,
+					mode: "insensitive",
+				}
+			: undefined,
 	};
 
 	const collections = await db.collection.findMany({
