@@ -218,6 +218,10 @@ export async function signOutAction(): Promise<ActionResult> {
 	const sessionCookie = lucia.createBlankSessionCookie();
 	setCookie(sessionCookie);
 	clearSessionCookie();
+	// clear all cookies
+	for (const cookie of cookies().getAll()) {
+		cookies().delete(cookie.name);
+	}
 	const c = createAnonymousSessionCookie();
 	cookies().set(c.name, c.value, c.attributes);
 	redirect("/");
@@ -553,6 +557,10 @@ export async function deleteAccountAction(
 		const sessionCookie = lucia.createBlankSessionCookie();
 		setCookie(sessionCookie);
 		clearSessionCookie();
+		// clear all cookies
+		for (const cookie of cookies().getAll()) {
+			cookies().delete(cookie.name);
+		}
 		const c = createAnonymousSessionCookie();
 		cookies().set(c.name, c.value, c.attributes);
 		redirect("/");

@@ -1,5 +1,5 @@
 import { memo, useCallback, useState } from "react";
-import type { ExploreDesign, InfiniteScrollDesignsProps } from "./types";
+import type { ExploreDesign } from "./types";
 import {
 	appBaseURL,
 	formatPrice,
@@ -19,13 +19,9 @@ import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import RelatedDesignsMiniList from "./related-designs";
 import { Button } from "@/components/ui/button";
-import {
-	CurrencyInr,
-	ShareFat,
-	ShoppingBag,
-} from "@phosphor-icons/react/dist/ssr";
+import { CurrencyInr, ShoppingBag } from "@phosphor-icons/react/dist/ssr";
 import { toast } from "sonner";
-import { useMutation, useMutationState } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import {
 	addToActiveCart,
 	type ActiveCartAndProducts,
@@ -39,8 +35,8 @@ import {
 	TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { CollectionsPopover } from "@/components/collections-popover";
-import type { AddDesignToCollectionData } from "@/lib/actions/collections";
 import { NewCollectionModal } from "@/components/new-collection-modal";
+import { DesignCardView } from "./design-card-view";
 
 const AddToCartButton = ({
 	designId,
@@ -96,17 +92,6 @@ const Actions = ({
 		useState(false);
 
 	const designId = design.id;
-
-	const mutations = useMutationState({
-		filters: {
-			mutationKey: ["add-design-to-collection", designId],
-		},
-		select: (mutation) => ({
-			status: mutation.state.status,
-			error: mutation.state.error,
-			data: mutation.state.data as AddDesignToCollectionData,
-		}),
-	});
 
 	const handleShare = useCallback(() => {
 		const designURL = `${appBaseURL}/d/${designId}`;
@@ -283,40 +268,7 @@ const DesignCard_ = ({
 	return (
 		<Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
 			<DialogTrigger className="text-left">
-				<div className="relative block w-full aspect-[3/4] rounded-lg overflow-hidden">
-					<img
-						src={getDesignThumbnailURL(design.thumbnailFileStorageKey, 1200)}
-						alt={design.name}
-						className="absolute inset-0 w-full h-full object-cover select-none pointer-events-none"
-						loading="lazy"
-					/>
-				</div>
-				<div className="flex items-center justify-between gap-2 py-2">
-					<div className="flex items-center gap-2">
-						<Avatar className="h-9 w-9 rounded-full">
-							<AvatarImage src={getUserAvatarURL(design.user.username, 72)} />
-						</Avatar>
-						<div className="flex flex-col">
-							<p className="font-medium">{design.user.username}</p>
-							<span
-								suppressHydrationWarning
-								className="text-sm text-muted-foreground"
-							>
-								Added {relativeTime(design.createdAt)}
-							</span>
-						</div>
-					</div>
-					<div className="flex flex-col items-end">
-						<p className="font-medium">{formatPrice(design.price)}</p>
-						<p className="text-sm text-muted-foreground">
-							<span className="uppercase text-primary">
-								{mimeToExtension(design.originalFileType)}
-							</span>
-							<span className="mx-2 font-bold">&middot;</span>
-							<span className="text-primary">{design.fileDPI} DPI</span>
-						</p>
-					</div>
-				</div>
+				<DesignCardView design={design} />
 			</DialogTrigger>
 			<DesignCardDialogContent
 				design={design}

@@ -171,6 +171,13 @@ export async function getCollectionDesigns(
 	};
 }
 
+export type CollectionDesignsData = Awaited<
+	ReturnType<typeof getCollectionDesigns>
+>;
+
+export type CollectionDesign =
+	CollectionDesignsData["designs"][number]["design"];
+
 export async function addDesignToCollection(
 	designId: string,
 	collectionId: string,

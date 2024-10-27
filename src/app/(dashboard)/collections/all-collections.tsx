@@ -13,6 +13,7 @@ import InfiniteScrollCollections from "./infinite-scroll-collections";
 import { Bookmark, MagnifyingGlass, SmileyMeh } from "@phosphor-icons/react";
 import { Input } from "@/components/ui/input";
 import { useDebounce } from "@/hooks/use-debounce";
+import { AddDesigns } from "./add-designs";
 
 function SearchInput() {
 	const [search, setSearch] = useQueryState("q", parseAsString);
@@ -97,14 +98,7 @@ export function AllCollections({
 								View All
 							</Button>
 						) : (
-							<div className="flex gap-2 mt-4">
-								<Button variant="outline" asChild>
-									<Link href="/designs">My Designs</Link>
-								</Button>
-								<Button asChild>
-									<Link href="/">Explore</Link>
-								</Button>
-							</div>
+							<AddDesigns />
 						)}
 					</div>
 				</div>
