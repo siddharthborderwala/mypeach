@@ -31,10 +31,14 @@ export async function getCurrentUserDesigns(
 		.filter(Boolean);
 
 	const where: Prisma.DesignWhereInput = {
-		AND: [
-			{ userId: session.user.id },
-			...(searchTerms ? [{ tags: { hasSome: searchTerms } }] : []),
-		],
+		userId: session.user.id,
+		name: options?.search
+			? {
+					contains: options.search,
+					mode: "insensitive",
+				}
+			: undefined,
+		tags: searchTerms ? { hasSome: searchTerms } : undefined,
 	};
 
 	const designs = await db.design.findMany({
@@ -85,13 +89,19 @@ export async function getDesignsForExplore(
 		.filter(Boolean);
 
 	const where: Prisma.DesignWhereInput = {
-		AND: [
-			{
-				isDraft: false,
-				isUploadComplete: true,
-			},
-			...(searchTerms ? [{ tags: { hasSome: searchTerms } }] : []),
-		],
+		isDraft: false,
+		isUploadComplete: true,
+		name: options?.search
+			? {
+					contains: options.search,
+					mode: "insensitive",
+				}
+			: undefined,
+		tags: searchTerms
+			? {
+					hasSome: searchTerms,
+				}
+			: undefined,
 	};
 
 	const designs = await db.design.findMany({
