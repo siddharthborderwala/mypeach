@@ -16,7 +16,7 @@ export default function NewDesignModalTrigger({
 
 	return (
 		<DialogTrigger asChild>
-			<Button className={cn("gap-2", className)}>
+			<Button size="sm" className={cn("gap-2", className)}>
 				{newDesignId ? (
 					<Spinner size={16} />
 				) : (

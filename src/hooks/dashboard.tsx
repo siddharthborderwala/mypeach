@@ -1,6 +1,6 @@
-import type { InfiniteDesignsResponse } from "@/app/api/designs/route";
-import type { DesignData, getCurrentUserDesigns } from "@/lib/actions/designs";
+import { type DesignData, getCurrentUserDesigns } from "@/lib/actions/designs";
 import {
+	keepPreviousData,
 	useInfiniteQuery,
 	useMutation,
 	useQueryClient,
@@ -22,10 +22,12 @@ export type InfiniteScrollDesignsProps = {
 };
 
 export function useGetDesigns({
+	search,
 	initialData,
 	trackDesignIdForPreview,
 	setTrackDesignIdForPreview,
 }: InfiniteScrollDesignsProps & {
+	search?: string | null;
 	trackDesignIdForPreview: string | undefined;
 	setTrackDesignIdForPreview: React.Dispatch<
 		React.SetStateAction<string | undefined>
@@ -39,29 +41,21 @@ export function useGetDesigns({
 		status,
 		refetch,
 	} = useInfiniteQuery({
-		queryKey: ["designs"],
-		initialPageParam: 1,
-		queryFn: async ({ pageParam = 1 }) => {
-			const res = await fetch(`/api/designs?page=${pageParam}`, {
-				method: "GET",
-				headers: {
-					"Content-Type": "application/json",
+		queryKey: ["designs", search],
+		initialPageParam: "",
+		queryFn: async ({ pageParam = "" }) => {
+			return getCurrentUserDesigns(
+				{
+					search,
 				},
-			});
-			if (!res.ok) {
-				throw new Error("Failed to fetch designs");
-			}
-
-			const data: InfiniteDesignsResponse = await res.json();
-			return data;
+				{ cursor: pageParam },
+			);
 		},
-		getNextPageParam: (lastPage) =>
-			lastPage.pagination.currentPage < lastPage.pagination.totalPages
-				? lastPage.pagination.currentPage + 1
-				: undefined,
+		placeholderData: keepPreviousData,
+		getNextPageParam: (lastPage) => lastPage.pagination.nextCursor,
 		initialData: {
 			pages: [initialData],
-			pageParams: [1],
+			pageParams: [""],
 		},
 	});
 

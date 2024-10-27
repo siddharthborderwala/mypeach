@@ -155,7 +155,10 @@ export function CollectionsPopover({
 					isCheckingCollectionsInWhichDesignIs,
 				})}
 			</PopoverTrigger>
-			<PopoverContent className="h-auto py-4 px-0 rounded-xl relative">
+			<PopoverContent
+				onWheel={(e) => e.preventDefault()}
+				className="h-auto py-4 px-0 rounded-xl relative"
+			>
 				<div>
 					<h3 className="font-semibold text-center px-4">Save</h3>
 					<div className="px-4 my-3">
@@ -174,7 +177,7 @@ export function CollectionsPopover({
 						</div>
 					) : null}
 					{status === "success" ? (
-						<ScrollArea className="h-[20rem] px-4">
+						<ScrollArea className="h-[20rem] px-4 pb-12">
 							<div>
 								{collections?.map((collection) => (
 									<CollectionListItem

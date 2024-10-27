@@ -7,40 +7,52 @@ import { db, PrismaError, TxError } from "@/lib/db";
 import { getUserAuth } from "../auth/utils";
 import type { Prettify } from "../type-utils";
 
-export async function getCurrentUserDesigns(page = 1, pageSize = 24) {
+export async function getCurrentUserDesigns(
+	options?: {
+		search?: string | null;
+	},
+	pagination?: {
+		cursor?: string;
+		take?: number;
+	},
+) {
 	const { session } = await getUserAuth();
 
 	if (!session) {
 		redirect("/login");
 	}
 
-	const skip = (page - 1) * pageSize;
+	const cursor = pagination?.cursor;
+	const take = pagination?.take ?? 24;
 
-	const [designs, totalCount] = await db.$transaction([
-		db.design.findMany({
-			where: {
-				userId: session.user.id,
-			},
-			orderBy: {
-				createdAt: "desc",
-			},
-			skip,
-			take: pageSize,
-		}),
-		db.design.count({
-			where: {
-				userId: session.user.id,
-			},
-		}),
-	]);
+	const searchTerms = options?.search
+		?.split(" ")
+		.map((t) => t.trim())
+		.filter(Boolean);
+
+	const where: Prisma.DesignWhereInput = {
+		AND: [
+			{ userId: session.user.id },
+			...(searchTerms ? [{ tags: { hasSome: searchTerms } }] : []),
+		],
+	};
+
+	const designs = await db.design.findMany({
+		where,
+		orderBy: { createdAt: "desc" },
+		cursor: cursor ? { id: cursor } : undefined,
+		take: take + 1,
+	});
+
+	const hasNextPage = designs.length > take;
+	const items = designs.slice(0, take);
+	const nextCursor = hasNextPage ? items[items.length - 1]?.id : undefined;
 
 	return {
-		designs,
+		designs: items,
 		pagination: {
-			currentPage: page,
-			pageSize,
-			totalCount,
-			totalPages: Math.ceil(totalCount / pageSize),
+			hasNextPage,
+			nextCursor,
 		},
 	};
 }
@@ -64,8 +76,6 @@ export async function getDesignsForExplore(
 		take?: number;
 	},
 ) {
-	const { session } = await getUserAuth();
-
 	const cursor = pagination?.cursor;
 	const take = pagination?.take ?? 24;
 
