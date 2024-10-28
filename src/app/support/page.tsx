@@ -140,7 +140,8 @@ export default function SupportPage() {
 						</CardHeader>
 						<CardContent>
 							<p>
-								B-1103, Rajhans Zion, Canal Road, Vesu, Surat, Gujarat - 395007
+								Plot No. I-47, Road No. 6, New GEB Road, GIDC Sachin, Surat,
+								Gujarat - 394230
 							</p>
 						</CardContent>
 					</Card>
