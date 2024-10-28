@@ -18,14 +18,13 @@ export const appBaseURL = (() => {
 
 const URLValidator = z.string().url();
 
-export function getSafeRedirect(formData: FormData) {
-	const redirectTo = formData.get("redirectTo") ?? undefined;
-	if (typeof redirectTo !== "string") return "/";
-	const result = URLValidator.safeParse(redirectTo);
-	if (result.success && new URL(redirectTo).origin !== appBaseURL) {
+export function getSafeRedirect(target: string | undefined) {
+	if (typeof target !== "string") return "/";
+	const result = URLValidator.safeParse(target);
+	if (result.success && new URL(target).origin !== appBaseURL) {
 		return "/";
 	}
-	return redirectTo;
+	return target;
 }
 
 export function getUserAvatarURL(userId: string, size = 56) {

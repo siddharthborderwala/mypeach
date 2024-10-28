@@ -28,6 +28,7 @@ import {
 } from "@/components/ui/popover";
 import { useDebounce } from "@/hooks/use-debounce";
 import { Button } from "../ui/button";
+import { useAuth } from "@/contexts/auth";
 
 export function CollectionsPopover({
 	open,
@@ -52,6 +53,8 @@ export function CollectionsPopover({
 	const cleanSearch = search.trim().toLowerCase();
 	const debouncedSearch = useDebounce(cleanSearch, 250);
 
+	const { isLoggedIn } = useAuth();
+
 	const {
 		data,
 		fetchNextPage,
@@ -71,6 +74,7 @@ export function CollectionsPopover({
 		},
 		placeholderData: keepPreviousData,
 		getNextPageParam: (lastPage) => lastPage.pagination.nextCursor,
+		enabled: isLoggedIn,
 	});
 
 	const {
@@ -80,6 +84,7 @@ export function CollectionsPopover({
 	} = useQuery({
 		queryKey: ["collections-in-which-design-is", designToAdd],
 		queryFn: () => getCollectionsInWhichDesignIs(designToAdd),
+		enabled: isLoggedIn,
 	});
 
 	const {

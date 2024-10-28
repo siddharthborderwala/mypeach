@@ -7,6 +7,8 @@ import { FlashToast } from "@/components/flash-toast";
 import "./globals.css";
 import { GlobalQueryClient } from "./global-query-client";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { validateRequest } from "@/lib/auth/lucia";
+import { AuthProvider } from "@/contexts/auth";
 
 const manrope = Manrope({
 	subsets: ["latin"],
@@ -18,19 +20,23 @@ export const metadata: Metadata = {
 	description: "Get the latest TIFF layered textile design files from Peach",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
 	children,
 }: Readonly<{
 	children: React.ReactNode;
 }>) {
+	const auth = await validateRequest();
+
 	return (
 		<html lang="en">
 			<body className={`${manrope.variable} font-sans`}>
-				<TooltipProvider delayDuration={150} skipDelayDuration={750}>
-					<GlobalQueryClient>{children}</GlobalQueryClient>
-					<Toaster richColors theme="light" className="font-sans" />
-					<FlashToast />
-				</TooltipProvider>
+				<AuthProvider auth={auth}>
+					<TooltipProvider delayDuration={150} skipDelayDuration={750}>
+						<GlobalQueryClient>{children}</GlobalQueryClient>
+						<Toaster richColors theme="light" className="font-sans" />
+						<FlashToast />
+					</TooltipProvider>
+				</AuthProvider>
 			</body>
 		</html>
 	);

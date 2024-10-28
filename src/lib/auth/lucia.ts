@@ -1,9 +1,10 @@
 import { cookies } from "next/headers";
 import { cache } from "react";
-import { type Session, type User, Lucia } from "lucia";
+import { Lucia } from "lucia";
 import { RedisAdapter } from "./redis-adapter";
 import { AUTH_SESSION, SESSION } from "../sessions";
 import { fromBase64 } from "../utils";
+import type { ValidateRequestResult } from "./client-server-utils";
 
 const adapter = new RedisAdapter(process.env.REDIS_URL!);
 
@@ -34,19 +35,7 @@ export const lucia = new Lucia(adapter, {
 });
 
 export const validateRequest = cache(
-	async (): Promise<
-		| { user: User; authSession: Session }
-		| { user: null; authSession: null }
-		| {
-				anonymousUser: {
-					id: string;
-				};
-				session: {
-					id: string;
-					userId: string;
-				};
-		  }
-	> => {
+	async (): Promise<ValidateRequestResult> => {
 		const authSessionId = cookies().get(AUTH_SESSION)?.value ?? null;
 
 		if (!authSessionId) {
@@ -104,18 +93,3 @@ export const validateRequest = cache(
 		return { user: result.user, authSession: result.session };
 	},
 );
-
-export function isAuthSession(
-	result: Awaited<ReturnType<typeof validateRequest>>,
-): result is { user: User; authSession: Session } {
-	return "authSession" in result && result.authSession !== null;
-}
-
-export function isAnonymousSession(
-	result: Awaited<ReturnType<typeof validateRequest>>,
-): result is {
-	anonymousUser: { id: string };
-	session: { id: string; expiresAt: Date; fresh: boolean; userId: string };
-} {
-	return "anonymousUser" in result && result.anonymousUser !== null;
-}

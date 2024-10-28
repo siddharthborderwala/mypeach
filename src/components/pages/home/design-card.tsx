@@ -37,6 +37,8 @@ import {
 import { CollectionsPopover } from "@/components/collections-popover";
 import { NewCollectionModal } from "@/components/new-collection-modal";
 import { DesignCardView } from "./design-card-view";
+import { useAuth } from "@/contexts/auth";
+import Link from "next/link";
 
 const AddToCartButton = ({
 	designId,
@@ -86,6 +88,8 @@ const Actions = ({
 }: {
 	design: ExploreDesign;
 }) => {
+	const { isLoggedIn } = useAuth();
+
 	const [isCollectionsPopoverOpen, setIsCollectionsPopoverOpen] =
 		useState(false);
 	const [isNewCollectionModalOpen, setIsNewCollectionModalOpen] =
@@ -132,37 +136,62 @@ const Actions = ({
 				</TooltipTrigger>
 				<TooltipContent>Share</TooltipContent>
 			</Tooltip>
-			<CollectionsPopover
-				open={isCollectionsPopoverOpen}
-				onOpenChange={setIsCollectionsPopoverOpen}
-				designToAdd={design.id}
-				onCreateNewCollection={() => {
-					setIsCollectionsPopoverOpen(false);
-					setIsNewCollectionModalOpen(true);
-				}}
-			>
-				{({ collectionsInWhichDesignIs }) => (
-					<Button
-						variant="outline"
-						size="sm"
-						className="font-normal h-8 p-0 px-2 rounded-l-none gap-2"
-						onClick={() => setIsCollectionsPopoverOpen(true)}
+			{isLoggedIn ? (
+				<>
+					<CollectionsPopover
+						open={isCollectionsPopoverOpen}
+						onOpenChange={setIsCollectionsPopoverOpen}
+						designToAdd={design.id}
+						onCreateNewCollection={() => {
+							setIsCollectionsPopoverOpen(false);
+							setIsNewCollectionModalOpen(true);
+						}}
 					>
-						<span>
-							{collectionsInWhichDesignIs &&
-							collectionsInWhichDesignIs.length > 0
-								? "Saved"
-								: "Save"}
-						</span>
-						<CaretDown className="w-3 h-3" />
-					</Button>
-				)}
-			</CollectionsPopover>
-			<NewCollectionModal
-				firstDesign={design}
-				open={isNewCollectionModalOpen}
-				onOpenChange={setIsNewCollectionModalOpen}
-			/>
+						{({ collectionsInWhichDesignIs }) => (
+							<Button
+								variant="outline"
+								size="sm"
+								className="font-normal h-8 p-0 px-2 rounded-l-none gap-2"
+								onClick={() => setIsCollectionsPopoverOpen(true)}
+							>
+								<span>
+									{collectionsInWhichDesignIs &&
+									collectionsInWhichDesignIs.length > 0
+										? "Saved"
+										: "Save"}
+								</span>
+								<CaretDown className="w-3 h-3" />
+							</Button>
+						)}
+					</CollectionsPopover>
+					<NewCollectionModal
+						firstDesign={design}
+						open={isNewCollectionModalOpen}
+						onOpenChange={setIsNewCollectionModalOpen}
+					/>
+				</>
+			) : (
+				<Tooltip>
+					<TooltipTrigger asChild>
+						<Button
+							variant="outline"
+							size="sm"
+							className="font-normal h-8 p-0 px-2 rounded-l-none gap-2"
+							asChild
+						>
+							<Link
+								href={`/login?redirectTo=${encodeURIComponent(
+									`/d/${designId}`,
+								)}`}
+							>
+								Save
+								<CaretDown className="w-3 h-3" />
+							</Link>
+						</Button>
+					</TooltipTrigger>
+					<TooltipContent>Login to Save</TooltipContent>
+				</Tooltip>
+			)}
 		</div>
 	);
 };

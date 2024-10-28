@@ -2,13 +2,14 @@ import { cookies } from "next/headers";
 
 import type { Cookie } from "lucia";
 
-import { isAuthSession, validateRequest } from "./lucia";
+import { validateRequest } from "./lucia";
 import {
 	type UsernameAndPassword,
 	authenticationSchema,
 } from "../db/schema/auth";
 import { SESSION } from "../sessions";
 import { redirect } from "next/navigation";
+import { isAuthSession } from "./client-server-utils";
 
 export type AuthSession = {
 	session: {

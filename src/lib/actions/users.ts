@@ -1,6 +1,6 @@
 "use server";
 
-import { redirect } from "next/navigation";
+import { redirect, RedirectType } from "next/navigation";
 
 import { db, PrismaError } from "@/lib/db/index";
 
@@ -9,12 +9,7 @@ import { generateId } from "lucia";
 import { z } from "zod";
 import { cookies } from "next/headers";
 
-import {
-	isAnonymousSession,
-	isAuthSession,
-	lucia,
-	validateRequest,
-} from "../auth/lucia";
+import { lucia, validateRequest } from "../auth/lucia";
 import {
 	clearSessionCookie,
 	setCookie,
@@ -32,6 +27,7 @@ import { redirectWithFlash } from "../utils.server";
 import { updateBasicUserDetailsSchema, updatePasswordSchema } from "./schema";
 import { redis } from "../redis";
 import { createAnonymousSessionCookie } from "../sessions";
+import { isAnonymousSession, isAuthSession } from "../auth/client-server-utils";
 
 const genericError = { error: "Error, please try again." };
 
@@ -80,7 +76,7 @@ export async function signInAction(
 	const { data, error } = validateAuthFormData(formData);
 	if (error !== null) return { error };
 
-	const redirectTo = getSafeRedirect(formData);
+	const redirectTo = getSafeRedirect(formData.get("redirectTo")?.toString());
 
 	let anonUserId: string | null = null;
 	const auth = await validateRequest();
@@ -118,7 +114,7 @@ export async function signInAction(
 			await migrateCart(anonUserId, existingUser.id);
 		}
 
-		return redirect(redirectTo);
+		redirect(redirectTo, RedirectType.push);
 	} catch (e) {
 		return genericError;
 	}
@@ -131,7 +127,7 @@ export async function signUpAction(
 	const { data, error } = validateAuthFormData(formData);
 	if (error !== null) return { error };
 
-	const redirectTo = getSafeRedirect(formData);
+	const redirectTo = getSafeRedirect(formData.get("redirectTo")?.toString());
 
 	let anonUserId: string | null = null;
 	const auth = await validateRequest();
@@ -197,7 +193,7 @@ export async function signUpAction(
 	setCookie(sessionCookie);
 	clearSessionCookie();
 
-	return redirectWithFlash(
+	redirectWithFlash(
 		redirectTo,
 		"Please check your email for a verification link",
 		"success",
