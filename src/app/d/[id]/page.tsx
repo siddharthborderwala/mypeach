@@ -1,6 +1,9 @@
+import { Header } from "@/components/header";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { getDesignByIdForExplore } from "@/lib/actions/designs";
 import { getDesignSocialImageURL } from "@/lib/storage/util";
 import { formatPrice } from "@/lib/utils";
+import { WarningCircle } from "@phosphor-icons/react/dist/ssr";
 import type { Metadata } from "next";
 
 export async function generateMetadata({
@@ -41,5 +44,19 @@ export default async function DesignPage({
 }: { params: { id: string } }) {
 	const design = await getDesignByIdForExplore(params.id);
 
-	return <pre>{JSON.stringify(design, null, 2)}</pre>;
+	return (
+		<>
+			<Header />
+			<main className="bg-white w-full px-4 md:py-6 md:px-8">
+				<Alert variant="info" className="max-w-md mx-auto">
+					<WarningCircle weight="bold" className="h-4 w-4" />
+					<AlertTitle>Coming Soon</AlertTitle>
+					<AlertDescription>
+						We are working on this page and it will be available soon.
+					</AlertDescription>
+				</Alert>
+				<pre className="mt-8">{JSON.stringify(design, null, 2)}</pre>
+			</main>
+		</>
+	);
 }
