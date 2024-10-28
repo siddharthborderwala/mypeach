@@ -24,7 +24,7 @@ export function DeleteAccountForm() {
 	return (
 		<Dialog open={open} onOpenChange={setOpen}>
 			<DialogTrigger asChild>
-				<Button variant="destructive">Delete Account</Button>
+				<Button variant="outline">Delete Account</Button>
 			</DialogTrigger>
 			<DialogContent className="max-w-sm">
 				<DialogHeader>
