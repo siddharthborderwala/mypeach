@@ -1,7 +1,10 @@
+"use client";
+
 import { memo, useCallback, useState } from "react";
 import type { ExploreDesign } from "./types";
 import {
 	appBaseURL,
+	cn,
 	formatPrice,
 	getUserAvatarURL,
 	isMobileUA,
@@ -294,14 +297,16 @@ const DesignCardDialogContent = ({
 
 const DesignCard_ = ({
 	design,
+	className,
 }: {
 	design: ExploreDesign;
+	className?: string;
 }) => {
 	const [isModalOpen, setIsModalOpen] = useState(false);
 
 	return (
 		<Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-			<DialogTrigger className="text-left">
+			<DialogTrigger className={cn("text-left", className)}>
 				<DesignCardView design={design} />
 			</DialogTrigger>
 			<DesignCardDialogContent

@@ -175,6 +175,8 @@ export async function getDesignByIdForExplore(id: string) {
 			createdAt: true,
 			price: true,
 			currency: true,
+			tags: true,
+			originalFileType: true,
 			user: {
 				select: {
 					id: true,
@@ -188,7 +190,10 @@ export async function getDesignByIdForExplore(id: string) {
 		notFound();
 	}
 
-	return design;
+	return {
+		...design,
+		fileDPI: (design.metadata as FileMetadata).fileDPI,
+	};
 }
 
 export async function getRelatedDesigns(designId: string, count = 8) {

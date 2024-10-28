@@ -1,4 +1,5 @@
 import { Header } from "@/components/header";
+import { DesignCard } from "@/components/pages/home/design-card";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { getDesignByIdForExplore } from "@/lib/actions/designs";
 import { getDesignSocialImageURL } from "@/lib/storage/util";
@@ -52,10 +53,12 @@ export default async function DesignPage({
 					<WarningCircle weight="bold" className="h-4 w-4" />
 					<AlertTitle>Coming Soon</AlertTitle>
 					<AlertDescription>
-						We are working on this page and it will be available soon.
+						This is a early version of the design page.
 					</AlertDescription>
 				</Alert>
-				<pre className="mt-8">{JSON.stringify(design, null, 2)}</pre>
+				<div className="max-w-md mx-auto flex items-center justify-center mt-8">
+					<DesignCard design={design} className="w-full sm:w-4/5" />
+				</div>
 			</main>
 		</>
 	);
