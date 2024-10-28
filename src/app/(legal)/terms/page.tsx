@@ -66,6 +66,12 @@ const TermsList = () => (
 			would make you ineligible for a refund.
 		</li>
 		<li>
+			By uploading designs to our platform, you grant Peach the right to use
+			these designs for quality assurance purposes and machine learning model
+			training to improve our services. This usage will be internal to Peach and
+			will not affect your ownership rights of the designs.
+		</li>
+		<li>
 			Notwithstanding anything contained in these Terms, the parties shall not
 			be liable for any failure to perform an obligation under these Terms if
 			performance is prevented or delayed by a force majeure event.
@@ -74,6 +80,12 @@ const TermsList = () => (
 			These Terms and any dispute or claim relating to it, or its
 			enforceability, shall be governed by and construed in accordance with the
 			laws of India.
+		</li>
+		<li>
+			Peach is not responsible for any violations of law by the sellers on the
+			platform. Sellers who violate these Terms or any applicable laws will be
+			permanently banned from using the platform without any possibility of
+			reinstatement.
 		</li>
 		<li>
 			All disputes arising out of or in connection with these Terms shall be
@@ -93,7 +105,7 @@ export default function TermsPage() {
 			<main className="relative p-4 md:gap-6 md:p-8 mx-auto max-w-3xl">
 				<h1 className="text-2xl font-semibold">Terms and Conditions</h1>
 				<h2 className="text-sm font-medium text-primary mt-2">
-					Last updated at 7<sup>th</sup> October 2024
+					Last updated at 28<sup>th</sup> October 2024
 				</h2>
 				<div className="prose mt-8 w-full">
 					<p>
@@ -103,7 +115,7 @@ export default function TermsPage() {
 						or "your") and relate to your use of our website, goods (as
 						applicable) or services (as applicable) (collectively, "Services").
 					</p>
-					<p>Peach is owned and operated by Pritesh Kadiwala.</p>
+					<p>Peach is owned and operated by DD TEXTILES.</p>
 					<p>
 						By using our website and availing the Services, you agree that you
 						have read and accepted these Terms (including the Privacy Policy).
