@@ -3,7 +3,8 @@
 import { redirect } from "next/navigation";
 import { getActiveCartAndProducts } from "./cart";
 import { setFlashMessage } from "../utils.server";
-import { isAuthSession, validateRequest } from "../auth/lucia";
+import { validateRequest } from "../auth/lucia";
+import { isAuthSession } from "../auth/client-server-utils";
 
 export async function checkoutAction() {
 	const auth = await validateRequest();
