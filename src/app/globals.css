@@ -84,3 +84,7 @@ body {
 		@apply bg-background text-foreground;
 	}
 }
+
+html > body {
+	pointer-events: all !important;
+}
