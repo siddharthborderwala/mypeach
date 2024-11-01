@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { parseAsBoolean } from "nuqs";
 import { Dialog } from "@/components/ui/dialog";
 import { getCurrentUserDesigns } from "@/lib/actions/designs";
 import { UploadProvider } from "@/components/pages/dashboard/designs/upload-context";
@@ -28,15 +27,41 @@ const searchParamsSchema = z.object({
 export default async function Designs({ searchParams }: PageProps) {
 	const result = searchParamsSchema.safeParse(searchParams);
 
-	const data = await getCurrentUserDesigns({
-		search: result.success ? result.data.q : null,
-	});
+	try {
+		// Attempt to get the designs data
+		const data = await getCurrentUserDesigns({
+			search: result.success ? result.data.q : null,
+		});
 
-	return (
-		<UploadProvider>
-			<Dialog defaultOpen={result.success ? result.data.new : false}>
-				<AllDesigns initialData={data} />
-			</Dialog>
-		</UploadProvider>
-	);
+		// If successful, render the AllDesigns component with the data
+		return (
+			<UploadProvider>
+				<Dialog defaultOpen={result.success ? result.data.new : false}>
+					<AllDesigns initialData={data} />
+				</Dialog>
+			</UploadProvider>
+		);
+	} catch (error) {
+		// Check if the error is "Vendor not found"
+		if (error instanceof Error && error.message === "Vendor not found") {
+			// Return early with the VendorNotFoundModalContent
+			return (
+				<UploadProvider>
+					<Dialog
+						defaultOpen={(result.success ? result.data.new : false) || true}
+					>
+						<div className="p-4">
+							<h2 className="text-xl font-semibold">Vendor Not Found</h2>
+							<p className="mt-2">
+								It looks like your vendor information is missing.
+							</p>
+							{/* Add more content or actions as needed */}
+						</div>
+					</Dialog>
+				</UploadProvider>
+			);
+		}
+		// Re-throw any other errors to be handled elsewhere
+		throw error;
+	}
 }

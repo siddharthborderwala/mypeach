@@ -30,31 +30,43 @@ export async function getCurrentUserDesigns(
 		.map((t) => t.trim())
 		.filter(Boolean);
 
-	const where: Prisma.DesignWhereInput = {
-		userId: session.user.id,
-		OR:
-			options?.search || searchTerms
-				? [
-						{
-							name: options?.search
-								? {
-										contains: options.search,
-										mode: "insensitive",
-									}
-								: undefined,
-						},
-						{
-							tags: searchTerms ? { hasSome: searchTerms } : undefined,
-						},
-					]
-				: undefined,
-	};
+	const { designs } = await db.$transaction(async (tx) => {
+		const vendor = await tx.vendor.findUnique({
+			where: { userId: session.user.id },
+		});
 
-	const designs = await db.design.findMany({
-		where,
-		orderBy: { createdAt: "desc" },
-		cursor: cursor ? { id: cursor } : undefined,
-		take: take + 1,
+		if (!vendor) {
+			throw new Error("Vendor not found");
+		}
+
+		const where: Prisma.DesignWhereInput = {
+			vendorId: vendor.id,
+			OR:
+				options?.search || searchTerms
+					? [
+							{
+								name: options?.search
+									? {
+											contains: options.search,
+											mode: "insensitive",
+										}
+									: undefined,
+							},
+							{
+								tags: searchTerms ? { hasSome: searchTerms } : undefined,
+							},
+						]
+					: undefined,
+		};
+
+		const designs = await db.design.findMany({
+			where,
+			orderBy: { createdAt: "desc" },
+			cursor: cursor ? { id: cursor } : undefined,
+			take: take + 1,
+		});
+
+		return { designs };
 	});
 
 	const hasNextPage = designs.length > take;
@@ -134,10 +146,14 @@ export async function getDesignsForExplore(
 			currency: true,
 			tags: true,
 			originalFileType: true,
-			user: {
-				select: {
-					id: true,
-					username: true,
+			vendor: {
+				include: {
+					user: {
+						select: {
+							id: true,
+							username: true,
+						},
+					},
 				},
 			},
 		},
@@ -177,10 +193,14 @@ export async function getDesignByIdForExplore(id: string) {
 			currency: true,
 			tags: true,
 			originalFileType: true,
-			user: {
-				select: {
-					id: true,
-					username: true,
+			vendor: {
+				include: {
+					user: {
+						select: {
+							id: true,
+							username: true,
+						},
+					},
 				},
 			},
 		},

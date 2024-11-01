@@ -35,7 +35,7 @@ export function DeleteAccountForm() {
 					<FormError state={state} />
 					<Button
 						type="button"
-						variant="default"
+						variant="outline"
 						onClick={() => setOpen(false)}
 					>
 						Cancel
@@ -51,7 +51,7 @@ function SubmitButton() {
 	const { pending } = useFormStatus();
 
 	return (
-		<Button type="submit" variant="outline" disabled={pending}>
+		<Button type="submit" variant="destructive" disabled={pending}>
 			{pending ? <Spinner className="mr-2" /> : null}
 			{pending ? "Deleting..." : "Delete Account"}
 		</Button>
