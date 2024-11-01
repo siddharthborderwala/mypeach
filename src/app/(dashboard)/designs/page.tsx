@@ -45,6 +45,7 @@ export default async function Designs({ searchParams }: PageProps) {
 		// Check if the error is "Vendor not found"
 		if (error instanceof Error && error.message === "Vendor not found") {
 			// Return early with the VendorNotFoundModalContent
+			// TODO: @sid put the vendor pop up here
 			return (
 				<UploadProvider>
 					<Dialog
