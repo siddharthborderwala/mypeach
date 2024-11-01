@@ -19,7 +19,6 @@ model User {
   emailVerified           Boolean                  @default(false)
   name                    String?
   emailVerificationTokens EmailVerificationToken[]
-  designs                 Design[]
   passwordResetTokens     PasswordResetToken[]
   orders                  Order[]
   collections             Collection[]
@@ -68,8 +67,8 @@ model Design {
   price    Int    @default(290)
   currency String @default("INR")
 
-  userId String
-  user   User   @relation(references: [id], fields: [userId], onDelete: Cascade)
+  vendorId Int    @unique
+  vendor   Vendor @relation(references: [id], fields: [vendorId], onDelete: Cascade)
 
   cartProducts CartProduct[]
 
@@ -77,23 +76,23 @@ model Design {
   updatedAt       DateTime         @updatedAt
   collectionItems CollectionItem[]
 
-  @@index([userId])
+  @@index([vendorId])
   @@index([createdAt])
   @@index([isDraft])
   @@index([isUploadComplete])
 }
 
 model Vendor {
-  id            Int     @id @default(autoincrement())
+  id            Int      @id @default(autoincrement())
   name          String
-  phone         String  @unique
+  phone         String   @unique
   status        String // ACTIVE, INACTIVE
   UPI           UPI?
   KYC           KYC?
-  orders        Order[]
-  totalEarnings Int     @default(0)
-  userId        String  @unique
-  user          User    @relation(references: [id], fields: [userId], onDelete: Cascade)
+  totalEarnings Int      @default(0)
+  userId        String   @unique
+  user          User     @relation(references: [id], fields: [userId], onDelete: Cascade)
+  Design        Design[]
 
   @@index([userId])
 }
@@ -118,23 +117,20 @@ model KYC {
 }
 
 model Order {
-  id                      Int       @id @default(autoincrement())
-  userId                  String
-  user                    User      @relation(references: [id], fields: [userId], onDelete: Cascade)
-  vendors                 Vendor[]
-  status                  String // ACTIVE, PAID, EXPIRED
-  createdAt               DateTime  @default(now())
-  updatedAt               DateTime  @updatedAt
-  // TODO: change to amount
-  price                   Int
-  paymentSessionId        String?
-  cashFreeOrderId         String?
-  percentageSplitToVendor Int?
-  orderExpiryTime         DateTime?
-  bankReference           String?
-  cashFreePaymentId       String?
-  paymentFailed           Boolean   @default(false)
-  failedReason            String?
+  id     Int    @id @default(autoincrement())
+  userId String
+  user   User   @relation(references: [id], fields: [userId], onDelete: Cascade)
+
+  status            String   @default("PENDING") // PENDING, COMPLETED, CANCELLED
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  amount            Int
+  paymentSessionId  String?
+  cashFreeOrderId   String?
+  bankReference     String?
+  cashFreePaymentId String?
+  paymentFailed     Boolean  @default(false)
+  failedReason      String?
 
   cartId Int  @unique
   cart   Cart @relation(references: [id], fields: [cartId], onDelete: Cascade)

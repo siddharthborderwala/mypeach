@@ -12,6 +12,7 @@ const bodyValidator = z.object({
 	fileId: z.string().length(36),
 	fileName: z.string(),
 	fileType: z.string(),
+	vendorId: z.number(),
 });
 
 export async function POST(request: Request) {
@@ -34,7 +35,7 @@ export async function POST(request: Request) {
 			);
 		}
 
-		const { designId, fileId, fileName, fileType } = result.data;
+		const { designId, fileId, fileName, fileType, vendorId } = result.data;
 
 		await db.design.create({
 			data: {
@@ -42,7 +43,7 @@ export async function POST(request: Request) {
 				originalFileStorageKey: getDesignFileStorageKey(fileId),
 				originalFileName: fileName,
 				originalFileType: fileType,
-				userId,
+				vendorId,
 				metadata: {
 					fileDPI: 300,
 				},
@@ -78,6 +79,7 @@ const putValidator = z.object({
 	price: z.number().min(290).optional(),
 	tags: z.union([z.string(), z.array(z.string())]),
 	fileDPI: z.number().min(72).optional(),
+	vendorId: z.number(),
 });
 
 // create a PUT endpoint
@@ -99,7 +101,8 @@ export async function PUT(request: Request) {
 			);
 		}
 
-		const { designId, fileDPI, tags, name, ...designData } = result.data;
+		const { designId, fileDPI, tags, name, vendorId, ...designData } =
+			result.data;
 
 		const tagsArray =
 			typeof tags === "string"
@@ -110,7 +113,7 @@ export async function PUT(request: Request) {
 				: tags;
 
 		const dbResult = await db.design.update({
-			where: { id: designId, userId: session.user.id },
+			where: { id: designId, vendorId },
 			data: {
 				...designData,
 				name,
@@ -145,23 +148,36 @@ export async function GET(request: Request) {
 
 	const skip = (page - 1) * pageSize;
 
-	const [designs, totalCount] = await Promise.all([
-		db.design.findMany({
-			where: {
-				userId: session.user.id,
-			},
-			orderBy: {
-				createdAt: "desc",
-			},
-			skip,
-			take: pageSize,
-		}),
-		db.design.count({
-			where: {
-				userId: session.user.id,
-			},
-		}),
-	]);
+	const { designs, totalCount } = await db.$transaction(async (tx) => {
+		const vendor = await tx.vendor.findUnique({
+			where: { userId: session.user.id },
+		});
+
+		if (!vendor) {
+			throw new Error("Vendor not found");
+		}
+
+		const [designs, totalCount] = await Promise.all([
+			db.design.findMany({
+				where: {
+					vendorId: vendor.id,
+				},
+				orderBy: {
+					createdAt: "desc",
+				},
+				skip,
+				take: pageSize,
+			}),
+
+			db.design.count({
+				where: {
+					vendorId: vendor.id,
+				},
+			}),
+		]);
+
+		return { designs, totalCount };
+	});
 
 	return NextResponse.json({
 		designs,
@@ -181,12 +197,12 @@ export async function DELETE(request: Request) {
 		return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 	}
 
-	const { designId } = await request.json();
+	const { designId, vendorId } = await request.json();
 
 	await db.design.delete({
 		where: {
 			id: designId,
-			userId: session.user.id,
+			vendorId,
 		},
 	});
 
