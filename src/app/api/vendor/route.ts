@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { Cashfree } from "cashfree-pg";
-import type { CreateVendorRequest, KycDetails, UpiDetails } from "cashfree-pg";
+import type { CreateVendorRequest, UpiDetails } from "cashfree-pg";
 import { z } from "zod";
 import { getUserAuth } from "@/lib/auth/utils";
 import { db } from "@/lib/db";
@@ -16,7 +16,6 @@ Cashfree.XEnvironment =
 interface VendorRequest
 	extends Omit<CreateVendorRequest, "upi" | "kyc_details"> {
 	upi: UpiDetails;
-	kyc_details: KycDetails;
 }
 
 const createVendorValidator = z.object({
@@ -27,9 +26,6 @@ const createVendorValidator = z.object({
 		vpa: z.string(),
 		accountHolder: z.string(),
 	}),
-	kyc_details: z.object({
-		pan: z.string(),
-	}),
 });
 
 // Function to create vendor, UPI, and KYC within a single transaction
@@ -39,7 +35,6 @@ async function createVendorWithDetails(vendorData: {
 	status: string;
 	phone: string;
 	upi: { vpa: string; accountHolder: string };
-	kyc_details: { pan: string };
 }) {
 	try {
 		const result = await db.$transaction(async (tx) => {
@@ -62,16 +57,8 @@ async function createVendorWithDetails(vendorData: {
 				},
 			});
 
-			// Create the KYC associated with the Vendor
-			const kyc = await tx.kYC.create({
-				data: {
-					pan: vendorData.kyc_details.pan,
-					vendorId: vendor.id,
-				},
-			});
-
 			// Optionally, return all created records
-			return { vendor, upi, kyc };
+			return { vendor, upi };
 		});
 
 		// Handle the result as needed
@@ -113,11 +100,6 @@ export async function POST(request: Request) {
 		verify_account: false,
 		dashboard_access: false,
 		schedule_option: 2, // Every second day at 11:00 AM
-		kyc_details: {
-			account_type: "INDIVIDUAL",
-			business_type: "Digital Goods",
-			pan: result.data.kyc_details.pan,
-		},
 	};
 
 	try {
@@ -127,7 +109,6 @@ export async function POST(request: Request) {
 			status: vendorData.status,
 			phone: vendorData.phone,
 			upi: vendorData.upi as { vpa: string; accountHolder: string },
-			kyc_details: vendorData.kyc_details as { pan: string },
 		});
 
 		vendorData.vendor_id = vendor.id.toString();
