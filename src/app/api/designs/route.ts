@@ -12,7 +12,6 @@ const bodyValidator = z.object({
 	fileId: z.string().length(36),
 	fileName: z.string(),
 	fileType: z.string(),
-	vendorId: z.number(),
 });
 
 export async function POST(request: Request) {
@@ -35,11 +34,15 @@ export async function POST(request: Request) {
 			);
 		}
 
-		const { designId, fileId, fileName, fileType, vendorId } = result.data;
-
 		const vendor = await db.vendor.findUnique({
 			where: { userId },
 		});
+
+		if (!vendor) {
+			return NextResponse.json({ error: "Vendor not found" }, { status: 404 });
+		}
+
+		const { designId, fileId, fileName, fileType } = result.data;
 
 		await db.design.create({
 			data: {
@@ -47,7 +50,7 @@ export async function POST(request: Request) {
 				originalFileStorageKey: getDesignFileStorageKey(fileId),
 				originalFileName: fileName,
 				originalFileType: fileType,
-				vendorId,
+				vendorId: vendor.id,
 				metadata: {
 					fileDPI: 300,
 				},

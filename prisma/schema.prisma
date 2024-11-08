@@ -67,7 +67,7 @@ model Design {
   price    Int    @default(290)
   currency String @default("INR")
 
-  vendorId Int    @unique
+  vendorId Int
   vendor   Vendor @relation(references: [id], fields: [vendorId], onDelete: Cascade)
 
   cartProducts CartProduct[]

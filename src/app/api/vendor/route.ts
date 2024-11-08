@@ -158,9 +158,14 @@ export async function POST(request: Request) {
 
 		return NextResponse.json({ data: vendor });
 	} catch (error: unknown) {
-		const err = error as AxiosError;
+		// Delete the vendor if the transaction fails
+		await db.vendor.delete({
+			where: {
+				userId: session.user.id,
+			},
+		});
 
-		console.error(err);
+		const err = error as AxiosError;
 
 		if (err.response) {
 			return NextResponse.json(err.response.data, {
