@@ -15,7 +15,6 @@ export const checkDesignUploaded = task({
 				const design = await db.design.findUnique({
 					where: {
 						id: payload.designId,
-						userId: payload.userId,
 					},
 					select: {
 						isUploadComplete: true,

@@ -86,7 +86,7 @@ model Vendor {
   id            Int      @id @default(autoincrement())
   name          String
   phone         String   @unique
-  status        String // ACTIVE, INACTIVE
+  status        String   @default("IN_BENE_CREATION") // ACTIVE, BLOCKED, DELETED, IN_BENE_CREATION, ACTION_REQUIRED, BANK_VALIDATION_FAILED
   UPI           UPI?
   KYC           KYC?
   totalEarnings Int      @default(0)

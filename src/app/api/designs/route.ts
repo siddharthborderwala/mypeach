@@ -79,7 +79,6 @@ const putValidator = z.object({
 	price: z.number().min(290).optional(),
 	tags: z.union([z.string(), z.array(z.string())]),
 	fileDPI: z.number().min(72).optional(),
-	vendorId: z.number(),
 });
 
 // create a PUT endpoint
@@ -101,8 +100,7 @@ export async function PUT(request: Request) {
 			);
 		}
 
-		const { designId, fileDPI, tags, name, vendorId, ...designData } =
-			result.data;
+		const { designId, fileDPI, tags, name, ...designData } = result.data;
 
 		const tagsArray =
 			typeof tags === "string"
@@ -113,7 +111,7 @@ export async function PUT(request: Request) {
 				: tags;
 
 		const dbResult = await db.design.update({
-			where: { id: designId, vendorId },
+			where: { id: designId },
 			data: {
 				...designData,
 				name,
@@ -197,12 +195,11 @@ export async function DELETE(request: Request) {
 		return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 	}
 
-	const { designId, vendorId } = await request.json();
+	const { designId } = await request.json();
 
 	await db.design.delete({
 		where: {
 			id: designId,
-			vendorId,
 		},
 	});
 

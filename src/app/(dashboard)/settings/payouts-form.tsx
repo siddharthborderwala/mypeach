@@ -1,46 +1,57 @@
+"use client";
 import { Button } from "@/components/ui/button";
-import { getVendor } from "@/lib/actions/payouts";
-import { Money } from "@phosphor-icons/react/dist/ssr";
+import { VendorForm } from "@/components/vendor-form";
+import { VendorOnboardingModal } from "@/components/vendor-onboarding-modal";
+import { useGetVendor } from "@/hooks/vendor";
+import { Spinner, Money } from "@phosphor-icons/react/dist/ssr";
+import { Dialog, DialogTrigger } from "@radix-ui/react-dialog";
 
-export async function PayoutsForm() {
-	const vendor = await getVendor();
+export function PayoutsForm() {
+	// const { data: vendor, isLoading } = useGetVendor();
+	const vendor = undefined;
+	const isLoading = false;
+
+	if (isLoading) {
+		return (
+			<div className="w-full flex justify-center items-center h-64">
+				<Spinner className="w-12 h-12 text-muted-foreground animate-spin" />
+			</div>
+		);
+	}
+
+	console.log(vendor);
 
 	if (!vendor) {
 		return (
-			<div className="mt-20 flex flex-col items-center justify-center">
-				<Money className="w-12 h-12 text-muted-foreground" />
-				<h3 className="text-xl font-semibold mt-4">Start getting paid</h3>
-				<p className="text-muted-foreground mt-2">
-					Create your vendor profile to start selling your designs!
-				</p>
-				<Button className="mt-8">Create Vendor Profile</Button>
-			</div>
+			<Dialog defaultOpen>
+				<div className="mt-20 flex flex-col items-center justify-center">
+					<Money className="w-12 h-12 text-muted-foreground" />
+					<h3 className="text-xl font-semibold mt-4">Start getting paid</h3>
+					<p className="text-muted-foreground mt-2">
+						Create your vendor profile to start selling your designs!
+					</p>
+					<DialogTrigger asChild>
+						<Button className="mt-8">Create Vendor Profile</Button>
+					</DialogTrigger>
+				</div>
+				<VendorOnboardingModal />
+			</Dialog>
 		);
 	}
 
-	if (!vendor.KYC) {
-		return (
-			<div className="mt-20 flex flex-col items-center justify-center">
-				<Money className="w-12 h-12 text-muted-foreground" />
-				<h3 className="text-xl font-semibold mt-4">Complete KYC</h3>
-				<p className="text-muted-foreground mt-2">
-					Complete your KYC verification to start receiving payments!
-				</p>
-				<Button className="mt-8">Complete KYC</Button>
-			</div>
-		);
-	}
-
-	if (!vendor.UPI) {
-		return (
-			<div className="mt-20 flex flex-col items-center justify-center">
-				<Money className="w-12 h-12 text-muted-foreground" />
-				<h3 className="text-xl font-semibold mt-4">Add UPI</h3>
-				<p className="text-muted-foreground mt-2">
-					Add your UPI details to start receiving payments!
-				</p>
-				<Button className="mt-8">Add UPI</Button>
-			</div>
-		);
-	}
+	return (
+		<div className="w-full space-y-4 [&_input]:max-w-sm">
+			<VendorForm
+				data={{
+					vendorId: vendor.id,
+					name: vendor.name,
+					phone: vendor.phone,
+					vpa: vendor.UPI?.vpa,
+					accountHolder: vendor.UPI?.accountHolder,
+					pan: vendor.KYC?.pan,
+					status: vendor.status,
+				}}
+			/>
+		</div>
+	);
 }

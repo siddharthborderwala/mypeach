@@ -4,7 +4,6 @@ import { getBasicUserDetails } from "@/lib/actions/users";
 import { UpdatePasswordForm } from "./update-password-form";
 import { DeleteAccountForm } from "./delete-account-form";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { unstable_cache } from "next/cache";
 import { z } from "zod";
 import { PayoutsForm } from "./payouts-form";
 
@@ -75,19 +74,3 @@ export default async function Settings({
 		</main>
 	);
 }
-
-/**
- * Account Settings
- *
- * show/edit
- * - name
- * - username
- * - email
- *
- * edit
- * - password
- *
- * danger zone
- * - delete account
- *
- */
