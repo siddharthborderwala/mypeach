@@ -47,8 +47,6 @@ export async function POST(request: Request) {
 				designId,
 				originalFileStorageKey: dbResult.originalFileStorageKey,
 			});
-
-			console.log("res", res);
 		}
 
 		return NextResponse.json({ design: dbResult });
