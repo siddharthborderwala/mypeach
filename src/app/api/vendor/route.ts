@@ -158,20 +158,18 @@ export async function POST(request: Request) {
 
 		return NextResponse.json({ data: vendor });
 	} catch (error: unknown) {
-		if (error instanceof Error) {
-			const err = error as AxiosError;
+		const err = error as AxiosError;
 
-			if (err.response) {
-				return NextResponse.json(err.response.data, {
-					status: err.response.status ? err.response.status : 500,
-				});
-			}
+		console.error(err);
 
-			return NextResponse.json({ error: error.message }, { status: 500 });
+		if (err.response) {
+			return NextResponse.json(err.response.data, {
+				status: err.response.status ? err.response.status : 500,
+			});
 		}
 
 		return NextResponse.json(
-			{ error: "An unknown error occurred" },
+			{ error: (error as Error).message },
 			{ status: 500 },
 		);
 	}
@@ -216,6 +214,17 @@ export async function GET() {
 					KYC: true,
 				},
 			});
+
+			if (result.data.status === "ACTIVE") {
+				await db.design.updateMany({
+					where: {
+						vendorId: vendor.id,
+					},
+					data: {
+						isDraft: false,
+					},
+				});
+			}
 		}
 	}
 

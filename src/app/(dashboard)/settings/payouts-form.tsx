@@ -7,9 +7,7 @@ import { Spinner, Money } from "@phosphor-icons/react/dist/ssr";
 import { Dialog, DialogTrigger } from "@radix-ui/react-dialog";
 
 export function PayoutsForm() {
-	// const { data: vendor, isLoading } = useGetVendor();
-	const vendor = undefined;
-	const isLoading = false;
+	const { data: vendor, isLoading } = useGetVendor();
 
 	if (isLoading) {
 		return (
@@ -18,8 +16,6 @@ export function PayoutsForm() {
 			</div>
 		);
 	}
-
-	console.log(vendor);
 
 	if (!vendor) {
 		return (

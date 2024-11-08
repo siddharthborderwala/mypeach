@@ -37,6 +37,10 @@ export async function POST(request: Request) {
 
 		const { designId, fileId, fileName, fileType, vendorId } = result.data;
 
+		const vendor = await db.vendor.findUnique({
+			where: { userId },
+		});
+
 		await db.design.create({
 			data: {
 				id: designId,
@@ -47,6 +51,7 @@ export async function POST(request: Request) {
 				metadata: {
 					fileDPI: 300,
 				},
+				isDraft: vendor?.status !== "ACTIVE",
 			},
 		});
 

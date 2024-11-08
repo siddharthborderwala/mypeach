@@ -115,8 +115,6 @@ export function VendorForm({
 
 				setIsLoading(true);
 
-				// Verify the UPI
-
 				await createVendorProfile({
 					phone,
 					upi: { vpa, accountHolder },
