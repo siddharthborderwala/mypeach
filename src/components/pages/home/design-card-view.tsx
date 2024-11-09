@@ -25,10 +25,12 @@ export const DesignCardView = ({
 			<div className="flex items-center justify-between gap-2 py-2">
 				<div className="flex items-center gap-2">
 					<Avatar className="h-9 w-9 rounded-full">
-						<AvatarImage src={getUserAvatarURL(design.user.username, 72)} />
+						<AvatarImage
+							src={getUserAvatarURL(design.vendor.user.username, 72)}
+						/>
 					</Avatar>
 					<div className="flex flex-col">
-						<p className="font-medium">{design.user.username}</p>
+						<p className="font-medium">{design.vendor.user.username}</p>
 						<span
 							suppressHydrationWarning
 							className="text-sm text-muted-foreground"

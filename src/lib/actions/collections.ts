@@ -122,10 +122,14 @@ export async function getCollectionDesigns(
 					currency: true,
 					tags: true,
 					originalFileType: true,
-					user: {
-						select: {
-							id: true,
-							username: true,
+					vendor: {
+						include: {
+							user: {
+								select: {
+									id: true,
+									username: true,
+								},
+							},
 						},
 					},
 				},
