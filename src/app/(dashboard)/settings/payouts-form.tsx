@@ -341,7 +341,9 @@ export function PayoutsForm({
 						<div
 							className={cn(
 								"h-1 w-full bg-muted rounded-full mt-2",
-								index < firstIncompleteStep ? "bg-primary" : null,
+								firstIncompleteStep === -1 || index < firstIncompleteStep
+									? "bg-primary"
+									: null,
 							)}
 						/>
 					</button>

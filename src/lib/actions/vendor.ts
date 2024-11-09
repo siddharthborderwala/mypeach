@@ -9,8 +9,8 @@ import { formatFlattenedErrors } from "../utils";
 const phoneRegex = /^(\+\d{1,2}\s?)?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}$/;
 
 const createVendorSchema = z.object({
-	name: z.string().min(1),
-	phone: z.string().regex(phoneRegex, "Invalid phone number"),
+	name: z.string().trim().min(3, "Name must have at least 3 letters"),
+	phone: z.string().trim().regex(phoneRegex, "Invalid phone number"),
 });
 
 export async function createVendorAction(data: {
@@ -64,6 +64,7 @@ export async function createVendorAction(data: {
 const createKYCSchema = z.object({
 	panNumber: z
 		.string()
+		.trim()
 		.regex(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/, "Invalid PAN number"),
 });
 
@@ -108,8 +109,12 @@ export async function createKYCAction(data: { panNumber: string }) {
 const createUPISchema = z.object({
 	upiId: z
 		.string()
+		.trim()
 		.regex(/^[a-zA-Z0-9.-]{2,256}@[a-zA-Z][a-zA-Z]{2,64}$/, "Invalid UPI ID"),
-	accountHolderName: z.string().min(3),
+	accountHolderName: z
+		.string()
+		.trim()
+		.min(3, "Account holder name must have at least 3 letters"),
 });
 
 export async function createUPIAction(data: {
