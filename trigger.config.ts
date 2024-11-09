@@ -1,10 +1,7 @@
 import { defineConfig } from "@trigger.dev/sdk/v3";
 import { prismaExtension } from "@trigger.dev/build/extensions/prisma";
 
-const project =
-	process.env.NODE_ENV === "production"
-		? "proj_vkutkwszmpyewlwnavsr" // prod project
-		: "proj_maroqjmxibdowszyhuhv"; // dev project
+const project = "proj_vkutkwszmpyewlwnavsr";
 
 export default defineConfig({
 	project,

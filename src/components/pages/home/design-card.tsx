@@ -221,10 +221,12 @@ const DesignCardDialogContent = ({
 		<div className="w-[24rem] flex flex-col h-full">
 			<div className="flex flex-row items-center gap-2">
 				<Avatar className="h-9 w-9">
-					<AvatarImage src={getUserAvatarURL(design.user.username, 72)} />
+					<AvatarImage
+						src={getUserAvatarURL(design.vendor.user.username, 72)}
+					/>
 				</Avatar>
 				<div className="flex flex-col">
-					<p className="font-medium">{design.user.username}</p>
+					<p className="font-medium">{design.vendor.user.username}</p>
 					<span
 						suppressHydrationWarning
 						className="text-xs text-muted-foreground"

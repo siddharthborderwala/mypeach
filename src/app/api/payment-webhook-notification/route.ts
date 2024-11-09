@@ -45,25 +45,43 @@ async function updateOrderStatus({
 					failedReason: error_details?.error_description,
 				},
 				include: {
-					vendors: {
-						select: {
-							id: true,
+					cart: {
+						include: {
+							products: {
+								include: {
+									design: {
+										include: {
+											vendor: {
+												select: {
+													id: true,
+												},
+											},
+										},
+									},
+								},
+							},
 						},
 					},
 				},
 			});
 
+			if (!order.cart) {
+				throw new Error("Invalid cart data");
+			}
+
 			if (payment.payment_status === "SUCCESS") {
-				await tx.vendor.update({
-					where: {
-						id: order.vendors[0]?.id,
-					},
-					data: {
-						totalEarnings: {
-							increment: order.price,
+				for (const product of order.cart.products) {
+					await tx.vendor.update({
+						where: {
+							id: product.design.vendor.id,
 						},
-					},
-				});
+						data: {
+							totalEarnings: {
+								increment: product.design.price,
+							},
+						},
+					});
+				}
 			}
 
 			return;

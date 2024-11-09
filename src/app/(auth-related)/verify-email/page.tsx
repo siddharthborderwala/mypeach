@@ -53,7 +53,7 @@ export default async function VerifyEmail({ searchParams }: VerifyEmailProps) {
 					</p>
 				</div>
 				<Button asChild>
-					<Link href="/account">Request Email Verification</Link>
+					<Link href="/settings">Request Email Verification</Link>
 				</Button>
 			</section>
 		</div>

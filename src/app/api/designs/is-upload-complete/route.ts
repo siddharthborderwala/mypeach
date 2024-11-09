@@ -32,7 +32,7 @@ export async function POST(request: Request) {
 		const { designId, isUploadComplete } = result.data;
 
 		const dbResult = await db.design.update({
-			where: { id: designId, userId: session.user.id },
+			where: { id: designId },
 			data: {
 				isUploadComplete,
 			},
@@ -43,7 +43,7 @@ export async function POST(request: Request) {
 		});
 
 		if (dbResult.isUploadComplete) {
-			await generateThumbnailTask.trigger({
+			const res = await generateThumbnailTask.trigger({
 				designId,
 				originalFileStorageKey: dbResult.originalFileStorageKey,
 			});

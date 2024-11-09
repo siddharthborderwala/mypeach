@@ -24,7 +24,11 @@ export function UpdatePasswordForm() {
 	}, [state.success]);
 
 	return (
-		<form ref={formRef} action={formAction} className="space-y-4 max-w-sm">
+		<form
+			ref={formRef}
+			action={formAction}
+			className="w-full space-y-4 [&_input]:max-w-sm"
+		>
 			<div>
 				<Label
 					htmlFor="currentPassword"

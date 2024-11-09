@@ -7,6 +7,7 @@ import {
 	ShoppingCart,
 	CurrencyCircleDollar,
 	Bookmark,
+	Gear,
 } from "@phosphor-icons/react/dist/ssr";
 
 import { Button } from "@/components/ui/button";
@@ -74,7 +75,7 @@ export default async function Layout({
 						</Link>
 					</div>
 					<div className="flex-1">
-						<nav className="grid items-start py-4 px-2 text-sm font-medium lg:px-4">
+						<nav className="flex flex-col py-4 px-2 text-sm font-medium lg:px-4 h-full">
 							<section>
 								{navItems.map((item) => (
 									<NavItem key={item.href} {...item} />
@@ -85,6 +86,15 @@ export default async function Layout({
 								{secondaryNavItems.map((item) => (
 									<NavItem key={item.href} {...item} />
 								))}
+							</section>
+							<hr className="my-4" />
+							<section>
+								<NavItem
+									key="settings"
+									href="/settings"
+									label="Settings"
+									icon={<Gear className="h-4 w-4" />}
+								/>
 							</section>
 						</nav>
 					</div>

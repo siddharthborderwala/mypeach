@@ -2,7 +2,7 @@
 
 import { redirect, RedirectType } from "next/navigation";
 
-import { db, PrismaError } from "@/lib/db/index";
+import { db, PrismaError, TxError } from "@/lib/db/index";
 
 import { Argon2id } from "oslo/password";
 import { generateId } from "lucia";
@@ -336,6 +336,69 @@ export async function resetPasswordAction(
 	return genericError;
 }
 
+export async function requestEmailVerificationEmail() {
+	const auth = await validateRequest();
+	if (!isAuthSession(auth)) {
+		throw new Error("Unauthorized");
+	}
+	const session = auth.authSession;
+	const userId = session.userId;
+
+	const { token, hashedToken } = await generateToken();
+
+	try {
+		const user = await db.$transaction(async (tx) => {
+			const user = await tx.user.findUniqueOrThrow({
+				where: { id: userId },
+			});
+
+			const verificationEmailsInLast24Hours =
+				await tx.emailVerificationToken.count({
+					where: {
+						userId,
+						expiresAt: {
+							gt: new Date(Date.now() - 1000 * 60 * 60 * 24),
+						},
+					},
+				});
+
+			if (verificationEmailsInLast24Hours >= 3) {
+				throw new TxError(
+					"You have reached the maximum number of verification emails per day",
+				);
+			}
+
+			await tx.emailVerificationToken.create({
+				data: {
+					userId,
+					hashedToken,
+					expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24),
+				},
+			});
+
+			return user;
+		});
+
+		await emailVerificationTask.trigger({
+			userId,
+			email: user.email,
+			token,
+		});
+
+		return true;
+	} catch (e) {
+		if (e instanceof TxError) {
+			throw new Error(e.message);
+		}
+		if (e instanceof PrismaError) {
+			if (e.code === "P2025") {
+				throw new Error("User not found");
+			}
+		}
+		throw genericError;
+	}
+}
+
 export async function getBasicUserDetails() {
 	const auth = await validateRequest();
 	if (!isAuthSession(auth)) {
@@ -347,7 +410,24 @@ export async function getBasicUserDetails() {
 
 	const user = await db.user.findUnique({
 		where: { id: session.userId },
-		select: { username: true, name: true, email: true },
+		select: {
+			username: true,
+			name: true,
+			email: true,
+			emailVerified: true,
+			emailVerificationTokens: {
+				select: {
+					createdAt: true,
+					expiresAt: true,
+				},
+				where: {
+					expiresAt: {
+						gt: new Date(),
+					},
+				},
+				take: 1,
+			},
+		},
 	});
 
 	if (!user) {
@@ -451,7 +531,7 @@ export async function updateBasicUserDetails(
 				return { error: "User not found" };
 			}
 		}
-		console.log(e);
+
 		return genericError;
 	}
 }
