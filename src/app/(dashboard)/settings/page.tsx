@@ -4,9 +4,9 @@ import { getBasicUserDetails } from "@/lib/actions/users";
 import { UpdatePasswordForm } from "./update-password-form";
 import { DeleteAccountForm } from "./delete-account-form";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { unstable_cache } from "next/cache";
 import { z } from "zod";
 import { PayoutsForm } from "./payouts-form";
+import { getVendor } from "@/lib/actions/payouts";
 
 export const metadata: Metadata = {
 	title: "Account Settings | Peach",
@@ -15,6 +15,12 @@ export const metadata: Metadata = {
 const searchParamsSchema = z.object({
 	tab: z.enum(["account", "password"]).optional().default("account"),
 });
+
+async function PayoutsFormWrapper() {
+	const vendor = await getVendor();
+
+	return <PayoutsForm vendor={vendor} />;
+}
 
 export default async function Settings({
 	searchParams,
@@ -40,14 +46,14 @@ export default async function Settings({
 				className="pb-4 px-4 md:pb-8 md:px-8 mt-6 flex items-start gap-8 overflow-y-auto flex-1"
 				orientation="vertical"
 			>
-				<TabsList className="sticky left-0 top-0 flex flex-col h-auto">
-					<TabsTrigger value="account" className="px-16 py-2">
+				<TabsList className="sticky left-0 top-0 flex flex-col items-stretch h-auto w-[15rem] p-0 bg-white shadow-none">
+					<TabsTrigger value="account" className="px-2 py-2 justify-start bg-white hover:bg-white data-[state=active]:bg-muted !shadow-none">
 						Account
 					</TabsTrigger>
-					<TabsTrigger value="password" className="px-16 py-2">
+					<TabsTrigger value="password" className="px-2 py-2 justify-start bg-white hover:bg-white data-[state=active]:bg-muted !shadow-none">
 						Password
 					</TabsTrigger>
-					<TabsTrigger value="payouts" className="px-16 py-2">
+					<TabsTrigger value="payouts" className="px-2 py-2 justify-start bg-white hover:bg-white data-[state=active]:bg-muted !shadow-none">
 						Payouts
 					</TabsTrigger>
 				</TabsList>
@@ -69,7 +75,7 @@ export default async function Settings({
 				</TabsContent>
 				<TabsContent value="payouts" className="p-0 mt-0 w-full">
 					<h3 className="text-lg font-semibold mb-4">Payouts</h3>
-					<PayoutsForm />
+					<PayoutsFormWrapper />
 				</TabsContent>
 			</Tabs>
 		</main>

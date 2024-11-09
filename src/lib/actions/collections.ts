@@ -7,6 +7,7 @@ import { getUserAuth } from "../auth/utils";
 import type { FileMetadata } from "./designs";
 import { generateId } from "lucia";
 import { z } from "zod";
+import { formatFlattenedErrors } from "../utils";
 
 export async function getCurrentUserCollectionsList(
 	options?: {
@@ -271,12 +272,6 @@ const createCollectionSchema = z.object({
 		.min(3, { message: "Name must be at least 3 characters long" }),
 	designId: z.string(),
 });
-
-const formatFlattenedErrors = <T>(errors: z.typeToFlattenedError<T>) => {
-	return Object.entries(errors.fieldErrors ?? {})
-		.map(([, errors]) => (errors as string[])?.join(", ") ?? "")
-		.join(", ");
-};
 
 export async function createCollection(name: string, designId: string) {
 	const { session } = await getUserAuth();

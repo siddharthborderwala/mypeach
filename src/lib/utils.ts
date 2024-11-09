@@ -85,3 +85,9 @@ export function toBase64(value: string) {
 export function mimeToExtension(mime: string) {
 	return mime.split("/")[1];
 }
+
+export function formatFlattenedErrors<T>(errors: z.typeToFlattenedError<T>) {
+	return Object.entries(errors.fieldErrors ?? {})
+		.map(([, errors]) => (errors as string[])?.join(", ") ?? "")
+		.join(", ");
+}
