@@ -531,7 +531,7 @@ export async function updateBasicUserDetails(
 				return { error: "User not found" };
 			}
 		}
-		console.log(e);
+
 		return genericError;
 	}
 }

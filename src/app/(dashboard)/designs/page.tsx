@@ -4,6 +4,7 @@ import { getCurrentUserDesigns } from "@/lib/actions/designs";
 import { UploadProvider } from "@/components/pages/dashboard/designs/upload-context";
 import { AllDesigns } from "./all-designs";
 import { z } from "zod";
+import { VendorNotFound } from "@/components/vendor-not-found";
 
 export const metadata: Metadata = {
 	title: "Designs | Peach",
@@ -44,21 +45,10 @@ export default async function Designs({ searchParams }: PageProps) {
 	} catch (error) {
 		// Check if the error is "Vendor not found"
 		if (error instanceof Error && error.message === "Vendor not found") {
-			// Return early with the VendorNotFoundModalContent
-			// TODO: @sid put the vendor pop up here
+			// Return early with the VendorOnboardingModal
 			return (
 				<UploadProvider>
-					<Dialog
-						defaultOpen={(result.success ? result.data.new : false) || true}
-					>
-						<div className="p-4">
-							<h2 className="text-xl font-semibold">Vendor Not Found</h2>
-							<p className="mt-2">
-								It looks like your vendor information is missing.
-							</p>
-							{/* Add more content or actions as needed */}
-						</div>
-					</Dialog>
+					<VendorNotFound title="Your Designs" />
 				</UploadProvider>
 			);
 		}

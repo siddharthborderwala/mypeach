@@ -92,6 +92,12 @@ importers:
       '@trigger.dev/sdk':
         specifier: 3.1.2
         version: 3.1.2
+<<<<<<< HEAD
+=======
+      axios:
+        specifier: ^1.7.7
+        version: 1.7.7
+>>>>>>> 6f479a39a638ad58e6aae9fd4cbd58c01fcb2194
       cashfree-pg:
         specifier: ^4.2.3
         version: 4.2.3
@@ -2172,8 +2178,13 @@ packages:
     peerDependencies:
       '@redis/client': ^1.0.0
 
+<<<<<<< HEAD
   '@rollup/rollup-darwin-arm64@4.25.0':
     resolution: {integrity: sha512-YVT6L3UrKTlC0FpCZd0MGA7NVdp7YNaEqkENbWQ7AOVOqd/7VzyHpgIpc1mIaxRAo1ZsJRH45fq8j4N63I/vvg==}
+=======
+  '@rollup/rollup-darwin-arm64@4.24.4':
+    resolution: {integrity: sha512-GmU/QgGtBTeraKyldC7cDVVvAJEOr3dFLKneez/n7BvX57UdhOqDsVwzU7UOnYA7AAOt+Xb26lk79PldDHgMIQ==}
+>>>>>>> 6f479a39a638ad58e6aae9fd4cbd58c01fcb2194
     cpu: [arm64]
     os: [darwin]
 
@@ -2555,6 +2566,9 @@ packages:
 
   axios@1.5.1:
     resolution: {integrity: sha512-Q28iYCWzNHjAm+yEAot5QaAMxhMghWLFVf7rRdwhUI+c2jix2DUXjAHXVi+s1ibs3mjPO/cCgbA++3BjD0vP/A==}
+
+  axios@1.7.7:
+    resolution: {integrity: sha512-S4kL7XrjgBmvdGut0sN3yJxqYzrDOnivkBiN0OFs6hLiUam3UPvswUo0kqGyhqUZGEOytHyumEdXsAkgCOUf3Q==}
 
   balanced-match@1.0.2:
     resolution: {integrity: sha512-3oSeUO0TMV67hN1AmbXsK4yaqU7tjiHlbxRDZOpH0KW9+CeX4bRAaX0Anxt0tx2MrpRpWwQaPwIlISEJhYU5Pw==}
@@ -4603,7 +4617,11 @@ snapshots:
 
   '@electric-sql/client@0.6.3':
     optionalDependencies:
+<<<<<<< HEAD
       '@rollup/rollup-darwin-arm64': 4.25.0
+=======
+      '@rollup/rollup-darwin-arm64': 4.24.4
+>>>>>>> 6f479a39a638ad58e6aae9fd4cbd58c01fcb2194
 
   '@emnapi/core@0.45.0':
     dependencies:
@@ -6050,7 +6068,11 @@ snapshots:
     dependencies:
       '@redis/client': 1.6.0
 
+<<<<<<< HEAD
   '@rollup/rollup-darwin-arm64@4.25.0':
+=======
+  '@rollup/rollup-darwin-arm64@4.24.4':
+>>>>>>> 6f479a39a638ad58e6aae9fd4cbd58c01fcb2194
     optional: true
 
   '@selderee/plugin-htmlparser2@0.11.0':
@@ -6634,6 +6656,14 @@ snapshots:
   attr-accept@2.2.2: {}
 
   axios@1.5.1:
+    dependencies:
+      follow-redirects: 1.15.9
+      form-data: 4.0.0
+      proxy-from-env: 1.1.0
+    transitivePeerDependencies:
+      - debug
+
+  axios@1.7.7:
     dependencies:
       follow-redirects: 1.15.9
       form-data: 4.0.0

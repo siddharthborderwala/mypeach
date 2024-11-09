@@ -81,19 +81,3 @@ export default async function Settings({
 		</main>
 	);
 }
-
-/**
- * Account Settings
- *
- * show/edit
- * - name
- * - username
- * - email
- *
- * edit
- * - password
- *
- * danger zone
- * - delete account
- *
- */

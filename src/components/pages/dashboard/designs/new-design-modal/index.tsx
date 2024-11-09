@@ -3,7 +3,6 @@
 import { ErrorCode, useDropzone } from "react-dropzone";
 import { generateId } from "lucia";
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { Dispatch, SetStateAction } from "react";
 import { toast } from "sonner";
 import {
 	DialogContent,

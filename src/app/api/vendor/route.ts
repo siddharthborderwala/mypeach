@@ -1,3 +1,4 @@
+import type { AxiosError } from "axios";
 import { NextResponse } from "next/server";
 import { Cashfree } from "cashfree-pg";
 import type { CreateVendorRequest, KycDetails, UpiDetails } from "cashfree-pg";
@@ -20,14 +21,12 @@ interface VendorRequest
 }
 
 const createVendorValidator = z.object({
-	name: z.string(),
-	email: z.string(),
 	phone: z.string(),
 	upi: z.object({
 		vpa: z.string(),
 		accountHolder: z.string(),
 	}),
-	kyc_details: z.object({
+	kyc: z.object({
 		pan: z.string(),
 	}),
 });
@@ -35,20 +34,32 @@ const createVendorValidator = z.object({
 // Function to create vendor, UPI, and KYC within a single transaction
 async function createVendorWithDetails(vendorData: {
 	userId: string;
-	name: string;
-	status: string;
 	phone: string;
 	upi: { vpa: string; accountHolder: string };
-	kyc_details: { pan: string };
+	kyc: {
+		pan: string;
+	};
 }) {
 	try {
 		const result = await db.$transaction(async (tx) => {
+			// Get the user
+			const user = await tx.user.findUnique({
+				where: {
+					id: vendorData.userId,
+				},
+			});
+
+			// If the user is not found, throw an error
+			if (!user) {
+				throw new Error("User not found");
+			}
+
 			// Create the Vendor
 			const vendor = await tx.vendor.create({
 				data: {
 					userId: vendorData.userId,
-					name: vendorData.name,
-					status: vendorData.status,
+					status: "IN_BENE_CREATION",
+					name: vendorData.upi.accountHolder,
 					phone: vendorData.phone,
 				},
 			});
@@ -65,13 +76,13 @@ async function createVendorWithDetails(vendorData: {
 			// Create the KYC associated with the Vendor
 			const kyc = await tx.kYC.create({
 				data: {
-					pan: vendorData.kyc_details.pan,
+					pan: vendorData.kyc.pan,
 					vendorId: vendor.id,
 				},
 			});
 
 			// Optionally, return all created records
-			return { vendor, upi, kyc };
+			return { user, vendor, upi, kyc };
 		});
 
 		// Handle the result as needed
@@ -106,31 +117,37 @@ export async function POST(request: Request) {
 	const vendorData: VendorRequest = {
 		vendor_id: "",
 		status: "ACTIVE",
-		name: result.data.name,
-		email: result.data.email,
+		email: "",
+		name: result.data.upi.accountHolder,
 		phone: result.data.phone,
-		upi: result.data.upi,
+		upi: {
+			vpa: result.data.upi.vpa,
+			account_holder: result.data.upi.accountHolder,
+		},
 		verify_account: false,
 		dashboard_access: false,
 		schedule_option: 2, // Every second day at 11:00 AM
 		kyc_details: {
-			account_type: "INDIVIDUAL",
 			business_type: "Digital Goods",
-			pan: result.data.kyc_details.pan,
+			pan: result.data.kyc.pan,
 		},
 	};
 
 	try {
-		const { vendor } = await createVendorWithDetails({
+		const { user, vendor } = await createVendorWithDetails({
 			userId: session.user.id,
-			name: vendorData.name,
-			status: vendorData.status,
 			phone: vendorData.phone,
-			upi: vendorData.upi as { vpa: string; accountHolder: string },
-			kyc_details: vendorData.kyc_details as { pan: string },
+			upi: {
+				vpa: vendorData.upi.vpa as string,
+				accountHolder: vendorData.upi.account_holder as string,
+			},
+			kyc: {
+				pan: vendorData.kyc_details.pan as string,
+			},
 		});
 
 		vendorData.vendor_id = vendor.id.toString();
+		vendorData.email = user.email;
 
 		await Cashfree.PGESCreateVendors(
 			"2023-08-01",
@@ -141,13 +158,80 @@ export async function POST(request: Request) {
 
 		return NextResponse.json({ data: vendor });
 	} catch (error: unknown) {
-		if (error instanceof Error) {
-			return NextResponse.json({ error: error }, { status: 500 });
+		// Delete the vendor if the transaction fails
+		await db.vendor.delete({
+			where: {
+				userId: session.user.id,
+			},
+		});
+
+		const err = error as AxiosError;
+
+		if (err.response) {
+			return NextResponse.json(err.response.data, {
+				status: err.response.status ? err.response.status : 500,
+			});
 		}
 
 		return NextResponse.json(
-			{ error: "An unknown error occurred" },
+			{ error: (error as Error).message },
 			{ status: 500 },
 		);
 	}
+}
+
+export async function GET() {
+	const { session } = await getUserAuth();
+	if (!session) {
+		return NextResponse.json({ error: "Unauthorised" }, { status: 401 });
+	}
+
+	let vendor = await db.vendor.findFirst({
+		where: {
+			userId: session.user.id,
+		},
+		include: {
+			UPI: true,
+			KYC: true,
+		},
+	});
+
+	if (!vendor) {
+		return NextResponse.json({ error: "Vendor not found" }, { status: 404 });
+	}
+
+	if (vendor.status === "IN_BENE_CREATION") {
+		const result = await Cashfree.PGESFetchVendors(
+			"2023-08-01",
+			vendor.id.toString(),
+		);
+
+		if (result.data.status !== "IN_BENE_CREATION") {
+			vendor = await db.vendor.update({
+				where: {
+					id: vendor.id,
+				},
+				data: {
+					status: result.data.status,
+				},
+				include: {
+					UPI: true,
+					KYC: true,
+				},
+			});
+
+			if (result.data.status === "ACTIVE") {
+				await db.design.updateMany({
+					where: {
+						vendorId: vendor.id,
+					},
+					data: {
+						isDraft: false,
+					},
+				});
+			}
+		}
+	}
+
+	return NextResponse.json({ ...vendor });
 }
