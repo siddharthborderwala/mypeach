@@ -1,6 +1,6 @@
 "use server";
 
-import { redirect, RedirectType } from "next/navigation";
+import { redirect } from "next/navigation";
 
 import { db, PrismaError, TxError } from "@/lib/db/index";
 
@@ -18,7 +18,7 @@ import {
 
 import { generateUsername } from "../username";
 import { emailVerificationTask } from "@/trigger/email-verification";
-import { getSafeRedirect } from "../utils";
+import { formatFlattenedErrors, getSafeRedirect } from "../utils";
 import { passwordResetTask } from "@/trigger/password-reset-task";
 import { generateToken } from "../tokens";
 import { sha256Digest } from "../crypto";
@@ -28,6 +28,7 @@ import { updateBasicUserDetailsSchema, updatePasswordSchema } from "./schema";
 import { redis } from "../redis";
 import { createAnonymousSessionCookie } from "../sessions";
 import { isAnonymousSession, isAuthSession } from "../auth/client-server-utils";
+import { authenticationSchema } from "../db/schema/auth";
 
 const genericError = { error: "Error, please try again." };
 
@@ -35,7 +36,7 @@ interface ActionResult {
 	error: string;
 }
 
-async function migrateCart(anonUserId: string, userId: string) {
+export async function migrateCart(anonUserId: string, userId: string) {
 	await db.$transaction(async (tx) => {
 		const anonCart = await tx.cart.findFirst({
 			where: { userId: anonUserId },
@@ -73,8 +74,14 @@ export async function signInAction(
 	_: ActionResult,
 	formData: FormData,
 ): Promise<ActionResult> {
-	const { data, error } = validateAuthFormData(formData);
-	if (error !== null) return { error };
+	const email = formData.get("email");
+	const password = formData.get("password");
+	const result = authenticationSchema.safeParse({ email, password });
+	if (result.error) {
+		return { error: formatFlattenedErrors(result.error.flatten()) };
+	}
+
+	const { data } = result;
 
 	const redirectTo = getSafeRedirect(formData.get("redirectTo")?.toString());
 
@@ -114,7 +121,7 @@ export async function signInAction(
 			await migrateCart(anonUserId, existingUser.id);
 		}
 
-		redirect(redirectTo, RedirectType.push);
+		redirect(redirectTo);
 	} catch (e) {
 		return genericError;
 	}
@@ -124,8 +131,14 @@ export async function signUpAction(
 	_: ActionResult,
 	formData: FormData,
 ): Promise<ActionResult> {
-	const { data, error } = validateAuthFormData(formData);
-	if (error !== null) return { error };
+	const email = formData.get("email");
+	const password = formData.get("password");
+	const result = authenticationSchema.safeParse({ email, password });
+	if (result.error) {
+		return { error: formatFlattenedErrors(result.error.flatten()) };
+	}
+
+	const { data } = result;
 
 	const redirectTo = getSafeRedirect(formData.get("redirectTo")?.toString());
 

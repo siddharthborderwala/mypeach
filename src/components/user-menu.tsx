@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "./ui/button";
 import { signOutAction } from "@/lib/actions/users";
-import { useFormStatus } from "react-dom";
+import { useFormState, useFormStatus } from "react-dom";
 import Link from "next/link";
 import { Avatar, AvatarImage } from "./ui/avatar";
 import { getUserAvatarURL } from "@/lib/utils";
@@ -26,16 +26,24 @@ function LogoutButton() {
 	const { pending } = useFormStatus();
 
 	return (
-		<form action={signOutAction} className="w-full text-left">
+		<Button
+			type="submit"
+			variant="ghost"
+			className="w-full gap-2 items-center justify-start h-auto p-2 font-normal"
+		>
+			<SignOut />
+			<span>Log{pending ? "ing" : ""} out</span>
+		</Button>
+	);
+}
+
+function Logout() {
+	const [, formAction] = useFormState(signOutAction, null);
+
+	return (
+		<form action={formAction} className="w-full text-left">
 			<DropdownMenuItem className="p-0">
-				<Button
-					type="submit"
-					variant="ghost"
-					className="w-full gap-2 items-center justify-start h-auto p-2 font-normal"
-				>
-					<SignOut />
-					<span>Log{pending ? "ing" : ""} out</span>
-				</Button>
+				<LogoutButton />
 			</DropdownMenuItem>
 		</form>
 	);
@@ -90,7 +98,7 @@ export function UserMenu({
 					</Link>
 				</DropdownMenuItem>
 				<DropdownMenuSeparator />
-				<LogoutButton />
+				<Logout />
 			</DropdownMenuContent>
 		</DropdownMenu>
 	);
