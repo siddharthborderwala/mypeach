@@ -97,6 +97,14 @@ export async function PUT(request: Request) {
 			return NextResponse.json({ error: "Unauthorised" }, { status: 401 });
 		}
 
+		const vendor = await db.vendor.findUnique({
+			where: { userId: session.user.id },
+		});
+
+		if (!vendor) {
+			return NextResponse.json({ error: "Vendor not found" }, { status: 404 });
+		}
+
 		const body = await request.json();
 
 		const result = putValidator.safeParse(body);
@@ -173,6 +181,19 @@ export async function GET(request: Request) {
 				},
 				skip,
 				take: pageSize,
+				include: {
+					vendor: {
+						include: {
+							user: {
+								select: {
+									id: true,
+									username: true,
+									email: true,
+								},
+							},
+						},
+					},
+				},
 			}),
 
 			db.design.count({
@@ -204,6 +225,21 @@ export async function DELETE(request: Request) {
 	}
 
 	const { designId } = await request.json();
+
+	if (!designId) {
+		return NextResponse.json(
+			{ error: "Design ID is required" },
+			{ status: 400 },
+		);
+	}
+
+	const vendor = await db.vendor.findUnique({
+		where: { userId: session.user.id },
+	});
+
+	if (!vendor) {
+		return NextResponse.json({ error: "Vendor not found" }, { status: 404 });
+	}
 
 	await db.design.delete({
 		where: {

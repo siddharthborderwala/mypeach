@@ -1,9 +1,8 @@
-// TODO: need to fix the signature verification and also then update the order status in the database
-
 import { db } from "@/lib/db";
+import { CartStatus } from "@/lib/db/schema/cart";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import { Cashfree } from "cashfree-pg";
-import type { PaymentWebhookDataEntity } from "cashfree-pg";
+import type { PaymentWebhookDataEntity, VendorSplit } from "cashfree-pg";
 import { NextResponse } from "next/server";
 
 Cashfree.XClientId = process.env.CASHFREE_CLIENT_ID;
@@ -38,7 +37,12 @@ async function updateOrderStatus({
 					id: Number.parseInt(orderData.order_id),
 				},
 				data: {
-					status: payment.payment_status === "SUCCESS" ? "PAID" : "ACTIVE",
+					status:
+						payment.payment_status === "SUCCESS"
+							? "PAID"
+							: payment.payment_status === "FAILED"
+								? "FAILED"
+								: "ACTIVE",
 					bankReference: payment.bank_reference,
 					cashFreePaymentId: payment.cf_payment_id,
 					paymentFailed: payment.payment_status === "FAILED",
@@ -70,14 +74,59 @@ async function updateOrderStatus({
 			}
 
 			if (payment.payment_status === "SUCCESS") {
-				for (const product of order.cart.products) {
+				await tx.cart.update({
+					where: {
+						id: order.cartId,
+					},
+					data: {
+						status: CartStatus.ORDERED,
+					},
+				});
+
+				const designsInCart = await tx.cartProduct.findMany({
+					where: { cartId: order.cartId },
+					include: {
+						design: {
+							select: {
+								vendorId: true,
+								price: true,
+							},
+						},
+					},
+				});
+
+				const splits: VendorSplit[] = [];
+
+				for (const data of designsInCart) {
+					if (
+						splits.find(
+							(split) => split.vendor_id === data.design.vendorId.toString(),
+						)
+					) {
+						const index = splits.findIndex(
+							(split) => split.vendor_id === data.design.vendorId.toString(),
+						);
+
+						if (splits[index].amount) {
+							splits[index].amount += Math.floor(data.design.price * 0.8);
+						}
+					} else {
+						splits.push({
+							vendor_id: data.design.vendorId.toString(),
+							amount: Math.floor(data.design.price * 0.8),
+						});
+					}
+				}
+
+				// Update totalEarnings for each vendor
+				for (const split of splits) {
 					await tx.vendor.update({
 						where: {
-							id: product.design.vendor.id,
+							id: Number.parseInt(split.vendor_id),
 						},
 						data: {
 							totalEarnings: {
-								increment: product.design.price,
+								increment: split.amount,
 							},
 						},
 					});

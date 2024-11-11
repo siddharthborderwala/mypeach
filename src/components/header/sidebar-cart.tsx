@@ -13,7 +13,6 @@ import {
 import {
 	type ActiveCartAndProducts,
 	getActiveCartAndProducts,
-	removeFromActiveCart,
 } from "@/lib/actions/cart";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { formatPrice, mimeToExtension } from "@/lib/utils";
@@ -21,12 +20,13 @@ import { getDesignThumbnailURL } from "@/lib/storage/util";
 import Link from "next/link";
 import { memo } from "react";
 import { queryClient } from "@/app/global-query-client";
+import { removeFromCart } from "@/lib/cart";
 
 function CartItem_({
 	product,
 }: { product: ActiveCartAndProducts["products"][number] }) {
 	const { mutate, isPending } = useMutation({
-		mutationFn: () => removeFromActiveCart(product.designId),
+		mutationFn: () => removeFromCart(product.designId),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ["cart"] });
 		},

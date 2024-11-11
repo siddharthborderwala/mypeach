@@ -108,20 +108,17 @@ export async function getCollectionDesigns(
 	const cursor = pagination?.cursor;
 	const take = pagination?.take ?? 24;
 
+	const { session } = await getUserAuth();
+
+	if (!session) {
+		redirect("/login");
+	}
+
 	const designs = await db.collectionItem.findMany({
 		where: { collectionId },
 		include: {
 			design: {
-				select: {
-					id: true,
-					name: true,
-					thumbnailFileStorageKey: true,
-					metadata: true,
-					createdAt: true,
-					price: true,
-					currency: true,
-					tags: true,
-					originalFileType: true,
+				include: {
 					vendor: {
 						include: {
 							user: {

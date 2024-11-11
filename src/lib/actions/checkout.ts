@@ -23,10 +23,5 @@ export async function checkoutAction() {
 		redirect("/");
 	}
 
-	// TODO: create a razorpay checkout
-	// TODO: create an order in db
-	// TODO: add order id to cart and set cart status to ORDERED
-
-	setFlashMessage("We are not accepting orders yet", "error");
-	redirect("/");
+	return;
 }

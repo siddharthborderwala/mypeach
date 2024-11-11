@@ -25,10 +25,7 @@ import { Button } from "@/components/ui/button";
 import { CurrencyInr, ShoppingBag } from "@phosphor-icons/react/dist/ssr";
 import { toast } from "sonner";
 import { useMutation } from "@tanstack/react-query";
-import {
-	addToActiveCart,
-	type ActiveCartAndProducts,
-} from "@/lib/actions/cart";
+import type { ActiveCartAndProducts } from "@/lib/actions/cart";
 import { Spinner } from "@/components/spinner";
 import { queryClient } from "@/app/global-query-client";
 import { CaretDown, Export } from "@phosphor-icons/react";
@@ -42,6 +39,7 @@ import { NewCollectionModal } from "@/components/new-collection-modal";
 import { DesignCardView } from "./design-card-view";
 import { useAuth } from "@/contexts/auth";
 import Link from "next/link";
+import { addToCart } from "@/lib/cart";
 
 const AddToCartButton = ({
 	designId,
@@ -58,7 +56,7 @@ const AddToCartButton = ({
 
 	const { mutate, isPending } = useMutation({
 		mutationKey: ["add-to-cart", designId],
-		mutationFn: () => addToActiveCart(designId),
+		mutationFn: () => addToCart(designId),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ["cart"] });
 			toast.success("Added to cart");
@@ -282,10 +280,10 @@ const DesignCardDialogContent = ({
 					) : null}
 				</div>
 				<div className="flex flex-col gap-2 mt-auto">
-					<Button variant="outline">
+					{/* <Button variant="outline">
 						<CurrencyInr weight="bold" />
 						<span className="ml-2">Buy Now</span>
-					</Button>
+					</Button> */}
 					<AddToCartButton
 						designId={design.id}
 						setIsModalOpen={setIsModalOpen}

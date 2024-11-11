@@ -5,14 +5,15 @@ import { getUserId } from "../auth/utils";
 import type { FileMetadata } from "./designs";
 import { CartStatus } from "../db/schema/cart";
 
-export async function addToActiveCart(designId: string) {
+export async function addItemAction(designId: string) {
 	const userId = await getUserId();
 
-	await db.$transaction(async (tx) => {
+	const data = await db.$transaction(async (tx) => {
 		// 1. check if there is a cart for the user, if not create one
 		const _cart = await tx.cart.findFirst({
 			where: {
 				userId,
+				status: CartStatus.ACTIVE,
 			},
 		});
 
@@ -23,6 +24,13 @@ export async function addToActiveCart(designId: string) {
 					},
 				})
 			: _cart;
+
+		// get order if it exists
+		const order = await tx.order.findFirst({
+			where: {
+				cartId: cart.id,
+			},
+		});
 
 		await tx.cartProduct.upsert({
 			where: {
@@ -37,13 +45,17 @@ export async function addToActiveCart(designId: string) {
 				designId,
 			},
 		});
+
+		return { order };
 	});
+
+	return data.order?.id;
 }
 
-export async function removeFromActiveCart(designId: string) {
+export async function removeItemAction(designId: string) {
 	const userId = await getUserId();
 
-	await db.$transaction(async (tx) => {
+	const data = await db.$transaction(async (tx) => {
 		const cart = await tx.cart.findFirst({
 			where: {
 				userId,
@@ -51,6 +63,13 @@ export async function removeFromActiveCart(designId: string) {
 		});
 
 		if (!cart) return;
+
+		// get order if it exists
+		const order = await tx.order.findFirst({
+			where: {
+				cartId: cart.id,
+			},
+		});
 
 		await tx.cartProduct.delete({
 			where: {
@@ -60,7 +79,11 @@ export async function removeFromActiveCart(designId: string) {
 				},
 			},
 		});
+
+		return { order };
 	});
+
+	return data?.order?.id;
 }
 
 export async function getActiveCartAndProducts() {
