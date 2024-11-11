@@ -43,7 +43,7 @@ export async function POST(request: Request) {
 		});
 
 		if (dbResult.isUploadComplete) {
-			const res = await generateThumbnailTask.trigger({
+			await generateThumbnailTask.trigger({
 				designId,
 				originalFileStorageKey: dbResult.originalFileStorageKey,
 			});

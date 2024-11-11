@@ -87,24 +87,7 @@ const OtherDetails = ({
 export default function EditDesignSheet() {
 	const [design, setDesign] = useQueryState("design", parseAsString);
 
-	const { editDesignDetails, setEditDesignDetails } = useUploadContext();
-
-	useEffect(() => {
-		if (design && setEditDesignDetails) {
-			// get the design details from the react-query cache
-			const allDesigns:
-				| InfiniteData<InfiniteDesignsResponse, unknown>
-				| undefined = queryClient.getQueryData(["designs"]);
-
-			const designDetails = allDesigns?.pages
-				.flatMap((page) => page.designs)
-				.find((d) => d.id === design);
-
-			if (designDetails) {
-				setEditDesignDetails(designDetails);
-			}
-		}
-	}, [design, setEditDesignDetails]);
+	const { editDesignDetails } = useUploadContext();
 
 	return (
 		<Sheet

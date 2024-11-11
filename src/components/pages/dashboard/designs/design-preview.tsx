@@ -24,7 +24,7 @@ function DesignPreview_({
 	design: DesignData;
 }) {
 	const [, setDesign] = useQueryState("design", parseAsString);
-	const { newDesignId } = useUploadContext();
+	const { newDesignId, setEditDesignDetails } = useUploadContext();
 	const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
 	const { mutate, isPending } = useDeleteDesign();
@@ -34,7 +34,10 @@ function DesignPreview_({
 			<button
 				type="button"
 				className="border rounded-lg p-4 shadow-sm"
-				onClick={() => setDesign(design.id)}
+				onClick={() => {
+					setDesign(design.id);
+					setEditDesignDetails(design);
+				}}
 			>
 				<ImageWithFallback
 					suppressHydrationWarning

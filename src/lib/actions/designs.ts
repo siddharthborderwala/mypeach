@@ -64,6 +64,18 @@ export async function getCurrentUserDesigns(
 			orderBy: { createdAt: "desc" },
 			cursor: cursor ? { id: cursor } : undefined,
 			take: take + 1,
+			include: {
+				vendor: {
+					include: {
+						user: {
+							select: {
+								id: true,
+								username: true,
+							},
+						},
+					},
+				},
+			},
 		});
 
 		return { designs };
@@ -240,6 +252,18 @@ export async function getRelatedDesigns(designId: string, count = 8) {
 				createdAt: "desc",
 			},
 			take: count,
+			include: {
+				vendor: {
+					include: {
+						user: {
+							select: {
+								id: true,
+								username: true,
+							},
+						},
+					},
+				},
+			},
 		});
 	});
 
@@ -255,24 +279,6 @@ export async function toggleDesignPublish(designId: string) {
 
 	try {
 		const published = await db.$transaction(async (tx) => {
-			// check if user has KYC and a vendor
-			const user = await tx.user.findUniqueOrThrow({
-				where: { id: session.user.id },
-				select: {
-					vendor: {
-						select: {
-							id: true,
-						},
-					},
-				},
-			});
-
-			// if (!user.vendor) {
-			// 	throw new TxError(
-			// 		"Please complete your KYC and add banking details to publish designs and start selling",
-			// 	);
-			// }
-
 			const design = await tx.design.findUniqueOrThrow({
 				where: { id: designId },
 			});
@@ -280,6 +286,18 @@ export async function toggleDesignPublish(designId: string) {
 			return tx.design.update({
 				where: { id: designId },
 				data: { isDraft: !design.isDraft },
+				include: {
+					vendor: {
+						include: {
+							user: {
+								select: {
+									id: true,
+									username: true,
+								},
+							},
+						},
+					},
+				},
 			});
 		});
 

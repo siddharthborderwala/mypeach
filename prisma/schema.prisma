@@ -117,23 +117,25 @@ model KYC {
 }
 
 model Order {
-  id     Int    @id @default(autoincrement())
-  userId String
-  user   User   @relation(references: [id], fields: [userId], onDelete: Cascade)
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  status            String   @default("PENDING") // PENDING, COMPLETED, CANCELLED
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-  amount            Int
+  status String @default("ACTIVE") // ACTIVE, PAID, FAILED
+  amount Int
+
   paymentSessionId  String?
   cashFreeOrderId   String?
   bankReference     String?
   cashFreePaymentId String?
-  paymentFailed     Boolean  @default(false)
+  paymentFailed     Boolean @default(false)
   failedReason      String?
 
   cartId Int  @unique
   cart   Cart @relation(references: [id], fields: [cartId], onDelete: Cascade)
+
+  userId String
+  user   User   @relation(references: [id], fields: [userId], onDelete: Cascade)
 
   @@index([userId])
   @@index([cartId])
@@ -168,7 +170,7 @@ model Cart {
   id Int @id @default(autoincrement())
 
   userId String
-  status String @default("ACTIVE") // ACTIVE, ORDERED, EXPIRED
+  status String @default("ACTIVE") // ACTIVE, ORDERED
 
   products CartProduct[]
 

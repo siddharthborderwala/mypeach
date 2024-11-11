@@ -3,22 +3,19 @@
 import Link from "next/link";
 import { memo } from "react";
 import { TrashSimple } from "@phosphor-icons/react";
-
-import {
-	type ActiveCartAndProducts,
-	removeFromActiveCart,
-} from "@/lib/actions/cart";
+import type { ActiveCartAndProducts } from "@/lib/actions/cart";
 import { formatPrice, mimeToExtension } from "@/lib/utils";
 import { getDesignThumbnailURL } from "@/lib/storage/util";
 import { useMutation } from "@tanstack/react-query";
 import { queryClient } from "@/app/global-query-client";
 import { Button } from "@/components/ui/button";
+import { removeFromCart } from "@/lib/cart";
 
 function CartItem_({
 	product,
 }: { product: ActiveCartAndProducts["products"][number] }) {
 	const { mutate, isPending } = useMutation({
-		mutationFn: () => removeFromActiveCart(product.designId),
+		mutationFn: () => removeFromCart(product.designId),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ["cart"] });
 		},
