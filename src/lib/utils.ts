@@ -38,8 +38,8 @@ export function formatPrice(amount: number, currency = "INR") {
 	}).format(amount);
 }
 
-export function relativeTime(date: Date) {
-	return formatDistanceToNow(date, { addSuffix: true });
+export function relativeTime(date: Date | string | number) {
+	return formatDistanceToNow(new Date(date), { addSuffix: true });
 }
 
 function formatDistanceToNow(date: Date, arg1: { addSuffix: boolean }) {
