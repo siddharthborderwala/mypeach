@@ -23,6 +23,7 @@ model User {
   orders                  Order[]
   collections             Collection[]
   vendor                  Vendor?
+  PurchasedDesign         PurchasedDesign[]
 }
 
 model PasswordResetToken {
@@ -72,9 +73,11 @@ model Design {
 
   cartProducts CartProduct[]
 
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
   collectionItems CollectionItem[]
+  Sales           Sales[]
+  PurchasedDesign PurchasedDesign[]
 
   @@index([vendorId])
   @@index([createdAt])
@@ -93,6 +96,7 @@ model Vendor {
   userId        String   @unique
   user          User     @relation(references: [id], fields: [userId], onDelete: Cascade)
   Design        Design[]
+  Sales         Sales[]
 
   @@index([userId])
 }
@@ -193,4 +197,32 @@ model CartProduct {
   updatedAt DateTime @updatedAt
 
   @@unique([cartId, designId])
+}
+
+model PurchasedDesign {
+  id        Int      @id @default(autoincrement())
+  designId  String
+  design    Design   @relation(references: [id], fields: [designId], onDelete: Cascade)
+  userId    String
+  user      User     @relation(references: [id], fields: [userId], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([designId])
+}
+
+model Sales {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  amount   Int
+  vendor   Vendor @relation(fields: [vendorId], references: [id])
+  vendorId Int
+
+  design   Design @relation(fields: [designId], references: [id])
+  designId String
+
+  @@index([vendorId])
+  @@index([designId])
 }

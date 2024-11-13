@@ -1,4 +1,8 @@
-import { type DesignData, getCurrentUserDesigns } from "@/lib/actions/designs";
+import {
+	type DesignData,
+	getCurrentUserDesigns,
+	getPurchasedDesigns,
+} from "@/lib/actions/designs";
 import {
 	keepPreviousData,
 	useInfiniteQuery,
@@ -19,6 +23,10 @@ export function useRefetchDesigns() {
 
 export type InfiniteScrollDesignsProps = {
 	initialData: Awaited<ReturnType<typeof getCurrentUserDesigns>>;
+};
+
+export type InfiniteScrollPurchasedDesignsProps = {
+	initialData: Awaited<ReturnType<typeof getPurchasedDesigns>>;
 };
 
 export function useGetDesigns({
@@ -93,6 +101,28 @@ export function useGetDesigns({
 			}
 		}
 	}, [data, trackDesignIdForPreview, refetch, setTrackDesignIdForPreview]);
+
+	return { data, fetchNextPage, hasNextPage, isFetchingNextPage, status };
+}
+
+export function useGetPurchasedDesigns({
+	initialData,
+}: InfiniteScrollPurchasedDesignsProps) {
+	const { data, fetchNextPage, hasNextPage, isFetchingNextPage, status } =
+		useInfiniteQuery({
+			queryKey: ["purchased-designs"],
+			initialPageParam: "",
+			queryFn: async ({ pageParam = "0" }) => {
+				return getPurchasedDesigns({ cursor: Number.parseInt(pageParam) });
+			},
+			placeholderData: keepPreviousData,
+			getNextPageParam: (lastPage) =>
+				lastPage.pagination.nextCursor?.toString(),
+			initialData: {
+				pages: [initialData],
+				pageParams: [""],
+			},
+		});
 
 	return { data, fetchNextPage, hasNextPage, isFetchingNextPage, status };
 }

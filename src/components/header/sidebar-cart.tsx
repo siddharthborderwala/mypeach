@@ -42,7 +42,7 @@ function CartItem_({
 				alt={product.design.name}
 				className="w-40 h-40 object-cover rounded-lg"
 			/>
-			<div className="flex flex-col">
+			<div className="flex flex-col items-start">
 				<Button
 					variant="link"
 					className="text-lg text-foreground h-auto p-0"
