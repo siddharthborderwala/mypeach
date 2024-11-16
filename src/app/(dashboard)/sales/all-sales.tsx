@@ -131,7 +131,9 @@ export function AllSales({
 												</TooltipContent>
 											</Tooltip>
 										</TableCell>
-										<TableCell>{formatPrice(sale.amount)}</TableCell>
+										<TableCell className="text-right">
+											{formatPrice(sale.amount)}
+										</TableCell>
 									</TableRow>
 								))}
 							</TableBody>
