@@ -61,6 +61,7 @@ const AddToCartButton = ({
 			queryClient.invalidateQueries({ queryKey: ["cart"] });
 			toast.success("Added to cart", {
 				dismissible: true,
+				duration: 1000,
 			});
 			setIsModalOpen(false);
 		},

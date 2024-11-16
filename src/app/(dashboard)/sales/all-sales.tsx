@@ -92,6 +92,7 @@ export function AllSales({
 						<Table>
 							<TableHeader className="sticky top-0 left-0 bg-background z-10">
 								<TableRow>
+									<TableHead>Sale ID</TableHead>
 									<TableHead>Design</TableHead>
 									<TableHead>Date</TableHead>
 									<TableHead className="text-right">Amount</TableHead>
@@ -100,8 +101,12 @@ export function AllSales({
 							<TableBody>
 								{sales.sales.map((sale) => (
 									<TableRow key={sale.id}>
+										<TableCell>{sale.id}</TableCell>
 										<TableCell className="font-medium">
-											<div className="flex items-center">
+											<Link
+												href={`/designs/?design=${sale.design.id}`}
+												className="flex items-center group"
+											>
 												<div className="w-10 h-10 rounded-md">
 													<ImageWithFallback
 														src={getDesignThumbnailURL(
@@ -111,8 +116,10 @@ export function AllSales({
 														className="w-full h-full rounded-md object-cover"
 													/>
 												</div>
-												<p className="ml-2">{sale.design.name}</p>
-											</div>
+												<p className="ml-2 group-hover:underline">
+													{sale.design.name}
+												</p>
+											</Link>
 										</TableCell>
 										<TableCell>
 											<Tooltip>

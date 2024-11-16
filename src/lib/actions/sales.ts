@@ -34,25 +34,25 @@ export async function getCurrentUserSales(args: {
 
 			const where: Prisma.SalesWhereInput = {
 				vendorId: vendor.id,
-				OR: [
-					{
-						design: search
-							? {
+				OR: search
+					? [
+							{
+								design: {
 									name: {
 										contains: search,
 										mode: "insensitive",
 									},
-								}
-							: undefined,
-					},
-					{
-						id: isSearchNumber
-							? {
-									equals: Number.parseInt(search!),
-								}
-							: undefined,
-					},
-				],
+								},
+							},
+							{
+								id: isSearchNumber
+									? {
+											equals: Number.parseInt(search!),
+										}
+									: undefined,
+							},
+						]
+					: undefined,
 			};
 
 			const [sales, totalCount, designCount] = await Promise.all([
