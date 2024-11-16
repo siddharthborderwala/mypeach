@@ -319,3 +319,58 @@ export async function toggleDesignPublish(designId: string) {
 		throw error;
 	}
 }
+
+export async function getPurchasedDesigns(pagination?: {
+	cursor?: number;
+	take?: number;
+}) {
+	const { session } = await getUserAuth();
+
+	if (!session) {
+		redirect("/login");
+	}
+
+	const cursor = pagination?.cursor;
+	const take = pagination?.take ?? 24;
+
+	const designs = await db.purchasedDesign.findMany({
+		where: {
+			userId: session.user.id,
+		},
+		include: {
+			design: {
+				include: {
+					vendor: {
+						include: {
+							user: {
+								select: {
+									id: true,
+									username: true,
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		cursor: cursor ? { id: cursor } : undefined,
+		take: take + 1,
+		orderBy: {
+			createdAt: "desc",
+		},
+	});
+
+	const hasNextPage = designs.length > take;
+	const items = designs.slice(0, take);
+	const nextCursor = hasNextPage ? items[items.length - 1]?.id : undefined;
+
+	return {
+		designs: items.map((d) => ({
+			...d.design,
+		})),
+		pagination: {
+			hasNextPage,
+			nextCursor,
+		},
+	};
+}

@@ -1,3 +1,4 @@
+import { PurchasedDesign } from "./../../../../node_modules/.pnpm/@prisma+client@5.19.1_prisma@5.19.1/node_modules/.prisma/client/index.d";
 import { db } from "@/lib/db";
 import { CartStatus } from "@/lib/db/schema/cart";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
@@ -31,7 +32,7 @@ async function updateOrderStatus({
 				throw new Error("Invalid payment data");
 			}
 
-			// Create the Vendor
+			// Update the order status
 			const order = await tx.order.update({
 				where: {
 					id: Number.parseInt(orderData.order_id),
@@ -93,6 +94,23 @@ async function updateOrderStatus({
 							},
 						},
 					},
+				});
+
+				// add the design as a purchase
+				await tx.purchasedDesign.createMany({
+					data: designsInCart.map((data) => ({
+						userId: order.userId,
+						designId: data.designId,
+					})),
+				});
+
+				// Update the sales table
+				await tx.sales.createMany({
+					data: designsInCart.map((data) => ({
+						amount: Math.floor(data.design.price * 0.8),
+						vendorId: data.design.vendorId,
+						designId: data.designId,
+					})),
 				});
 
 				const splits: VendorSplit[] = [];

@@ -5,7 +5,6 @@ import {
 	PaintBrush,
 	Tag,
 	ShoppingCart,
-	CurrencyCircleDollar,
 	Bookmark,
 	Gear,
 } from "@phosphor-icons/react/dist/ssr";
@@ -36,11 +35,6 @@ const navItems = [
 		label: "Sales",
 		href: "/sales",
 		icon: <Tag className="h-4 w-4" />,
-	},
-	{
-		label: "Payouts",
-		href: "/payouts",
-		icon: <CurrencyCircleDollar className="h-4 w-4" />,
 	},
 ];
 
