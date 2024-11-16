@@ -27,9 +27,7 @@ export function VendorNotFound({
 								Create your vendor profile to start selling your designs!
 							</p>
 							<DialogTrigger asChild>
-								<Button size="sm" className="gap-2 mt-4">
-									Create Vendor Profile
-								</Button>
+								<Button className="gap-2 mt-4">Create Vendor Profile</Button>
 							</DialogTrigger>
 						</div>
 					</div>

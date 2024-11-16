@@ -59,11 +59,15 @@ const AddToCartButton = ({
 		mutationFn: () => addToCart(designId),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ["cart"] });
-			toast.success("Added to cart");
+			toast.success("Added to cart", {
+				dismissible: true,
+			});
 			setIsModalOpen(false);
 		},
 		onError: () => {
-			toast.error("Failed to add to cart");
+			toast.error("Failed to add to cart", {
+				dismissible: true,
+			});
 		},
 	});
 
@@ -107,7 +111,6 @@ const Actions = ({
 				.share({
 					url: designURL,
 				})
-				.then(() => console.log("Successful share"))
 				.catch(() => {
 					navigator.clipboard
 						.writeText(designURL)

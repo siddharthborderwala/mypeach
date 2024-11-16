@@ -46,11 +46,7 @@ export default async function Designs({ searchParams }: PageProps) {
 		// Check if the error is "Vendor not found"
 		if (error instanceof Error && error.message === "Vendor not found") {
 			// Return early with the VendorOnboardingModal
-			return (
-				<UploadProvider>
-					<VendorNotFound title="Your Designs" />
-				</UploadProvider>
-			);
+			return <VendorNotFound title="Your Designs" />;
 		}
 		// Re-throw any other errors to be handled elsewhere
 		throw error;
