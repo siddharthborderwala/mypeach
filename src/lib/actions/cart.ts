@@ -59,6 +59,7 @@ export async function removeItemAction(designId: string) {
 		const cart = await tx.cart.findFirst({
 			where: {
 				userId,
+				status: CartStatus.ACTIVE,
 			},
 		});
 
