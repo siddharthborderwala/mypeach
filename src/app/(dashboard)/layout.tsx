@@ -4,9 +4,10 @@ import {
 	List as Menu,
 	PaintBrush,
 	Tag,
-	ShoppingCart,
 	Bookmark,
+	Books,
 	Gear,
+	Package,
 } from "@phosphor-icons/react/dist/ssr";
 
 import { Button } from "@/components/ui/button";
@@ -15,7 +16,7 @@ import { getCurrentUser } from "@/lib/auth/utils";
 import { NavItem, NavItemMobile } from "./nav";
 import { UserMenu } from "@/components/user-menu";
 
-const navItems = [
+const sellerNavItems = [
 	{
 		label: "Dashboard",
 		href: "/home",
@@ -38,11 +39,16 @@ const navItems = [
 	},
 ];
 
-const secondaryNavItems = [
+const buyerNavItems = [
 	{
-		label: "Purchases",
-		href: "/purchases",
-		icon: <ShoppingCart className="h-4 w-4" />,
+		label: "My Library",
+		href: "/library",
+		icon: <Books className="h-4 w-4" />,
+	},
+	{
+		label: "My Orders",
+		href: "/orders",
+		icon: <Package className="h-4 w-4" />,
 	},
 ];
 
@@ -71,13 +77,13 @@ export default async function Layout({
 					<div className="flex-1">
 						<nav className="flex flex-col py-4 px-2 text-sm font-medium lg:px-4 h-full">
 							<section>
-								{navItems.map((item) => (
+								{sellerNavItems.map((item) => (
 									<NavItem key={item.href} {...item} />
 								))}
 							</section>
 							<hr className="my-4" />
 							<section>
-								{secondaryNavItems.map((item) => (
+								{buyerNavItems.map((item) => (
 									<NavItem key={item.href} {...item} />
 								))}
 							</section>
@@ -117,13 +123,13 @@ export default async function Layout({
 							</Link>
 							<nav className="grid gap-2 mt-4 text-base font-medium">
 								<section>
-									{navItems.map((item) => (
+									{sellerNavItems.map((item) => (
 										<NavItemMobile key={item.href} {...item} />
 									))}
 								</section>
 								<hr className="my-4" />
 								<section>
-									{secondaryNavItems.map((item) => (
+									{buyerNavItems.map((item) => (
 										<NavItem key={item.href} {...item} />
 									))}
 								</section>
