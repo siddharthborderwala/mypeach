@@ -6,7 +6,6 @@ import { DeleteAccountForm } from "./delete-account-form";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { z } from "zod";
 import { PayoutsForm } from "./payouts-form";
-import { getVendor } from "@/lib/actions/payouts";
 
 export const metadata: Metadata = {
 	title: "Account Settings | Peach",
@@ -17,9 +16,7 @@ const searchParamsSchema = z.object({
 });
 
 async function PayoutsFormWrapper() {
-	const vendor = await getVendor();
-
-	return <PayoutsForm vendor={vendor} />;
+	return <PayoutsForm />;
 }
 
 export default async function Settings({
@@ -47,13 +44,22 @@ export default async function Settings({
 				orientation="vertical"
 			>
 				<TabsList className="sticky left-0 top-0 flex flex-col items-stretch h-auto w-[15rem] p-0 bg-white shadow-none">
-					<TabsTrigger value="account" className="px-2 py-2 justify-start bg-white hover:bg-white data-[state=active]:bg-muted !shadow-none">
+					<TabsTrigger
+						value="account"
+						className="px-2 py-2 justify-start bg-white hover:bg-white data-[state=active]:bg-muted !shadow-none"
+					>
 						Account
 					</TabsTrigger>
-					<TabsTrigger value="password" className="px-2 py-2 justify-start bg-white hover:bg-white data-[state=active]:bg-muted !shadow-none">
+					<TabsTrigger
+						value="password"
+						className="px-2 py-2 justify-start bg-white hover:bg-white data-[state=active]:bg-muted !shadow-none"
+					>
 						Password
 					</TabsTrigger>
-					<TabsTrigger value="payouts" className="px-2 py-2 justify-start bg-white hover:bg-white data-[state=active]:bg-muted !shadow-none">
+					<TabsTrigger
+						value="payouts"
+						className="px-2 py-2 justify-start bg-white hover:bg-white data-[state=active]:bg-muted !shadow-none"
+					>
 						Payouts
 					</TabsTrigger>
 				</TabsList>
