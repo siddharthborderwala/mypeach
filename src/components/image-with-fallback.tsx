@@ -2,7 +2,6 @@
 
 import { cn } from "@/lib/utils";
 import { useState, useEffect } from "react";
-import { Spinner } from "./spinner";
 
 interface ImageWithFallbackProps
 	extends React.ImgHTMLAttributes<HTMLImageElement> {
