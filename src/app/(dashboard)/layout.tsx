@@ -41,8 +41,8 @@ const sellerNavItems = [
 
 const buyerNavItems = [
 	{
-		label: "My Library",
-		href: "/library",
+		label: "My Purchases",
+		href: "/purchases",
 		icon: <Books className="h-4 w-4" />,
 	},
 	{
