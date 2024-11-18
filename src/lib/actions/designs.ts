@@ -283,6 +283,17 @@ export async function toggleDesignPublish(designId: string) {
 				where: { id: designId },
 			});
 
+			if (design.isDraft) {
+				if (!design.isUploadComplete) {
+					throw new TxError("Design upload is not complete");
+				}
+				if (!design.thumbnailFileStorageKey) {
+					throw new TxError(
+						"Wait for thumbnail to be generated before publishing",
+					);
+				}
+			}
+
 			return tx.design.update({
 				where: { id: designId },
 				data: { isDraft: !design.isDraft },

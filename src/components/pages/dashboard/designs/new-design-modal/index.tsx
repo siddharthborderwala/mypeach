@@ -199,8 +199,9 @@ export function NewDesignModal() {
 		],
 	);
 
-	const { getRootProps, isDragActive, acceptedFiles } = useDropzone({
+	const { getRootProps, isDragActive, acceptedFiles, open } = useDropzone({
 		onDrop,
+		autoFocus: true,
 		multiple: false,
 		accept: { "image/tiff": [".tif", ".tiff"] },
 		disabled: uploadState.state !== "idle",
@@ -329,7 +330,15 @@ export function NewDesignModal() {
 					<p className="text-sm text-gray-500 mt-1">
 						Your files are private until you publish them.
 					</p>
-					<Button className="mt-4">Select File</Button>
+					<Button
+						onClick={() => {
+							console.log("bruh");
+							open();
+						}}
+						className="mt-4"
+					>
+						Select File
+					</Button>
 				</div>
 			) : null}
 			{uploadState.state === "uploading" || uploadState.state === "complete" ? (

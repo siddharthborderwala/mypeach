@@ -11,7 +11,7 @@ export function getDesignThumbnailFileStorageKey(id: string) {
 	return {
 		folder: `design-thumbnails/${id}`,
 		social: `design-thumbnails/${id}/social.jpeg`,
-		2000: `design-thumbnails/${id}/2000.webp`,
+		600: `design-thumbnails/${id}/600.webp`,
 		1200: `design-thumbnails/${id}/1200.webp`,
 	};
 }
@@ -73,7 +73,7 @@ async function createSharpTransform(
 	}
 
 	return transform.on("error", (error: unknown) => {
-		console.error("Error in sharp transform:", { error });
+		logger.error("Error in sharp transform:", { error });
 		throw error;
 	});
 }
@@ -148,31 +148,30 @@ async function convertToWebp({
 }: {
 	originalFileStorageKey: string;
 	thumbnailStorageKey: string;
-	width: 2000 | 1200;
+	width: 600 | 1200;
 	quality: number;
 	sourceBucket: string;
 	destinationBucket: string;
 	addWatermark: boolean;
 }): Promise<void> {
+	let transform: sharp.Sharp | undefined;
 	try {
 		const readableStream = await getInputStreamFromS3(
 			originalFileStorageKey,
 			sourceBucket,
 		);
-		const transform = await createSharpTransform(width, quality, addWatermark);
+		transform = await createSharpTransform(width, quality, addWatermark);
 		await uploadToPublicBucket(
 			readableStream,
 			transform,
 			thumbnailStorageKey,
 			destinationBucket,
 		);
-	} catch (error) {
-		logger.error(`Error in convertTiffToWebp for ${width}w:`, {
-			error,
-			originalFileStorageKey,
-			thumbnailStorageKey,
-		});
-		throw error;
+	} finally {
+		if (transform) {
+			// Cleanup sharp instance
+			transform.destroy();
+		}
 	}
 }
 
@@ -236,7 +235,7 @@ export const generateThumbnailTask = task({
 	id: "generate-thumbnail",
 	queue: {
 		name: "generate-thumbnail-queue",
-		concurrencyLimit: 9,
+		concurrencyLimit: 5,
 	},
 	run: async (payload: {
 		designId: string;
@@ -252,39 +251,37 @@ export const generateThumbnailTask = task({
 		);
 
 		try {
-			// Generate 2000w WebP
+			// Generate 1200w WebP
 			await convertToWebp({
 				originalFileStorageKey: payload.originalFileStorageKey,
-				thumbnailStorageKey: thumbnailStorageKey[2000],
-				width: 2000,
+				thumbnailStorageKey: thumbnailStorageKey[1200],
+				width: 1200,
 				quality: 50,
 				sourceBucket: process.env.R2_PROTECTED_BUCKET_NAME!,
 				destinationBucket: process.env.R2_PUBLIC_BUCKET_NAME!,
 				addWatermark: true,
 			});
 
-			// Generate 1200w WebP from 2000w WebP
-			const p1 = convertToWebp({
-				originalFileStorageKey: thumbnailStorageKey[2000],
-				thumbnailStorageKey: thumbnailStorageKey[1200],
-				width: 1200,
-				quality: 50,
+			// Generate 600w WebP from 1200w WebP
+			await convertToWebp({
+				originalFileStorageKey: thumbnailStorageKey[1200],
+				thumbnailStorageKey: thumbnailStorageKey[600],
+				width: 600,
+				quality: 100,
 				sourceBucket: process.env.R2_PUBLIC_BUCKET_NAME!,
 				destinationBucket: process.env.R2_PUBLIC_BUCKET_NAME!,
 				addWatermark: false,
 			});
 
-			// Generate 1200w JPEG for social sharing from 2000w WebP
-			const p2 = convertToJpeg({
-				originalFileStorageKey: thumbnailStorageKey[2000],
+			// Generate 1200w JPEG for social sharing from 1200w WebP
+			await convertToJpeg({
+				originalFileStorageKey: thumbnailStorageKey[1200],
 				thumbnailStorageKey: thumbnailStorageKey.social,
 				width: 1200,
-				quality: 80,
+				quality: 100,
 				sourceBucket: process.env.R2_PUBLIC_BUCKET_NAME!,
 				destinationBucket: process.env.R2_PUBLIC_BUCKET_NAME!,
 			});
-
-			await Promise.all([p1, p2]);
 
 			await updateDesignRecord(payload.designId, thumbnailStorageKey.folder);
 

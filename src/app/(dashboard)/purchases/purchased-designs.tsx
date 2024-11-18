@@ -5,8 +5,8 @@ import type { InfiniteScrollPurchasedDesignsProps } from "@/hooks/dashboard";
 import { useGetPurchasedDesigns } from "@/hooks/dashboard";
 import type { DesignData } from "@/lib/actions/designs";
 import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
 import InfiniteScrollPurchasedDesigns from "@/components/pages/dashboard/purchases/infinite-scroll-purchased-designs-view";
+import Link from "next/link";
 
 export function PurchasedDesigns({
 	initialData,
@@ -29,8 +29,6 @@ export function PurchasedDesigns({
 				self.findIndex((d) => d.id === design.id) === index,
 		);
 
-	const router = useRouter();
-
 	return (
 		<main className="relative flex h-[calc(100svh-3.5rem)] flex-col gap-4 md:gap-6">
 			<div className="flex items-center justify-between pt-4 px-4 md:pt-8 md:px-8">
@@ -45,15 +43,8 @@ export function PurchasedDesigns({
 						<p className="text-sm text-muted-foreground">
 							You can purchase designs from the marketplace.
 						</p>
-						<Button
-							className="mt-4"
-							onClick={() => {
-								// go to the main page which is just '/'
-
-								router.push("/");
-							}}
-						>
-							Explore Marketplace
+						<Button className="mt-4" asChild>
+							<Link href="/">Explore Marketplace</Link>
 						</Button>
 					</div>
 				</div>

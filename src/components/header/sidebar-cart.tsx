@@ -144,7 +144,7 @@ export function SidebarCart({
 						<>
 							<div className="flex mb-4">
 								<div className="text-sm flex justify-between w-full font-medium">
-									<p>Total</p>
+									<p>Subtotal</p>
 									<p>
 										<span>{formatPrice(total)}</span>
 										<span className="text-muted-foreground text-sm ml-2">

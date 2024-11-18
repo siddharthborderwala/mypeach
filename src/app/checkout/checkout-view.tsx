@@ -36,7 +36,12 @@ export function CheckoutView({
 
 	return (
 		<main className="container mx-auto py-8 max-w-5xl">
-			<h1 className="text-3xl font-bold mb-8">Checkout</h1>
+			<h1 className="text-3xl font-bold mb-8">
+				Checkout{" "}
+				<span className="text-muted-foreground">
+					({itemCount} item{itemCount > 1 ? "s" : ""})
+				</span>
+			</h1>
 			<div className="grid grid-cols-3 grid-rows-[auto_auto] gap-8">
 				{itemCount > 0 ? (
 					<>
@@ -46,16 +51,20 @@ export function CheckoutView({
 							))}
 						</ul>
 						<div>
-							<div className="flex justify-between mb-2 col-span-1">
-								<div className="text-xl font-semibold">
-									Total: {formatPrice(total + total * 0.18)}
+							<div className="space-y-2 mb-8">
+								<div className="flex justify-between">
+									<p>Subtotal</p>
+									<p>{formatPrice(total)}</p>
 								</div>
-								<div className="text-muted-foreground">
-									{itemCount} item{itemCount > 1 ? "s" : ""}
+								<div className="flex justify-between">
+									<p>GST (18%)</p>
+									<p>{formatPrice(total * 0.18)}</p>
 								</div>
-							</div>
-							<div className="text-neutral-500 text-sm mb-8">
-								GST: {formatPrice(calculatedTotal() - total)}
+								<hr />
+								<div className="flex justify-between font-bold text-lg">
+									<p>Total</p>
+									<p>{formatPrice(calculatedTotal())}</p>
+								</div>
 							</div>
 						</div>
 						<div className="col-span-1">
@@ -63,11 +72,16 @@ export function CheckoutView({
 								amount={calculatedTotal()}
 								cartId={data.cart?.id as number}
 							/>
-							<p className="text-xs text-muted-foreground text-center mt-2">
+							<p className="text-xs text-muted-foreground text-center mt-3">
 								Secured by{" "}
-								<Link href="https://www.cashfree.com/" className="underline">
+								<a
+									href="https://www.cashfree.com"
+									target="_blank"
+									rel="noopener noreferrer"
+									className="underline"
+								>
 									Cashfree
-								</Link>
+								</a>
 							</p>
 						</div>
 					</>

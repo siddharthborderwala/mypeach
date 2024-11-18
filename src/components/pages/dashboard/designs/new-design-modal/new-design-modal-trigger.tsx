@@ -12,11 +12,11 @@ export default function NewDesignModalTrigger({
 }: {
 	className?: string;
 }) {
-	const { newDesignId, uploadState } = useUploadContext();
+	const { newDesignId } = useUploadContext();
 
 	return (
 		<DialogTrigger asChild>
-			<Button size="sm" className={cn("gap-2", className)}>
+			<Button className={cn("gap-2", className)}>
 				{newDesignId ? (
 					<Spinner size={16} />
 				) : (
