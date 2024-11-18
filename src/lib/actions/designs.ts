@@ -279,9 +279,23 @@ export async function toggleDesignPublish(designId: string) {
 
 	try {
 		const published = await db.$transaction(async (tx) => {
+			const vendor = await tx.vendor.findUniqueOrThrow({
+				where: { userId: session.user.id },
+			});
+
 			const design = await tx.design.findUniqueOrThrow({
 				where: { id: designId },
 			});
+
+			// is user is strying to publish
+			if (design.isDraft) {
+				// check if vendor is active, if not throw error
+				if (vendor.status !== "ACTIVE") {
+					throw new TxError(
+						"Your vendor account is not active, please reach out to support",
+					);
+				}
+			}
 
 			if (design.isDraft) {
 				if (!design.isUploadComplete) {
