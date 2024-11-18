@@ -68,10 +68,11 @@ export function VendorForm({
 					},
 				);
 
-				setTimeout(() => {
-					// Refresh the page to reflect the changes
-					window.location.reload();
-				}, 1500);
+				// TODO: uncomment
+				// setTimeout(() => {
+				// 	// Refresh the page to reflect the changes
+				// 	window.location.reload();
+				// }, 1500);
 			},
 		});
 
