@@ -217,10 +217,10 @@ model Sales {
   updatedAt DateTime @updatedAt
 
   amount   Int
-  vendor   Vendor @relation(fields: [vendorId], references: [id])
+  vendor   Vendor @relation(fields: [vendorId], references: [id], onDelete: Cascade)
   vendorId Int
 
-  design   Design @relation(fields: [designId], references: [id])
+  design   Design @relation(fields: [designId], references: [id], onDelete: Cascade)
   designId String
 
   @@index([vendorId])

@@ -200,36 +200,34 @@ export async function GET() {
 		return NextResponse.json({ error: "Vendor not found" }, { status: 404 });
 	}
 
-	if (vendor.status === "IN_BENE_CREATION") {
+	if (vendor.status !== "ACTIVE") {
 		const result = await Cashfree.PGESFetchVendors(
 			"2023-08-01",
 			vendor.id.toString(),
 		);
 
-		if (result.data.status !== "IN_BENE_CREATION") {
-			vendor = await db.vendor.update({
+		vendor = await db.vendor.update({
+			where: {
+				id: vendor.id,
+			},
+			data: {
+				status: result.data.status,
+			},
+			include: {
+				UPI: true,
+				KYC: true,
+			},
+		});
+
+		if (result.data.status === "ACTIVE") {
+			await db.design.updateMany({
 				where: {
-					id: vendor.id,
+					vendorId: vendor.id,
 				},
 				data: {
-					status: result.data.status,
-				},
-				include: {
-					UPI: true,
-					KYC: true,
+					isDraft: false,
 				},
 			});
-
-			if (result.data.status === "ACTIVE") {
-				await db.design.updateMany({
-					where: {
-						vendorId: vendor.id,
-					},
-					data: {
-						isDraft: false,
-					},
-				});
-			}
 		}
 	}
 
