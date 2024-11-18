@@ -129,6 +129,7 @@ export function BasicDetailsForm({
 					defaultValue={initialData.username}
 					required
 					className="peer data-[error=true]:border-red-500 mt-2"
+					disabled
 				/>
 				{state.fieldErrors?.username && (
 					<p className="text-red-500 text-sm mt-2">
