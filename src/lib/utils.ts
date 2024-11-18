@@ -16,6 +16,10 @@ export const appBaseURL = (() => {
 	return "http://localhost:3000";
 })();
 
+export const getCashfreeReturnURL = (orderId: number | string) => {
+	return `${appBaseURL}/order?order_id=${orderId}`;
+};
+
 const URLValidator = z.string().url();
 
 export function getSafeRedirect(target: string | undefined) {

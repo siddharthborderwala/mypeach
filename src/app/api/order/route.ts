@@ -5,6 +5,7 @@ import { z } from "zod";
 import { getUserAuth } from "@/lib/auth/utils";
 import { db } from "@/lib/db";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
+import { getCashfreeReturnURL } from "@/lib/utils";
 
 Cashfree.XClientId = process.env.CASHFREE_CLIENT_ID;
 Cashfree.XClientSecret = process.env.CASHFREE_SECRET_KEY;
@@ -188,7 +189,7 @@ export async function POST(request: Request) {
 				customer_phone: "9999999999",
 			},
 			order_meta: {
-				return_url: `${process.env.CASHFREE_RETURN_URL}?order_id=${order.id}`,
+				return_url: getCashfreeReturnURL(order.id),
 				payment_methods: "cc,dc,upi",
 			},
 			order_splits: splits,
