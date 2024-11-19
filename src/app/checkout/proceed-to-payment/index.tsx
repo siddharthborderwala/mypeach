@@ -1,11 +1,11 @@
-"use client";
+"use server";
 
 import { checkoutAction } from "@/lib/actions/checkout";
 import { ProceedToPaymentButton } from "./button";
 import { checkout } from "@/lib/checkout";
 import { redirect } from "next/navigation";
 
-export function ProceedToPaymentForm({
+export async function ProceedToPaymentForm({
 	amount,
 	cartId,
 }: {
@@ -15,8 +15,6 @@ export function ProceedToPaymentForm({
 	return (
 		<form
 			action={async () => {
-				"use server";
-
 				try {
 					await checkoutAction();
 					const response = await checkout({
