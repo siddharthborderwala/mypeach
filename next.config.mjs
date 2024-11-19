@@ -36,6 +36,21 @@ const nextConfig = {
 			},
 		];
 	},
+	async headers() {
+		return [
+			{
+				source: "/api/payment-webhook-notification",
+				headers: [
+					{ key: "Access-Control-Allow-Origin", value: "*" },
+					{ key: "Access-Control-Allow-Methods", value: "POST" },
+					{
+						key: "Access-Control-Allow-Headers",
+						value: "Content-Type, x-webhook-signature, x-webhook-timestamp",
+					},
+				],
+			},
+		];
+	},
 };
 
 export default nextConfig;
