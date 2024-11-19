@@ -29,7 +29,7 @@ jobs:
         run: |
           git config --local user.email "siddharthborderwala@gmail.com"
           git config --local user.name "Siddharth Borderwala"
-          git commit --allow-empty -m "Follow-up commit to $(git log -1 --pretty=%B)"
+          git commit --allow-empty -m "Vercel deployment hack commit - $(git log -1 --pretty=%B)"
           
       - name: Push changes
         uses: ad-m/github-push-action@master
