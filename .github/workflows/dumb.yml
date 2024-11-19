@@ -14,7 +14,17 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          
+
+      - name: Check commit author and create empty commit
+        run: |
+          LAST_COMMIT_AUTHOR=$(git log -1 --pretty=format:'%ae')
+          if [ "$LAST_COMMIT_AUTHOR" != "siddharthborderwala@gmail.com" ]; then
+            echo "Commit author is not Siddharth, creating follow-up commit"
+          else
+            echo "Commit author is Siddharth, skipping follow-up commit"
+            exit 0
+          fi
+
       - name: Create empty commit
         run: |
           git config --local user.email "siddharthborderwala@gmail.com"
