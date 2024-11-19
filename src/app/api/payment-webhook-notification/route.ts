@@ -1,6 +1,7 @@
 import { db } from "@/lib/db";
 import { CartStatus } from "@/lib/db/schema/cart";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
+import { AxiosError } from "axios";
 import { Cashfree } from "cashfree-pg";
 import type { PaymentWebhookDataEntity, VendorSplit } from "cashfree-pg";
 import { NextResponse } from "next/server";
@@ -192,8 +193,8 @@ export async function POST(request: Request) {
 		return NextResponse.json({ success: true });
 	} catch (error: unknown) {
 		console.log(error);
-		if (error instanceof Error) {
-			return NextResponse.json({ error: error }, { status: 500 });
+		if (error instanceof AxiosError || error instanceof Error) {
+			return NextResponse.json({ error: error.message }, { status: 400 });
 		}
 
 		return NextResponse.json(
