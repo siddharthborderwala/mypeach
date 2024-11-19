@@ -1,17 +1,19 @@
-"use server";
+"use client";
 
 import { checkoutAction } from "@/lib/actions/checkout";
 import { ProceedToPaymentButton } from "./button";
 import { checkout } from "@/lib/checkout";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 
-export async function ProceedToPaymentForm({
+export function ProceedToPaymentForm({
 	amount,
 	cartId,
 }: {
 	amount: number;
 	cartId: number;
 }) {
+	const router = useRouter();
+
 	return (
 		<form
 			action={async () => {
@@ -24,7 +26,7 @@ export async function ProceedToPaymentForm({
 
 					if (response.success) {
 						console.log(response);
-						redirect(`/order?orderId=${response.data.orderId}`);
+						router.push(`/order?orderId=${response.data.orderId}`);
 					}
 				} catch (error) {
 					console.error("Error placing order", error);
