@@ -15,6 +15,8 @@ export function ProceedToPaymentForm({
 	return (
 		<form
 			action={async () => {
+				"use server";
+
 				try {
 					await checkoutAction();
 					const response = await checkout({
