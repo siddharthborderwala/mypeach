@@ -17,7 +17,7 @@ export const appBaseURL = (() => {
 })();
 
 export const getCashfreeReturnURL = (orderId: number | string) => {
-	return `${appBaseURL}/order?order_id=${orderId}`;
+	return `${appBaseURL}/order?orderId=${orderId}`;
 };
 
 const URLValidator = z.string().url();
