@@ -11,6 +11,11 @@ interface Vendor {
 	KYC: {
 		pan: string;
 	};
+	BankAccount: {
+		accountNumber: string;
+		IFSC: string;
+		accountHolder: string;
+	};
 	status: Status;
 }
 

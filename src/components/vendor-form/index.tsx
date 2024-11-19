@@ -16,14 +16,16 @@ export function VendorForm({
 		name?: string;
 		phone?: string;
 		email?: string;
-		vpa?: string;
+		accountNumber?: string;
+		ifsc?: string;
 		accountHolder?: string;
 		pan?: string;
 		status?: string;
 	};
 }) {
 	const [phone, setPhone] = useState(data?.phone ?? "");
-	const [vpa, setVpa] = useState(data?.vpa ?? "");
+	const [accountNumber, setAccountNumber] = useState(data?.accountNumber ?? "");
+	const [ifsc, setIfsc] = useState(data?.ifsc ?? "");
 	const [accountHolder, setAccountHolder] = useState(data?.accountHolder ?? "");
 	const [pan, setPan] = useState(data?.pan ?? "");
 	const [isLoading, setIsLoading] = useState(false);
@@ -33,18 +35,22 @@ export function VendorForm({
 			mutationKey: ["create-vendor-profile"],
 			mutationFn: ({
 				phone,
-				upi,
+				bankAccount,
 				kyc,
 			}: {
 				phone: string;
-				upi: { vpa: string; accountHolder: string };
+				bankAccount: {
+					accountNumber: string;
+					ifsc: string;
+					accountHolder: string;
+				};
 				kyc: { pan: string };
 			}) => {
 				return fetch("/api/vendor", {
 					method: "POST",
 					body: JSON.stringify({
 						phone,
-						upi,
+						bankAccount,
 						kyc,
 					}),
 				});
@@ -68,11 +74,10 @@ export function VendorForm({
 					},
 				);
 
-				// TODO: uncomment
-				// setTimeout(() => {
-				// 	// Refresh the page to reflect the changes
-				// 	window.location.reload();
-				// }, 1500);
+				setTimeout(() => {
+					// Refresh the page to reflect the changes
+					window.location.reload();
+				}, 1500);
 			},
 		});
 
@@ -118,7 +123,7 @@ export function VendorForm({
 
 				await createVendorProfile({
 					phone,
-					upi: { vpa, accountHolder },
+					bankAccount: { accountNumber, ifsc, accountHolder },
 					kyc: { pan },
 				});
 			}}
@@ -185,18 +190,37 @@ export function VendorForm({
 			</div>
 
 			<div>
-				<Label htmlFor="UPI" className="peer-data-[error=true]:text-red-500">
-					UPI ID
+				<Label
+					htmlFor="AccountNumber"
+					className="peer-data-[error=true]:text-red-500"
+				>
+					Bank Account Number
 				</Label>
 
 				<Input
 					required
-					value={vpa}
+					value={accountNumber}
 					disabled={data != null}
-					placeholder="test@upi"
-					onChange={(e) => setVpa(e.target.value)}
-					name="UPI"
-					id="UPI"
+					placeholder="1234567890"
+					onChange={(e) => setAccountNumber(e.target.value)}
+					name="AccountNumber"
+					id="AccountNumber"
+				/>
+			</div>
+
+			<div>
+				<Label htmlFor="IFSC" className="peer-data-[error=true]:text-red-500">
+					IFSC Code
+				</Label>
+
+				<Input
+					required
+					value={ifsc}
+					disabled={data != null}
+					placeholder="SBIN0001234"
+					onChange={(e) => setIfsc(e.target.value)}
+					name="IFSC"
+					id="IFSC"
 				/>
 			</div>
 

@@ -1,7 +1,7 @@
 import type { AxiosError } from "axios";
 import { NextResponse } from "next/server";
 import { Cashfree } from "cashfree-pg";
-import type { CreateVendorRequest, KycDetails, UpiDetails } from "cashfree-pg";
+import type { CreateVendorRequest, KycDetails, BankDetails } from "cashfree-pg";
 import { z } from "zod";
 import { getUserAuth } from "@/lib/auth/utils";
 import { db } from "@/lib/db";
@@ -15,16 +15,17 @@ Cashfree.XEnvironment =
 		: Cashfree.Environment.SANDBOX;
 
 interface VendorRequest
-	extends Omit<CreateVendorRequest, "upi" | "kyc_details"> {
-	upi: UpiDetails;
+	extends Omit<CreateVendorRequest, "bank" | "kyc_details"> {
+	bank: BankDetails;
 	kyc_details: KycDetails;
 }
 
 const createVendorValidator = z.object({
 	phone: z.string(),
-	upi: z.object({
-		vpa: z.string(),
+	bankAccount: z.object({
+		accountNumber: z.string(),
 		accountHolder: z.string(),
+		ifsc: z.string(),
 	}),
 	kyc: z.object({
 		pan: z.string(),
@@ -35,7 +36,11 @@ const createVendorValidator = z.object({
 async function createVendorWithDetails(vendorData: {
 	userId: string;
 	phone: string;
-	upi: { vpa: string; accountHolder: string };
+	bankAccount: {
+		accountNumber: string;
+		ifsc: string;
+		accountHolder: string;
+	};
 	kyc: {
 		pan: string;
 	};
@@ -59,16 +64,17 @@ async function createVendorWithDetails(vendorData: {
 				data: {
 					userId: vendorData.userId,
 					status: "IN_BENE_CREATION",
-					name: vendorData.upi.accountHolder,
+					name: vendorData.bankAccount.accountHolder,
 					phone: vendorData.phone,
 				},
 			});
 
-			// Create the UPI associated with the Vendor
-			const upi = await tx.uPI.create({
+			// Create the bank Account associated with the Vendor
+			const bankAccount = await tx.bankAccount.create({
 				data: {
-					vpa: vendorData.upi.vpa,
-					accountHolder: vendorData.upi.accountHolder,
+					accountNumber: vendorData.bankAccount.accountNumber,
+					accountHolder: vendorData.bankAccount.accountHolder,
+					IFSC: vendorData.bankAccount.ifsc,
 					vendorId: vendor.id,
 				},
 			});
@@ -82,7 +88,7 @@ async function createVendorWithDetails(vendorData: {
 			});
 
 			// Optionally, return all created records
-			return { user, vendor, upi, kyc };
+			return { user, vendor, bankAccount, kyc };
 		});
 
 		// Handle the result as needed
@@ -118,11 +124,12 @@ export async function POST(request: Request) {
 		vendor_id: "",
 		status: "ACTIVE",
 		email: "",
-		name: result.data.upi.accountHolder,
+		name: result.data.bankAccount.accountHolder,
 		phone: result.data.phone,
-		upi: {
-			vpa: result.data.upi.vpa,
-			account_holder: result.data.upi.accountHolder,
+		bank: {
+			account_number: result.data.bankAccount.accountNumber,
+			ifsc: result.data.bankAccount.ifsc,
+			account_holder: result.data.bankAccount.accountHolder,
 		},
 		verify_account: false,
 		dashboard_access: false,
@@ -137,9 +144,10 @@ export async function POST(request: Request) {
 		const { user, vendor } = await createVendorWithDetails({
 			userId: session.user.id,
 			phone: vendorData.phone,
-			upi: {
-				vpa: vendorData.upi.vpa as string,
-				accountHolder: vendorData.upi.account_holder as string,
+			bankAccount: {
+				accountNumber: vendorData.bank.account_number as string,
+				ifsc: vendorData.bank.ifsc as string,
+				accountHolder: vendorData.bank.account_holder as string,
 			},
 			kyc: {
 				pan: vendorData.kyc_details.pan as string,
@@ -193,6 +201,7 @@ export async function GET() {
 		include: {
 			UPI: true,
 			KYC: true,
+			BankAccount: true,
 		},
 	});
 
@@ -216,6 +225,7 @@ export async function GET() {
 			include: {
 				UPI: true,
 				KYC: true,
+				BankAccount: true,
 			},
 		});
 

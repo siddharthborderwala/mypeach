@@ -86,17 +86,18 @@ model Design {
 }
 
 model Vendor {
-  id            Int      @id @default(autoincrement())
+  id            Int          @id @default(autoincrement())
   name          String
-  phone         String   @unique
-  status        String   @default("IN_BENE_CREATION") // ACTIVE, BLOCKED, DELETED, IN_BENE_CREATION, ACTION_REQUIRED, BANK_VALIDATION_FAILED
+  phone         String       @unique
+  status        String       @default("IN_BENE_CREATION") // ACTIVE, BLOCKED, DELETED, IN_BENE_CREATION, ACTION_REQUIRED, BANK_VALIDATION_FAILED
   UPI           UPI?
   KYC           KYC?
-  totalEarnings Int      @default(0)
-  userId        String   @unique
-  user          User     @relation(references: [id], fields: [userId], onDelete: Cascade)
+  totalEarnings Int          @default(0)
+  userId        String       @unique
+  user          User         @relation(references: [id], fields: [userId], onDelete: Cascade)
   Design        Design[]
   Sales         Sales[]
+  BankAccount   BankAccount?
 
   @@index([userId])
 }
@@ -105,6 +106,17 @@ model UPI {
   id            Int    @id @default(autoincrement())
   vpa           String @unique
   accountHolder String
+  vendorId      Int    @unique
+  vendor        Vendor @relation(references: [id], fields: [vendorId], onDelete: Cascade)
+
+  @@index([vendorId])
+}
+
+model BankAccount {
+  id            Int    @id @default(autoincrement())
+  accountHolder String
+  accountNumber String @unique
+  IFSC          String
   vendorId      Int    @unique
   vendor        Vendor @relation(references: [id], fields: [vendorId], onDelete: Cascade)
 

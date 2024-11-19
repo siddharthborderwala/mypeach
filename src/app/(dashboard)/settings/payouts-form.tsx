@@ -42,8 +42,9 @@ export function PayoutsForm() {
 					vendorId: vendor.id,
 					name: vendor.name,
 					phone: vendor.phone,
-					vpa: vendor.UPI?.vpa,
-					accountHolder: vendor.UPI?.accountHolder,
+					accountNumber: vendor.BankAccount?.accountNumber,
+					ifsc: vendor.BankAccount?.IFSC,
+					accountHolder: vendor.BankAccount?.accountHolder,
 					pan: vendor.KYC?.pan,
 					status: vendor.status,
 				}}
