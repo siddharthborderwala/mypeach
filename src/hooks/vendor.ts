@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 
-interface Vendor {
+export interface Vendor {
 	id: number;
 	name: string;
 	phone: string;
@@ -27,7 +27,7 @@ type Status =
 	| "ACTION_REQUIRED"
 	| "BANK_VALIDATION_FAILED";
 
-export function useGetVendor(): {
+export function useGetVendor(options?: { refetchOnWindowFocus?: boolean }): {
 	data: Vendor;
 	isLoading: boolean;
 } {
@@ -47,6 +47,7 @@ export function useGetVendor(): {
 			}
 		},
 		initialData: undefined,
+		...options,
 	});
 
 	return {

@@ -25,7 +25,6 @@ export function ProceedToPaymentForm({
 					});
 
 					if (response.success) {
-						console.log(response);
 						router.push(`/order?orderId=${response.data.orderId}`);
 					}
 				} catch (error) {

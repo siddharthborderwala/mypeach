@@ -332,7 +332,6 @@ export function NewDesignModal() {
 					</p>
 					<Button
 						onClick={() => {
-							console.log("bruh");
 							open();
 						}}
 						className="mt-4"

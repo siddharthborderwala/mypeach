@@ -5,9 +5,19 @@ import { VendorOnboardingModal } from "@/components/vendor-onboarding-modal";
 import { useGetVendor } from "@/hooks/vendor";
 import { Spinner, Money } from "@phosphor-icons/react/dist/ssr";
 import { Dialog, DialogTrigger } from "@radix-ui/react-dialog";
+import { useEffect, useState } from "react";
 
 export function PayoutsForm() {
-	const { data: vendor, isLoading } = useGetVendor();
+	const [isModalOpen, setIsModalOpen] = useState(false);
+	const { data: vendor, isLoading } = useGetVendor({
+		refetchOnWindowFocus: !isModalOpen,
+	});
+
+	useEffect(() => {
+		if (vendor == null) {
+			setIsModalOpen(true);
+		}
+	}, [vendor]);
 
 	if (isLoading) {
 		return (
