@@ -1,4 +1,3 @@
-import { PurchasedDesign } from "./../../../../node_modules/.pnpm/@prisma+client@5.19.1_prisma@5.19.1/node_modules/.prisma/client/index.d";
 import { db } from "@/lib/db";
 import { CartStatus } from "@/lib/db/schema/cart";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
