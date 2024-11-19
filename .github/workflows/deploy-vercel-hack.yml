@@ -22,7 +22,7 @@ jobs:
             echo "Commit author is not Siddharth, creating follow-up commit"
           else
             echo "Commit author is Siddharth, skipping follow-up commit"
-            exit 0
+            exit 1
           fi
 
       - name: Create empty commit
