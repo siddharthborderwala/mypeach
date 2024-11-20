@@ -218,26 +218,44 @@ async function updateDesignRecord(
 export const generateThumbnailTask = task({
 	id: "generate-thumbnail",
 	machine: {
-		preset: "small-2x",
+		preset: "micro", // Start with the smallest preset
 	},
 	queue: {
 		name: "generate-thumbnail-queue",
 		concurrencyLimit: 5,
 	},
+	retry: {
+		maxAttempts: 7,
+	},
 	run: async (payload: {
 		designId: string;
 		originalFileStorageKey: string;
+		retryCount?: number;
 	}) => {
+		const presets = [
+			"micro",
+			"small-1x",
+			"small-2x",
+			"medium-1x",
+			"medium-2x",
+			"large-1x",
+			"large-2x",
+		];
+
+		const currentRetryCount = payload.retryCount || 0;
+
 		logger.info("Starting generateThumbnailTask", {
 			designId: payload.designId,
 			originalFileStorageKey: payload.originalFileStorageKey,
+			retryCount: currentRetryCount,
+			preset: presets[currentRetryCount],
 		});
 
-		const thumbnailStorageKey = getDesignThumbnailFileStorageKey(
-			payload.designId,
-		);
-
 		try {
+			const thumbnailStorageKey = getDesignThumbnailFileStorageKey(
+				payload.designId,
+			);
+
 			// Generate 1200w WebP
 			await convertToWebp({
 				originalFileStorageKey: payload.originalFileStorageKey,
@@ -274,12 +292,27 @@ export const generateThumbnailTask = task({
 
 			logger.info("generateThumbnailTask completed successfully", {
 				designId: payload.designId,
+				retryCount: currentRetryCount,
 			});
 		} catch (error) {
 			logger.error("Error in generateThumbnailTask:", {
 				error,
 				designId: payload.designId,
+				retryCount: currentRetryCount,
 			});
+
+			if (currentRetryCount < presets.length - 1) {
+				const retryDelay = 2 ** currentRetryCount * 1000;
+
+				await new Promise((resolve) => setTimeout(resolve, retryDelay));
+
+				await generateThumbnailTask.trigger({
+					...payload,
+					retryCount: currentRetryCount + 1,
+				});
+
+				return;
+			}
 			throw error;
 		}
 	},
