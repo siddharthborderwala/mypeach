@@ -232,72 +232,148 @@ async function updateDesignRecord(
 	});
 }
 
-export const generateThumbnailTask = task({
-	id: "generate-thumbnail",
+const run = async (payload: {
+	designId: string;
+	originalFileStorageKey: string;
+}) => {
+	logger.info("Starting generateThumbnailTask", {
+		designId: payload.designId,
+		originalFileStorageKey: payload.originalFileStorageKey,
+	});
+
+	const thumbnailStorageKey = getDesignThumbnailFileStorageKey(
+		payload.designId,
+	);
+
+	try {
+		// Generate 1200w WebP
+		await convertToWebp({
+			originalFileStorageKey: payload.originalFileStorageKey,
+			thumbnailStorageKey: thumbnailStorageKey[1200],
+			width: 1200,
+			quality: 50,
+			sourceBucket: process.env.R2_PROTECTED_BUCKET_NAME!,
+			destinationBucket: process.env.R2_PUBLIC_BUCKET_NAME!,
+			addWatermark: false,
+		});
+
+		// Generate 600w WebP from 1200w WebP
+		await convertToWebp({
+			originalFileStorageKey: thumbnailStorageKey[1200],
+			thumbnailStorageKey: thumbnailStorageKey[600],
+			width: 600,
+			quality: 100,
+			sourceBucket: process.env.R2_PUBLIC_BUCKET_NAME!,
+			destinationBucket: process.env.R2_PUBLIC_BUCKET_NAME!,
+			addWatermark: false,
+		});
+
+		// Generate 1200w JPEG for social sharing from 1200w WebP
+		await convertToJpeg({
+			originalFileStorageKey: thumbnailStorageKey[1200],
+			thumbnailStorageKey: thumbnailStorageKey.social,
+			width: 1200,
+			quality: 100,
+			sourceBucket: process.env.R2_PUBLIC_BUCKET_NAME!,
+			destinationBucket: process.env.R2_PUBLIC_BUCKET_NAME!,
+		});
+
+		await updateDesignRecord(payload.designId, thumbnailStorageKey.folder);
+
+		logger.info("generateThumbnailTask completed successfully", {
+			designId: payload.designId,
+		});
+	} catch (error) {
+		logger.error("Error in generateThumbnailTask:", {
+			error,
+			designId: payload.designId,
+		});
+		throw error;
+	}
+};
+
+export const generateThumbnailTaskSmall = task({
+	id: "generate-thumbnail-small",
+	machine: {
+		preset: "small-1x",
+	},
+	queue: {
+		concurrencyLimit: 1,
+	},
+	run,
+});
+
+export const generateThumbnailTaskMedium1 = task({
+	id: "generate-thumbnail-medium-1",
+	machine: {
+		preset: "medium-1x",
+	},
+	queue: {
+		concurrencyLimit: 1,
+	},
+	run,
+});
+
+export const generateThumbnailTaskMedium2 = task({
+	id: "generate-thumbnail-medium-2",
+	machine: {
+		preset: "medium-2x",
+	},
+	queue: {
+		concurrencyLimit: 1,
+	},
+	run,
+});
+
+export const generateThumbnailTaskLarge1 = task({
+	id: "generate-thumbnail-large-1",
 	machine: {
 		preset: "large-1x",
 	},
 	queue: {
-		name: "generate-thumbnail-queue",
-		concurrencyLimit: 2,
+		concurrencyLimit: 1,
 	},
-	run: async (payload: {
-		designId: string;
-		originalFileStorageKey: string;
-	}) => {
-		logger.info("Starting generateThumbnailTask", {
-			designId: payload.designId,
-			originalFileStorageKey: payload.originalFileStorageKey,
-		});
-
-		const thumbnailStorageKey = getDesignThumbnailFileStorageKey(
-			payload.designId,
-		);
-
-		try {
-			// Generate 1200w WebP
-			await convertToWebp({
-				originalFileStorageKey: payload.originalFileStorageKey,
-				thumbnailStorageKey: thumbnailStorageKey[1200],
-				width: 1200,
-				quality: 50,
-				sourceBucket: process.env.R2_PROTECTED_BUCKET_NAME!,
-				destinationBucket: process.env.R2_PUBLIC_BUCKET_NAME!,
-				addWatermark: false,
-			});
-
-			// Generate 600w WebP from 1200w WebP
-			await convertToWebp({
-				originalFileStorageKey: thumbnailStorageKey[1200],
-				thumbnailStorageKey: thumbnailStorageKey[600],
-				width: 600,
-				quality: 100,
-				sourceBucket: process.env.R2_PUBLIC_BUCKET_NAME!,
-				destinationBucket: process.env.R2_PUBLIC_BUCKET_NAME!,
-				addWatermark: false,
-			});
-
-			// Generate 1200w JPEG for social sharing from 1200w WebP
-			await convertToJpeg({
-				originalFileStorageKey: thumbnailStorageKey[1200],
-				thumbnailStorageKey: thumbnailStorageKey.social,
-				width: 1200,
-				quality: 100,
-				sourceBucket: process.env.R2_PUBLIC_BUCKET_NAME!,
-				destinationBucket: process.env.R2_PUBLIC_BUCKET_NAME!,
-			});
-
-			await updateDesignRecord(payload.designId, thumbnailStorageKey.folder);
-
-			logger.info("generateThumbnailTask completed successfully", {
-				designId: payload.designId,
-			});
-		} catch (error) {
-			logger.error("Error in generateThumbnailTask:", {
-				error,
-				designId: payload.designId,
-			});
-			throw error;
-		}
-	},
+	run,
 });
+
+export const generateThumbnailTaskLarge2 = task({
+	id: "generate-thumbnail-large-2",
+	machine: {
+		preset: "large-2x",
+	},
+	queue: {
+		concurrencyLimit: 1,
+	},
+	run,
+});
+
+const oneMB = 1024 * 1024;
+
+function MB(value: number) {
+	return value * oneMB;
+}
+
+export const getGenerateThumbnailTask = (fileSizeInBytes: number) => {
+	// upto 200MB
+	if (fileSizeInBytes < MB(200)) {
+		return generateThumbnailTaskSmall;
+	}
+	// upto 400MB
+	if (fileSizeInBytes < MB(400)) {
+		return generateThumbnailTaskMedium1;
+	}
+	// upto 800MB
+	if (fileSizeInBytes < MB(800)) {
+		return generateThumbnailTaskMedium2;
+	}
+	// upto 1600MB
+	if (fileSizeInBytes < MB(1600)) {
+		return generateThumbnailTaskLarge1;
+	}
+	// upto 2400MB
+	if (fileSizeInBytes < MB(2400)) {
+		return generateThumbnailTaskLarge2;
+	}
+	// bigger sizes not supported
+	throw new Error("File to big to process and generate thumbnail");
+};

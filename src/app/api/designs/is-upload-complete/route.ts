@@ -3,7 +3,7 @@ import { z } from "zod";
 
 import { getUserAuth } from "@/lib/auth/utils";
 import { db } from "@/lib/db";
-import { generateThumbnailTask } from "@/trigger/generate-thumbnail";
+import { getGenerateThumbnailTask } from "@/trigger/generate-thumbnail";
 import { storage } from "@/lib/storage";
 import { env } from "@/lib/env.mjs";
 import { HeadObjectCommand } from "@aws-sdk/client-s3";
@@ -54,6 +54,16 @@ export async function POST(request: Request) {
 				}),
 			);
 
+			if (!result.ContentLength) {
+				return NextResponse.json(
+					{
+						error:
+							"Unable to determine file size. Please refresh and try uploading again.",
+					},
+					{ status: 400 },
+				);
+			}
+
 			await db.design.update({
 				where: { id: designId },
 				data: {
@@ -61,7 +71,9 @@ export async function POST(request: Request) {
 				},
 			});
 
-			await generateThumbnailTask.trigger({
+			const task = getGenerateThumbnailTask(result.ContentLength);
+
+			await task.trigger({
 				designId,
 				originalFileStorageKey: dbResult.originalFileStorageKey,
 			});
