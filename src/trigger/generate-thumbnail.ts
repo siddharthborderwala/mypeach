@@ -218,11 +218,11 @@ async function updateDesignRecord(
 export const generateThumbnailTask = task({
 	id: "generate-thumbnail",
 	machine: {
-		preset: "small-2x",
+		preset: "medium-1x",
 	},
 	queue: {
 		name: "generate-thumbnail-queue",
-		concurrencyLimit: 5,
+		concurrencyLimit: 2,
 	},
 	run: async (payload: {
 		designId: string;
