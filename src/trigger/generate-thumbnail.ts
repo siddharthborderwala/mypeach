@@ -233,6 +233,9 @@ async function updateDesignRecord(
 
 export const generateThumbnailTask = task({
 	id: "generate-thumbnail",
+	machine: {
+		preset: "small-2x",
+	},
 	queue: {
 		name: "generate-thumbnail-queue",
 		concurrencyLimit: 5,
