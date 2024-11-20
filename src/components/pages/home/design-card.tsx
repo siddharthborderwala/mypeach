@@ -283,10 +283,6 @@ const DesignCardDialogContent = ({
 					) : null}
 				</div>
 				<div className="flex flex-col gap-2 mt-auto">
-					{/* <Button variant="outline">
-						<CurrencyInr weight="bold" />
-						<span className="ml-2">Buy Now</span>
-					</Button> */}
 					<AddToCartButton
 						designId={design.id}
 						setIsModalOpen={setIsModalOpen}
