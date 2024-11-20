@@ -7,6 +7,43 @@ import { task, logger } from "@trigger.dev/sdk/v3";
 import { db } from "@/lib/db";
 import { storage } from "./util/storage";
 
+sharp.cache(false);
+sharp.concurrency(1);
+
+const MAX_FILE_SIZE = 2 * 1024 * 1024 * 1024; // 2GB
+const CHUNK_SIZE = 64 * 1024 * 1024; // 64MB chunks for multipart upload
+
+// Enhanced file size checking
+async function checkFileSize(bucket: string, key: string): Promise<void> {
+	const command = new GetObjectCommand({
+		Bucket: bucket,
+		Key: key,
+	});
+
+	try {
+		const response = await storage.send(command);
+		const size = response.ContentLength || 0;
+
+		if (size > MAX_FILE_SIZE) {
+			throw new Error(
+				`File size ${size} bytes exceeds maximum allowed size of ${MAX_FILE_SIZE} bytes`,
+			);
+		}
+
+		if (size === 0) {
+			throw new Error("File is empty");
+		}
+
+		logger.info("File size check passed:", {
+			size,
+			sizeInMB: Math.round((size / (1024 * 1024)) * 100) / 100,
+		});
+	} catch (error) {
+		logger.error("File size check failed:", { error, bucket, key });
+		throw error;
+	}
+}
+
 export function getDesignThumbnailFileStorageKey(id: string) {
 	return {
 		folder: `design-thumbnails/${id}`,
@@ -38,26 +75,35 @@ async function getInputStreamFromS3(
 	);
 }
 
+// Optimized version of createSharpTransform
 async function createSharpTransform(
 	width: number,
 	quality: number,
 	addWatermark: boolean,
 ): Promise<sharp.Sharp> {
-	let transform = sharp()
+	let transform = sharp({
+		limitInputPixels: 32000 * 32000, // Support for very large images
+		density: 300,
+		failOn: "none",
+		unlimited: true, // Remove limits on input file size
+	})
+		.rotate()
 		.resize({
 			width: width,
 			fit: "inside",
 			withoutEnlargement: true,
+			fastShrinkOnLoad: true,
 		})
-		.webp({ quality, effort: 6 });
+		.webp({
+			quality,
+			effort: 6,
+			mixed: true,
+			force: true, // Ensure WebP output
+		});
 
 	if (addWatermark) {
 		const watermarkText = "mypeach.in";
-
-		// Generate the watermark SVG with fixed dimensions
 		const svgBuffer = generateWatermarkSVG(watermarkText);
-
-		// Composite the watermark SVG over the image with tiling
 		transform = transform.composite([
 			{
 				input: svgBuffer,
@@ -67,10 +113,20 @@ async function createSharpTransform(
 		]);
 	}
 
-	return transform.on("error", (error: unknown) => {
-		logger.error("Error in sharp transform:", { error });
-		throw error;
-	});
+	return transform
+		.on("error", (error: unknown) => {
+			logger.error("Error in sharp transform:", { error });
+			throw error;
+		})
+		.on("info", (info) => {
+			logger.info("Processing image:", {
+				width: info.width,
+				height: info.height,
+				channels: info.channels,
+				size: info.size,
+				format: info.format,
+			});
+		});
 }
 
 function generateWatermarkSVG(text: string): Buffer {
@@ -101,6 +157,7 @@ function generateWatermarkSVG(text: string): Buffer {
 	return Buffer.from(svgContent);
 }
 
+// Enhanced uploadToPublicBucket with better chunking
 async function uploadToPublicBucket(
 	readableStream: Readable,
 	transform: sharp.Sharp,
@@ -116,11 +173,38 @@ async function uploadToPublicBucket(
 			ContentType: "image/webp",
 			ACL: "public-read",
 		},
+		queueSize: 4, // Concurrent upload parts
+		partSize: CHUNK_SIZE,
+		leavePartsOnError: false,
+		tags: [{ Key: "source", Value: "image-processing" }], // Optional: Add tags for tracking
 	});
 
-	await upload.done();
+	let lastLogged = 0;
+	upload.on("httpUploadProgress", (progress) => {
+		// Log progress every 10%
+		const percentage = Math.round(
+			((progress.loaded || 0) / (progress.total || 1)) * 100,
+		);
+		if (percentage >= lastLogged + 10) {
+			lastLogged = percentage;
+			logger.info("Upload progress:", {
+				loaded: progress.loaded,
+				total: progress.total,
+				percentage,
+				key: key,
+			});
+		}
+	});
+
+	try {
+		await upload.done();
+	} catch (error) {
+		logger.error("Upload failed:", { error, key });
+		throw error;
+	}
 }
 
+// Enhanced convertToWebp with better memory management
 async function convertToWebp({
 	originalFileStorageKey,
 	thumbnailStorageKey,
@@ -139,22 +223,61 @@ async function convertToWebp({
 	addWatermark: boolean;
 }): Promise<void> {
 	let transform: sharp.Sharp | undefined;
+	let readableStream: Readable | undefined;
+
 	try {
-		const readableStream = await getInputStreamFromS3(
+		const startTime = Date.now();
+		const startMemory = process.memoryUsage();
+		logger.info("Starting conversion:", {
+			startMemory: {
+				heapUsed: `${Math.round(startMemory.heapUsed / 1024 / 1024)}MB`,
+				rss: `${Math.round(startMemory.rss / 1024 / 1024)}MB`,
+			},
+		});
+
+		readableStream = await getInputStreamFromS3(
 			originalFileStorageKey,
 			sourceBucket,
 		);
+
 		transform = await createSharpTransform(width, quality, addWatermark);
+		transform.withMetadata();
+
 		await uploadToPublicBucket(
 			readableStream,
 			transform,
 			thumbnailStorageKey,
 			destinationBucket,
 		);
+
+		const endTime = Date.now();
+		const endMemory = process.memoryUsage();
+		logger.info("Conversion complete:", {
+			duration: `${(endTime - startTime) / 1000}s`,
+			memoryDelta: {
+				heapUsed: `${Math.round(
+					(endMemory.heapUsed - startMemory.heapUsed) / 1024 / 1024,
+				)}MB`,
+				rss: `${Math.round((endMemory.rss - startMemory.rss) / 1024 / 1024)}MB`,
+			},
+		});
+	} catch (error) {
+		logger.error("Error in convertToWebp:", {
+			error,
+			originalFileStorageKey,
+			thumbnailStorageKey,
+		});
+		throw error;
 	} finally {
 		if (transform) {
-			// Cleanup sharp instance
 			transform.destroy();
+		}
+		if (readableStream) {
+			readableStream.destroy();
+		}
+
+		if (global.gc) {
+			global.gc();
 		}
 	}
 }
@@ -215,14 +338,15 @@ async function updateDesignRecord(
 	});
 }
 
+// Updated main task with enhanced error handling
 export const generateThumbnailTask = task({
 	id: "generate-thumbnail",
 	machine: {
-		preset: "small-2x",
+		preset: "medium-2x", // Increased machine size for large files
 	},
 	queue: {
 		name: "generate-thumbnail-queue",
-		concurrencyLimit: 5,
+		concurrencyLimit: 2, // Reduced concurrency for better stability
 	},
 	run: async (payload: {
 		designId: string;
@@ -233,12 +357,18 @@ export const generateThumbnailTask = task({
 			originalFileStorageKey: payload.originalFileStorageKey,
 		});
 
+		// Check file size and validity
+		await checkFileSize(
+			process.env.R2_PROTECTED_BUCKET_NAME!,
+			payload.originalFileStorageKey,
+		);
+
 		const thumbnailStorageKey = getDesignThumbnailFileStorageKey(
 			payload.designId,
 		);
 
 		try {
-			// Generate 1200w WebP
+			// Process sequentially with cleanup between steps
 			await convertToWebp({
 				originalFileStorageKey: payload.originalFileStorageKey,
 				thumbnailStorageKey: thumbnailStorageKey[1200],
@@ -249,7 +379,8 @@ export const generateThumbnailTask = task({
 				addWatermark: true,
 			});
 
-			// Generate 600w WebP from 1200w WebP
+			if (global.gc) global.gc();
+
 			await convertToWebp({
 				originalFileStorageKey: thumbnailStorageKey[1200],
 				thumbnailStorageKey: thumbnailStorageKey[600],
@@ -260,7 +391,8 @@ export const generateThumbnailTask = task({
 				addWatermark: false,
 			});
 
-			// Generate 1200w JPEG for social sharing from 1200w WebP
+			if (global.gc) global.gc();
+
 			await convertToJpeg({
 				originalFileStorageKey: thumbnailStorageKey[1200],
 				thumbnailStorageKey: thumbnailStorageKey.social,
