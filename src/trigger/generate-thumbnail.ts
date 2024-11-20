@@ -43,7 +43,9 @@ async function createSharpTransform(
 	quality: number,
 	addWatermark: boolean,
 ): Promise<sharp.Sharp> {
-	let transform = sharp()
+	let transform = sharp({
+		limitInputPixels: false, // Disable pixel limit
+	})
 		.resize({
 			width: width,
 			fit: "inside",
