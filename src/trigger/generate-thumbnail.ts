@@ -1,6 +1,6 @@
 import { GetObjectCommand } from "@aws-sdk/client-s3";
 import sharp from "sharp";
-import { Readable } from "node:stream";
+import { Readable, PassThrough } from "node:stream";
 import { Upload } from "@aws-sdk/lib-storage";
 import { task, logger } from "@trigger.dev/sdk/v3";
 
@@ -43,9 +43,14 @@ async function createSharpTransform(
 	quality: number,
 	addWatermark: boolean,
 ): Promise<sharp.Sharp> {
-	let transform = sharp()
+	const MAX_HEIGHT = 10000; // Set a reasonable maximum height
+
+	let transform = sharp({
+		limitInputPixels: false, // Disable pixel limit
+	})
 		.resize({
 			width: width,
+			height: MAX_HEIGHT, // Constrain height
 			fit: "inside",
 			withoutEnlargement: true,
 		})
@@ -53,20 +58,15 @@ async function createSharpTransform(
 
 	if (addWatermark) {
 		const watermarkText = "mypeach.in";
-		const repetitions = 5; // Set the desired number of repetitions
 
-		// Generate the watermark SVG
-		const svgBuffer = generateWatermarkSVG(
-			width,
-			width, // If your images are not square, adjust this
-			watermarkText,
-			repetitions,
-		);
+		// Generate the watermark SVG with fixed dimensions
+		const svgBuffer = generateWatermarkSVG(watermarkText);
 
-		// Composite the watermark SVG over the image
+		// Composite the watermark SVG over the image with tiling
 		transform = transform.composite([
 			{
 				input: svgBuffer,
+				tile: true,
 				blend: "over",
 			},
 		]);
@@ -78,41 +78,30 @@ async function createSharpTransform(
 	});
 }
 
-function generateWatermarkSVG(
-	width: number,
-	height: number,
-	text: string,
-	repetitions: number,
-): Buffer {
+function generateWatermarkSVG(text: string): Buffer {
 	const xmlns = "http://www.w3.org/2000/svg";
-
-	// Calculate pattern dimensions based on the number of repetitions
-	const patternWidth = width / repetitions;
+	const patternWidth = 200; // Fixed pattern width
 	const patternHeight = patternWidth; // Assuming square patterns
-
-	// Center positions for the rotated text
 	const centerX = patternWidth / 2;
 	const centerY = patternHeight / 2;
+	const fontSize = patternWidth * 0.25; // Adjust font size as needed
 
-	// Adjust font size
-	const fontSize = patternWidth * 0.25; // Increase multiplier to increase font size
-
-	// Create the SVG content
+	// Create the SVG content with fixed dimensions
 	const svgContent = `
-<svg xmlns="${xmlns}" width="${width}" height="${height}">
-  <defs>
-    <pattern id="watermarkPattern" patternUnits="userSpaceOnUse" width="${patternWidth}" height="${patternHeight}">
-      <g transform="translate(${centerX}, ${centerY}) rotate(-45)">
-        <text x="0" y="0" font-size="${fontSize}" fill="rgba(255,255,255,0.3)"
-          text-anchor="middle" dominant-baseline="central" font-family="Arial, sans-serif">
-          ${text}
-        </text>
-      </g>
-    </pattern>
-  </defs>
-  <rect width="100%" height="100%" fill="url(#watermarkPattern)" />
-</svg>
-`;
+  <svg xmlns="${xmlns}" width="${patternWidth}" height="${patternHeight}">
+    <defs>
+      <pattern id="watermarkPattern" patternUnits="userSpaceOnUse" width="${patternWidth}" height="${patternHeight}">
+        <g transform="translate(${centerX}, ${centerY}) rotate(-45)">
+          <text x="0" y="0" font-size="${fontSize}" fill="rgba(255,255,255,0.3)"
+            text-anchor="middle" dominant-baseline="central" font-family="Arial, sans-serif">
+            ${text}
+          </text>
+        </g>
+      </pattern>
+    </defs>
+    <rect width="100%" height="100%" fill="url(#watermarkPattern)" />
+  </svg>
+  `;
 
 	return Buffer.from(svgContent);
 }
@@ -123,15 +112,26 @@ async function uploadToPublicBucket(
 	key: string,
 	bucket: string,
 ): Promise<void> {
+	const passThrough = new PassThrough();
+
+	readableStream.pipe(transform).pipe(passThrough);
+
 	const upload = new Upload({
 		client: storage,
 		params: {
 			Bucket: bucket,
 			Key: key,
-			Body: readableStream.pipe(transform),
+			Body: passThrough,
 			ContentType: "image/webp",
 			ACL: "public-read",
 		},
+	});
+
+	upload.on("httpUploadProgress", (progress) => {
+		logger.info("Upload progress:", {
+			loaded: progress.loaded,
+			total: progress.total,
+		});
 	});
 
 	await upload.done();
@@ -198,6 +198,7 @@ async function convertToJpeg({
 		const transform = sharp()
 			.resize({
 				width: width,
+				height: 10000, // Constrain height for JPEG as well
 				fit: "inside",
 				withoutEnlargement: true,
 			})
@@ -233,9 +234,12 @@ async function updateDesignRecord(
 
 export const generateThumbnailTask = task({
 	id: "generate-thumbnail",
+	machine: {
+		preset: "large-1x",
+	},
 	queue: {
 		name: "generate-thumbnail-queue",
-		concurrencyLimit: 5,
+		concurrencyLimit: 2,
 	},
 	run: async (payload: {
 		designId: string;
@@ -259,7 +263,7 @@ export const generateThumbnailTask = task({
 				quality: 50,
 				sourceBucket: process.env.R2_PROTECTED_BUCKET_NAME!,
 				destinationBucket: process.env.R2_PUBLIC_BUCKET_NAME!,
-				addWatermark: true,
+				addWatermark: false,
 			});
 
 			// Generate 600w WebP from 1200w WebP
