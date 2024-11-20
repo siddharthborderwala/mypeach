@@ -65,6 +65,8 @@ model Design {
   metadata Json?
   tags     String[]
 
+  isSoftDeleted Boolean @default(false)
+
   // price is stored in the smallest unit of the currency
   price    Int    @default(290)
   currency String @default("INR")

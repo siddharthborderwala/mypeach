@@ -41,6 +41,7 @@ export async function getCurrentUserDesigns(
 
 		const where: Prisma.DesignWhereInput = {
 			vendorId: vendor.id,
+			isSoftDeleted: false,
 			OR:
 				options?.search || searchTerms
 					? [
@@ -124,6 +125,7 @@ export async function getDesignsForExplore(
 	const where: Prisma.DesignWhereInput = {
 		isDraft: false,
 		isUploadComplete: true,
+		isSoftDeleted: false,
 		OR:
 			options?.search || searchTerms
 				? [
@@ -194,7 +196,7 @@ export async function getDesignsForExplore(
 
 export async function getDesignByIdForExplore(id: string) {
 	const design = await db.design.findFirst({
-		where: { id, isDraft: false, isUploadComplete: true },
+		where: { id, isDraft: false, isUploadComplete: true, isSoftDeleted: false },
 		select: {
 			id: true,
 			name: true,

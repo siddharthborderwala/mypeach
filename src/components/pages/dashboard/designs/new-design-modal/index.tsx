@@ -9,7 +9,7 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@/components/ui/dialog";
-import { cn } from "@/lib/utils";
+import { cn, MB } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { CheckCircle, WarningCircle } from "@phosphor-icons/react";
@@ -199,21 +199,41 @@ export function NewDesignModal() {
 		],
 	);
 
-	const { getRootProps, isDragActive, acceptedFiles, open } = useDropzone({
-		onDrop,
-		autoFocus: true,
-		multiple: false,
-		accept: { "image/tiff": [".tif", ".tiff"] },
-		disabled: uploadState.state !== "idle",
-		onDropRejected: (fileRejections) => {
-			const error = fileRejections[0]?.errors[0];
-			if (error?.code === ErrorCode.FileInvalidType) {
-				toast.error("You can only upload TIFF files.");
-			} else if (error) {
-				toast.error(error.message);
-			}
-		},
-	});
+	const { getRootProps, getInputProps, isDragActive, acceptedFiles, open } =
+		useDropzone({
+			onDrop,
+			autoFocus: true,
+			multiple: false,
+			accept: { "image/tiff": [".tif", ".tiff"] },
+			minSize: MB(5),
+			maxSize: MB(2400),
+			disabled: uploadState.state !== "idle",
+			onDropRejected: (fileRejections) => {
+				const error = fileRejections[0]?.errors[0];
+				if (error.code) {
+					switch (error.code) {
+						case ErrorCode.FileInvalidType:
+							toast.error("You can only upload TIFF files.");
+							break;
+						case ErrorCode.FileTooLarge:
+							toast.error(
+								"You can only upload files up to 2400MB. Please try a smaller file.",
+							);
+							break;
+						case ErrorCode.FileTooSmall:
+							toast.error(
+								"The file is too small. The minimum size is 5MB. Please try a larger file.",
+							);
+							break;
+						case ErrorCode.TooManyFiles:
+							toast.error("You can only upload one file at a time.");
+							break;
+					}
+				} else {
+					toast.error(error.message);
+				}
+			},
+		});
 
 	useEffect(() => {
 		if (uploadState.state === "idle") {
@@ -330,12 +350,8 @@ export function NewDesignModal() {
 					<p className="text-sm text-gray-500 mt-1">
 						Your files are private until you publish them.
 					</p>
-					<Button
-						onClick={() => {
-							open();
-						}}
-						className="mt-4"
-					>
+					<Button className="mt-4">
+						<input {...getInputProps()} />
 						Select File
 					</Button>
 				</div>

@@ -95,3 +95,9 @@ export function formatFlattenedErrors<T>(errors: z.typeToFlattenedError<T>) {
 		.map(([, errors]) => (errors as string[])?.join(", ") ?? "")
 		.join(", ");
 }
+
+const oneMB = 1024 * 1024;
+
+export function MB(value: number) {
+	return value * oneMB;
+}

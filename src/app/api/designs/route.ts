@@ -5,6 +5,9 @@ import { getDesignFileStorageKey } from "@/lib/storage/util";
 import { z } from "zod";
 import type { DesignData } from "@/lib/actions/designs";
 import { checkDesignUploaded } from "@/trigger/check-design-upload-after-a-day";
+import { DeleteObjectCommand } from "@aws-sdk/client-s3";
+import { storage } from "@/lib/storage";
+import { env } from "@/lib/env.mjs";
 
 const bodyValidator = z.object({
 	name: z.string().optional().default("Untitled"),
@@ -175,6 +178,7 @@ export async function GET(request: Request) {
 			db.design.findMany({
 				where: {
 					vendorId: vendor.id,
+					isSoftDeleted: false,
 				},
 				orderBy: {
 					createdAt: "desc",
@@ -241,13 +245,62 @@ export async function DELETE(request: Request) {
 		return NextResponse.json({ error: "Vendor not found" }, { status: 404 });
 	}
 
-	await db.design.delete({
-		where: {
-			id: designId,
-		},
-	});
+	try {
+		const result = await db.$transaction(async (tx) => {
+			const numberOfSalesForDesign = await tx.sales.count({
+				where: {
+					designId,
+				},
+			});
 
-	return NextResponse.json({ success: true });
+			if (numberOfSalesForDesign > 0) {
+				await tx.design.update({
+					where: { id: designId },
+					data: { isSoftDeleted: true },
+				});
+				return null;
+			}
+
+			return tx.design.delete({
+				where: { id: designId },
+				select: {
+					originalFileStorageKey: true,
+					thumbnailFileStorageKey: true,
+				},
+			});
+		});
+
+		if (!result) {
+			return NextResponse.json({ success: true });
+		}
+
+		const { originalFileStorageKey, thumbnailFileStorageKey } = result;
+
+		await Promise.allSettled([
+			storage.send(
+				new DeleteObjectCommand({
+					Bucket: env.R2_PROTECTED_BUCKET_NAME,
+					Key: originalFileStorageKey,
+				}),
+			),
+			thumbnailFileStorageKey
+				? storage.send(
+						new DeleteObjectCommand({
+							Bucket: env.R2_PROTECTED_BUCKET_NAME,
+							Key: thumbnailFileStorageKey,
+						}),
+					)
+				: null,
+		]);
+
+		return NextResponse.json({ success: true });
+	} catch (error) {
+		console.error("Error deleting design:", error);
+		return NextResponse.json(
+			{ error: "Sorry, we couldn't delete your design at this time." },
+			{ status: 500 },
+		);
+	}
 }
 
 export type InfiniteDesignsResponse = {
