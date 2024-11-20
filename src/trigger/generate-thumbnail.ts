@@ -53,20 +53,15 @@ async function createSharpTransform(
 
 	if (addWatermark) {
 		const watermarkText = "mypeach.in";
-		const repetitions = 5; // Set the desired number of repetitions
 
-		// Generate the watermark SVG
-		const svgBuffer = generateWatermarkSVG(
-			width,
-			width, // If your images are not square, adjust this
-			watermarkText,
-			repetitions,
-		);
+		// Generate the watermark SVG with fixed dimensions
+		const svgBuffer = generateWatermarkSVG(watermarkText);
 
-		// Composite the watermark SVG over the image
+		// Composite the watermark SVG over the image with tiling
 		transform = transform.composite([
 			{
 				input: svgBuffer,
+				tile: true,
 				blend: "over",
 			},
 		]);
@@ -78,28 +73,17 @@ async function createSharpTransform(
 	});
 }
 
-function generateWatermarkSVG(
-	width: number,
-	height: number,
-	text: string,
-	repetitions: number,
-): Buffer {
+function generateWatermarkSVG(text: string): Buffer {
 	const xmlns = "http://www.w3.org/2000/svg";
-
-	// Calculate pattern dimensions based on the number of repetitions
-	const patternWidth = width / repetitions;
+	const patternWidth = 200; // Fixed pattern width
 	const patternHeight = patternWidth; // Assuming square patterns
-
-	// Center positions for the rotated text
 	const centerX = patternWidth / 2;
 	const centerY = patternHeight / 2;
+	const fontSize = patternWidth * 0.25; // Adjust font size as needed
 
-	// Adjust font size
-	const fontSize = patternWidth * 0.25; // Increase multiplier to increase font size
-
-	// Create the SVG content
+	// Create the SVG content with fixed dimensions
 	const svgContent = `
-<svg xmlns="${xmlns}" width="${width}" height="${height}">
+<svg xmlns="${xmlns}" width="${patternWidth}" height="${patternHeight}">
   <defs>
     <pattern id="watermarkPattern" patternUnits="userSpaceOnUse" width="${patternWidth}" height="${patternHeight}">
       <g transform="translate(${centerX}, ${centerY}) rotate(-45)">
@@ -110,7 +94,7 @@ function generateWatermarkSVG(
       </g>
     </pattern>
   </defs>
-  <rect width="100%" height="100%" fill="url(#watermarkPattern)" />
+  <rect width="${patternWidth}" height="${patternHeight}" fill="url(#watermarkPattern)" />
 </svg>
 `;
 
