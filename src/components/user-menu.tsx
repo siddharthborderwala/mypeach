@@ -42,7 +42,13 @@ function Logout() {
 
 	return (
 		<form action={formAction} className="w-full text-left">
-			<DropdownMenuItem className="p-0">
+			<DropdownMenuItem
+				className="p-0"
+				onSelect={(e) => {
+					// Prevent the dropdown from closing
+					e.preventDefault();
+				}}
+			>
 				<LogoutButton />
 			</DropdownMenuItem>
 		</form>
