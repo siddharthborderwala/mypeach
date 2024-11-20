@@ -263,7 +263,7 @@ export const generateThumbnailTask = task({
 				quality: 50,
 				sourceBucket: process.env.R2_PROTECTED_BUCKET_NAME!,
 				destinationBucket: process.env.R2_PUBLIC_BUCKET_NAME!,
-				addWatermark: true,
+				addWatermark: false,
 			});
 
 			// Generate 600w WebP from 1200w WebP
