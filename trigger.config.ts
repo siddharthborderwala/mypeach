@@ -6,6 +6,7 @@ const project = "proj_vkutkwszmpyewlwnavsr";
 export default defineConfig({
 	project,
 	logLevel: "log",
+	machine: "small-2x",
 	retries: {
 		enabledInDev: true,
 		default: {
