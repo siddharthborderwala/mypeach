@@ -4,6 +4,9 @@ import { db } from "@/lib/db";
 import { getUserId } from "../auth/utils";
 import type { FileMetadata } from "./designs";
 import { CartStatus } from "../db/schema/cart";
+import axios from "axios";
+import { appBaseURL } from "../utils";
+import { cookies } from "next/headers";
 
 export async function addItemAction(designId: string) {
 	const userId = await getUserId();
@@ -49,7 +52,15 @@ export async function addItemAction(designId: string) {
 		return { order };
 	});
 
-	return data.order?.id;
+	if (data.order?.id) {
+		await axios.delete(`${appBaseURL}/api/order?order_id=${data.order.id}`, {
+			headers: {
+				cookie: cookies().toString(),
+			},
+		});
+	}
+
+	return null;
 }
 
 export async function removeItemAction(designId: string) {
@@ -84,7 +95,15 @@ export async function removeItemAction(designId: string) {
 		return { order };
 	});
 
-	return data?.order?.id;
+	if (data?.order?.id) {
+		await axios.delete(`${appBaseURL}/api/order?order_id=${data.order.id}`, {
+			headers: {
+				cookie: cookies().toString(),
+			},
+		});
+	}
+
+	return null;
 }
 
 export async function getActiveCartAndProducts() {

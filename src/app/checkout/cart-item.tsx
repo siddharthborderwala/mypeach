@@ -3,19 +3,22 @@
 import Link from "next/link";
 import { memo } from "react";
 import { TrashSimple } from "@phosphor-icons/react";
-import type { ActiveCartAndProducts } from "@/lib/actions/cart";
+import {
+	removeItemAction,
+	type ActiveCartAndProducts,
+} from "@/lib/actions/cart";
 import { formatPrice, mimeToExtension } from "@/lib/utils";
 import { getDesignThumbnailURL } from "@/lib/storage/util";
 import { useMutation } from "@tanstack/react-query";
 import { queryClient } from "@/app/global-query-client";
 import { Button } from "@/components/ui/button";
-import { removeFromCart } from "@/lib/cart";
+import { Spinner } from "@/components/spinner";
 
 function CartItem_({
 	product,
 }: { product: ActiveCartAndProducts["products"][number] }) {
 	const { mutate, isPending } = useMutation({
-		mutationFn: () => removeFromCart(product.designId),
+		mutationFn: () => removeItemAction(product.designId),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ["cart"] });
 		},
@@ -63,7 +66,7 @@ function CartItem_({
 					className="mt-4 hover:text-destructive transition-colors"
 				>
 					<span className="sr-only">Remove from cart</span>
-					<TrashSimple size={16} weight="bold" />
+					{isPending ? <Spinner /> : <TrashSimple size={16} weight="bold" />}
 				</Button>
 			</div>
 		</div>
