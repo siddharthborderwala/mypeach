@@ -4,6 +4,9 @@ import { z } from "zod";
 import { getUserAuth } from "@/lib/auth/utils";
 import { db } from "@/lib/db";
 import { generateThumbnailTask } from "@/trigger/generate-thumbnail";
+import { storage } from "@/lib/storage";
+import { env } from "@/lib/env.mjs";
+import { HeadObjectCommand } from "@aws-sdk/client-s3";
 
 const putValidator = z.object({
 	designId: z.string().length(36),
@@ -43,6 +46,21 @@ export async function POST(request: Request) {
 		});
 
 		if (dbResult.isUploadComplete) {
+			// get the file size of the original file
+			const result = await storage.send(
+				new HeadObjectCommand({
+					Bucket: env.R2_PROTECTED_BUCKET_NAME,
+					Key: dbResult.originalFileStorageKey,
+				}),
+			);
+
+			await db.design.update({
+				where: { id: designId },
+				data: {
+					originalFileSizeBytes: result.ContentLength,
+				},
+			});
+
 			await generateThumbnailTask.trigger({
 				designId,
 				originalFileStorageKey: dbResult.originalFileStorageKey,
