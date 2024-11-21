@@ -9,7 +9,7 @@ export const SearchBar = () => {
 	const [showedToast, setShowedToast] = useState(false);
 
 	return (
-		<div className="relative justify-self-center flex-1 w-full">
+		<div className="relative justify-self-center flex-1 w-[20rem]">
 			<MagnifyingGlass className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
 			<Input
 				type="search"
