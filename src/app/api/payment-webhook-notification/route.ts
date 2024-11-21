@@ -2,16 +2,9 @@ import { db } from "@/lib/db";
 import { CartStatus } from "@/lib/db/schema/cart";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import { AxiosError } from "axios";
-import { Cashfree } from "cashfree-pg";
 import type { PaymentWebhookDataEntity, VendorSplit } from "cashfree-pg";
 import { NextResponse } from "next/server";
-
-Cashfree.XClientId = process.env.CASHFREE_CLIENT_ID;
-Cashfree.XClientSecret = process.env.CASHFREE_SECRET_KEY;
-Cashfree.XEnvironment =
-	process.env.NODE_ENV === "production"
-		? Cashfree.Environment.PRODUCTION
-		: Cashfree.Environment.SANDBOX;
+import Cashfree from "@/lib/payments/cashfree";
 
 async function updateOrderStatus({
 	order: orderData,

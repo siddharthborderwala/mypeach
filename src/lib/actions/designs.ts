@@ -3,6 +3,7 @@
 import { notFound, redirect } from "next/navigation";
 import type { Prisma } from "@prisma/client";
 
+import Cashfree from "@/lib/payments/cashfree";
 import { db, PrismaError, TxError } from "@/lib/db";
 import { getUserAuth } from "../auth/utils";
 import type { Prettify } from "../type-utils";
@@ -280,52 +281,62 @@ export async function toggleDesignPublish(designId: string) {
 	}
 
 	try {
-		const published = await db.$transaction(async (tx) => {
-			const vendor = await tx.vendor.findUniqueOrThrow({
+		const [vendor, design] = await db.$transaction([
+			db.vendor.findUniqueOrThrow({
 				where: { userId: session.user.id },
-			});
-
-			const design = await tx.design.findUniqueOrThrow({
+			}),
+			db.design.findUniqueOrThrow({
 				where: { id: designId },
-			});
+			}),
+		]);
 
-			// is user is strying to publish
-			if (design.isDraft) {
-				// check if vendor is active, if not throw error
-				if (vendor.status !== "ACTIVE") {
+		// user is trying to publish
+		if (design.isDraft) {
+			if (!design.isUploadComplete) {
+				throw new TxError("Design upload is not complete");
+			}
+			if (!design.thumbnailFileStorageKey) {
+				throw new TxError(
+					"Wait for thumbnail to be generated before publishing",
+				);
+			}
+		}
+
+		// user is trying to publish
+		if (design.isDraft) {
+			// check if vendor is active, if not throw error
+			if (vendor.status !== "ACTIVE") {
+				const result = await Cashfree.PGESFetchVendors(
+					"2023-08-01",
+					vendor.id.toString(),
+				);
+				if (result.data.status !== "ACTIVE") {
 					throw new TxError(
 						"Your vendor account is not active, please reach out to support",
 					);
 				}
+				await db.vendor.update({
+					where: { id: vendor.id },
+					data: { status: "ACTIVE" },
+				});
 			}
+		}
 
-			if (design.isDraft) {
-				if (!design.isUploadComplete) {
-					throw new TxError("Design upload is not complete");
-				}
-				if (!design.thumbnailFileStorageKey) {
-					throw new TxError(
-						"Wait for thumbnail to be generated before publishing",
-					);
-				}
-			}
-
-			return tx.design.update({
-				where: { id: designId },
-				data: { isDraft: !design.isDraft },
-				include: {
-					vendor: {
-						include: {
-							user: {
-								select: {
-									id: true,
-									username: true,
-								},
+		const published = await db.design.update({
+			where: { id: designId },
+			data: { isDraft: !design.isDraft },
+			include: {
+				vendor: {
+					include: {
+						user: {
+							select: {
+								id: true,
+								username: true,
 							},
 						},
 					},
 				},
-			});
+			},
 		});
 
 		return {
@@ -335,13 +346,15 @@ export async function toggleDesignPublish(designId: string) {
 			},
 		};
 	} catch (error) {
-		if (error instanceof PrismaError) {
-			if (error.code === "P2025") {
-				throw new TxError("Design not found");
+		if (error instanceof PrismaError && error.code === "P2025") {
+			if (typeof error.meta?.target === "string") {
+				if (error.meta?.target.includes("design")) {
+					throw new TxError("Design not found");
+				}
+				if (error.meta?.target.includes("vendor")) {
+					throw new TxError("Vendor not found");
+				}
 			}
-		}
-		if (error instanceof TxError) {
-			throw error;
 		}
 		throw error;
 	}

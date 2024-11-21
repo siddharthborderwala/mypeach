@@ -1,18 +1,11 @@
 import type { AxiosError } from "axios";
 import { NextResponse } from "next/server";
-import { Cashfree } from "cashfree-pg";
 import type { CreateVendorRequest, KycDetails, BankDetails } from "cashfree-pg";
 import { z } from "zod";
 import { getUserAuth } from "@/lib/auth/utils";
 import { db } from "@/lib/db";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
-
-Cashfree.XClientId = process.env.CASHFREE_CLIENT_ID;
-Cashfree.XClientSecret = process.env.CASHFREE_SECRET_KEY;
-Cashfree.XEnvironment =
-	process.env.NODE_ENV === "production"
-		? Cashfree.Environment.PRODUCTION
-		: Cashfree.Environment.SANDBOX;
+import Cashfree from "@/lib/payments/cashfree";
 
 interface VendorRequest
 	extends Omit<CreateVendorRequest, "bank" | "kyc_details"> {

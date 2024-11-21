@@ -1,18 +1,11 @@
 import { NextResponse } from "next/server";
-import { Cashfree } from "cashfree-pg";
 import type { CreateOrderRequest, VendorSplit } from "cashfree-pg";
 import { z } from "zod";
 import { getUserAuth } from "@/lib/auth/utils";
 import { db } from "@/lib/db";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import { getCashfreeReturnURL } from "@/lib/utils";
-
-Cashfree.XClientId = process.env.CASHFREE_CLIENT_ID;
-Cashfree.XClientSecret = process.env.CASHFREE_SECRET_KEY;
-Cashfree.XEnvironment =
-	process.env.NODE_ENV === "production"
-		? Cashfree.Environment.PRODUCTION
-		: Cashfree.Environment.SANDBOX;
+import Cashfree from "@/lib/payments/cashfree";
 
 const createOrderValidator = z.object({
 	amount: z.number(),
