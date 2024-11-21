@@ -43,7 +43,11 @@ export const DesignsGrid = ({ initialData }: InfiniteScrollDesignsProps) => {
 		<>
 			<div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
 				{allDesigns.map((design) => (
-					<DesignCard key={design.id} design={design} />
+					<DesignCard
+						key={design.id}
+						design={design}
+						style={{ contentVisibility: "auto" }}
+					/>
 				))}
 			</div>
 			<InfiniteQueryBottom

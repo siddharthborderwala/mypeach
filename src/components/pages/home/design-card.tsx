@@ -297,15 +297,17 @@ const DesignCardDialogContent = ({
 const DesignCard_ = ({
 	design,
 	className,
+	style,
 }: {
 	design: ExploreDesign;
 	className?: string;
+	style?: React.CSSProperties;
 }) => {
 	const [isModalOpen, setIsModalOpen] = useState(false);
 
 	return (
 		<Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-			<DialogTrigger className={cn("text-left", className)}>
+			<DialogTrigger className={cn("text-left", className)} style={style}>
 				<DesignCardView design={design} />
 			</DialogTrigger>
 			<DesignCardDialogContent
