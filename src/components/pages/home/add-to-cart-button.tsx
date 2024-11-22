@@ -5,13 +5,16 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { ShoppingBag } from "@phosphor-icons/react";
 import { Spinner } from "@/components/spinner";
+import { cn } from "@/lib/utils";
 
 export const AddToCartButton = ({
 	designId,
 	setIsModalOpen,
+	className,
 }: {
 	designId: string;
 	setIsModalOpen: (isModalOpen: boolean) => void;
+	className?: string;
 }) => {
 	const data = queryClient.getQueryData<ActiveCartAndProducts>(["cart"]);
 
@@ -39,7 +42,7 @@ export const AddToCartButton = ({
 
 	if (isInCart) {
 		return (
-			<Button disabled className="gap-2">
+			<Button disabled className={cn("gap-2", className)}>
 				<ShoppingBag weight="bold" />
 				<span>Added to Cart</span>
 			</Button>
@@ -47,7 +50,11 @@ export const AddToCartButton = ({
 	}
 
 	return (
-		<Button disabled={isPending} onClick={() => mutate()} className="gap-2">
+		<Button
+			disabled={isPending}
+			onClick={() => mutate()}
+			className={cn("gap-2", className)}
+		>
 			{isPending ? <Spinner /> : <ShoppingBag weight="bold" />}
 			<span>Add to Cart</span>
 		</Button>

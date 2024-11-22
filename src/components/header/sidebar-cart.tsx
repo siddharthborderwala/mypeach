@@ -1,7 +1,7 @@
 "use client";
 
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { ShoppingBag, TrashSimple } from "@phosphor-icons/react";
+import { ShoppingBag, TrashSimple, X } from "@phosphor-icons/react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -108,7 +108,7 @@ export function SidebarCart({
 					variant="ghost"
 					className="text-sm h-auto p-2 font-normal gap-2 items-center relative"
 				>
-					<ShoppingBag size={20} />
+					<ShoppingBag className="h-6 w-6 sm:h-5 sm:w-5" />
 					{itemCount > 0 ? (
 						<span
 							aria-label={`${itemCount} item${itemCount > 1 ? "s" : ""} in cart`}
@@ -121,9 +121,20 @@ export function SidebarCart({
 				</Button>
 			</SheetTrigger>
 			<SheetContent
+				isCloseButtonHidden={true}
 				side="right"
 				className="flex flex-col bg-background max-sm:w-full"
 			>
+				<SheetClose asChild>
+					<Button
+						variant="ghost"
+						size="icon"
+						className="absolute right-4 top-4 z-50"
+					>
+						<X weight="bold" className="h-4 w-4" />
+						<span className="sr-only">Close</span>
+					</Button>
+				</SheetClose>
 				<h2 className="text-lg font-semibold mb-4">Your Cart</h2>
 				{itemCount > 0 ? (
 					<>

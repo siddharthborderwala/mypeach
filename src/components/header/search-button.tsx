@@ -13,7 +13,7 @@ export function SearchButton() {
 				toast.error("This feature is not available yet.");
 			}}
 		>
-			<MagnifyingGlass size={20} />
+			<MagnifyingGlass className="h-6 w-6 sm:h-5 sm:w-5" />
 			<span className="sr-only">Search</span>
 		</Button>
 	);

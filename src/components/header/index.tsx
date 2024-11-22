@@ -7,6 +7,7 @@ import { UserMenu } from "@/components/user-menu";
 import { getActiveCartAndProducts } from "@/lib/actions/cart";
 import { SidebarCart } from "./sidebar-cart";
 import { SearchButton } from "./search-button";
+import { MobileMenu } from "./mobile-menu";
 
 async function HeaderCartButton() {
 	const initialData = await getActiveCartAndProducts();
@@ -39,7 +40,7 @@ export async function Header() {
 						>
 							<Link href="/designs?new=true">
 								<span>Create</span>
-								<Plus weight="bold" />
+								<Plus weight="bold" className="h-6 w-6 sm:h-5 sm:w-5" />
 							</Link>
 						</Button>
 						<SearchButton />
@@ -51,7 +52,11 @@ export async function Header() {
 					</div>
 				) : (
 					<>
-						<nav className="flex-1 flex items-center justify-end gap-2">
+						<nav className="sm:hidden space-x-2">
+							<HeaderCartButton />
+							<MobileMenu />
+						</nav>
+						<nav className="hidden sm:flex flex-1 items-center justify-end gap-2">
 							<HeaderCartButton />
 							<Button asChild variant="ghost" className="text-base font-normal">
 								<Link href="/support">Support</Link>

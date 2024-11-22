@@ -1,6 +1,6 @@
 "use client";
 
-import { DialogContent } from "@/components/ui/dialog";
+import { DialogClose, DialogContent } from "@/components/ui/dialog";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { DialogTitle } from "@/components/ui/dialog";
@@ -15,6 +15,8 @@ import RelatedDesignsMiniList from "./related-designs";
 import { Actions } from "./actions";
 import type { ExploreDesign } from "./types";
 import { AddToCartButton } from "./add-to-cart-button";
+import { X } from "@phosphor-icons/react";
+import { Button } from "@/components/ui/button";
 
 export function DesignCardDialogMobile({
 	design,
@@ -25,10 +27,21 @@ export function DesignCardDialogMobile({
 }) {
 	return (
 		<DialogContent
+			isCloseButtonHidden={true}
 			onOpenAutoFocus={(e) => e.preventDefault()}
 			className="flex flex-col items-start w-[100svw] h-[100svh] m-0 p-0 rounded-none"
 		>
-			<div className="relative h-[45vh] w-full">
+			<DialogClose asChild>
+				<Button
+					variant="outline"
+					size="icon"
+					className="absolute right-4 top-4 z-50"
+				>
+					<X weight="bold" className="h-4 w-4" />
+					<span className="sr-only">Close</span>
+				</Button>
+			</DialogClose>
+			<div className="relative h-[60vh] w-full">
 				<img
 					src={getDesignThumbnailURL(design.thumbnailFileStorageKey, 1200)}
 					alt={design.name}
@@ -115,8 +128,12 @@ export function DesignCardDialogMobile({
 				</div>
 			</div>
 
-			<div className="sticky bottom-0 left-0 right-0 p-4 backdrop-blur-[2px] bg-background/80 border-t">
-				<AddToCartButton designId={design.id} setIsModalOpen={setIsModalOpen} />
+			<div className="fixed bottom-0 left-0 right-0 p-4 backdrop-blur-[1px] bg-background/80 border-t">
+				<AddToCartButton
+					designId={design.id}
+					setIsModalOpen={setIsModalOpen}
+					className="w-full"
+				/>
 			</div>
 		</DialogContent>
 	);
