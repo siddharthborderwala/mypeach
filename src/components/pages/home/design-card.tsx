@@ -1,13 +1,11 @@
 "use client";
 
-import { memo, useCallback, useState } from "react";
+import { memo, useState } from "react";
 import type { ExploreDesign } from "./types";
 import {
-	appBaseURL,
 	cn,
 	formatPrice,
 	getUserAvatarURL,
-	isMobileUA,
 	mimeToExtension,
 	relativeTime,
 } from "@/lib/utils";
@@ -21,184 +19,11 @@ import { getDesignThumbnailURL } from "@/lib/storage/util";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import RelatedDesignsMiniList from "./related-designs";
-import { Button } from "@/components/ui/button";
-import { CurrencyInr, ShoppingBag } from "@phosphor-icons/react/dist/ssr";
-import { toast } from "sonner";
-import { useMutation } from "@tanstack/react-query";
-import { addItemAction, type ActiveCartAndProducts } from "@/lib/actions/cart";
-import { Spinner } from "@/components/spinner";
-import { queryClient } from "@/app/global-query-client";
-import { CaretDown, Export } from "@phosphor-icons/react";
-import {
-	Tooltip,
-	TooltipContent,
-	TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { CollectionsPopover } from "@/components/collections-popover";
-import { NewCollectionModal } from "@/components/new-collection-modal";
 import { DesignCardView } from "./design-card-view";
-import { useAuth } from "@/contexts/auth";
-import Link from "next/link";
-
-const AddToCartButton = ({
-	designId,
-	setIsModalOpen,
-}: {
-	designId: string;
-	setIsModalOpen: (isModalOpen: boolean) => void;
-}) => {
-	const data = queryClient.getQueryData<ActiveCartAndProducts>(["cart"]);
-
-	const isInCart = data?.products.some(
-		(product) => product.designId === designId,
-	);
-
-	const { mutate, isPending } = useMutation({
-		mutationKey: ["add-to-cart", designId],
-		mutationFn: () => addItemAction(designId),
-		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: ["cart"] });
-			toast.success("Added to cart", {
-				dismissible: true,
-				duration: 1000,
-			});
-			setIsModalOpen(false);
-		},
-		onError: () => {
-			toast.error("Failed to add to cart", {
-				dismissible: true,
-			});
-		},
-	});
-
-	if (isInCart) {
-		return (
-			<Button disabled className="gap-2">
-				<ShoppingBag weight="bold" />
-				<span>Added to Cart</span>
-			</Button>
-		);
-	}
-
-	return (
-		<Button disabled={isPending} onClick={() => mutate()} className="gap-2">
-			{isPending ? <Spinner /> : <ShoppingBag weight="bold" />}
-			<span>Add to Cart</span>
-		</Button>
-	);
-};
-
-const Actions = ({
-	design,
-}: {
-	design: ExploreDesign;
-}) => {
-	const { isLoggedIn } = useAuth();
-
-	const [isCollectionsPopoverOpen, setIsCollectionsPopoverOpen] =
-		useState(false);
-	const [isNewCollectionModalOpen, setIsNewCollectionModalOpen] =
-		useState(false);
-
-	const designId = design.id;
-
-	const handleShare = useCallback(() => {
-		const designURL = `${appBaseURL}/d/${designId}`;
-		const isMobile = isMobileUA(navigator.userAgent);
-
-		if (navigator.share && isMobile) {
-			navigator
-				.share({
-					url: designURL,
-				})
-				.catch(() => {
-					navigator.clipboard
-						.writeText(designURL)
-						.then(() => toast.success("Copied URL to clipboard"))
-						.catch(() => toast.error("Failed to copy URL to clipboard"));
-				});
-		} else {
-			navigator.clipboard
-				.writeText(designURL)
-				.then(() => toast.success("Copied URL to clipboard"))
-				.catch(() => toast.error("Failed to copy URL to clipboard"));
-		}
-	}, [designId]);
-
-	return (
-		<div className="flex items-center">
-			<Tooltip>
-				<TooltipTrigger asChild>
-					<Button
-						onClick={handleShare}
-						size="sm"
-						variant="outline"
-						className="font-normal h-8 w-8 p-0 rounded-r-none border-r-0"
-					>
-						<Export className="w-4 h-4" />
-					</Button>
-				</TooltipTrigger>
-				<TooltipContent>Share</TooltipContent>
-			</Tooltip>
-			{isLoggedIn ? (
-				<>
-					<CollectionsPopover
-						open={isCollectionsPopoverOpen}
-						onOpenChange={setIsCollectionsPopoverOpen}
-						designToAdd={design.id}
-						onCreateNewCollection={() => {
-							setIsCollectionsPopoverOpen(false);
-							setIsNewCollectionModalOpen(true);
-						}}
-					>
-						{({ collectionsInWhichDesignIs }) => (
-							<Button
-								variant="outline"
-								size="sm"
-								className="font-normal h-8 p-0 px-2 rounded-l-none gap-2"
-								onClick={() => setIsCollectionsPopoverOpen(true)}
-							>
-								<span>
-									{collectionsInWhichDesignIs &&
-									collectionsInWhichDesignIs.length > 0
-										? "Saved"
-										: "Save"}
-								</span>
-								<CaretDown className="w-3 h-3" />
-							</Button>
-						)}
-					</CollectionsPopover>
-					<NewCollectionModal
-						firstDesign={design}
-						open={isNewCollectionModalOpen}
-						onOpenChange={setIsNewCollectionModalOpen}
-					/>
-				</>
-			) : (
-				<Tooltip>
-					<TooltipTrigger asChild>
-						<Button
-							variant="outline"
-							size="sm"
-							className="font-normal h-8 p-0 px-2 rounded-l-none gap-2"
-							asChild
-						>
-							<Link
-								href={`/login?redirectTo=${encodeURIComponent(
-									`/d/${designId}`,
-								)}`}
-							>
-								Save
-								<CaretDown className="w-3 h-3" />
-							</Link>
-						</Button>
-					</TooltipTrigger>
-					<TooltipContent>Login to Save</TooltipContent>
-				</Tooltip>
-			)}
-		</div>
-	);
-};
+import { Actions } from "./actions";
+import { AddToCartButton } from "./add-to-cart-button";
+import { useMediaQuery } from "use-media-query-react";
+import { DesignCardDialogMobile } from "./design-card-dialog-mobile";
 
 const DesignCardDialogContent = ({
 	design,
@@ -304,16 +129,24 @@ const DesignCard_ = ({
 	style?: React.CSSProperties;
 }) => {
 	const [isModalOpen, setIsModalOpen] = useState(false);
+	const isMobile = useMediaQuery("(max-width: 768px)");
 
 	return (
 		<Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
 			<DialogTrigger className={cn("text-left", className)} style={style}>
 				<DesignCardView design={design} />
 			</DialogTrigger>
-			<DesignCardDialogContent
-				design={design}
-				setIsModalOpen={setIsModalOpen}
-			/>
+			{isMobile ? (
+				<DesignCardDialogMobile
+					design={design}
+					setIsModalOpen={setIsModalOpen}
+				/>
+			) : (
+				<DesignCardDialogContent
+					design={design}
+					setIsModalOpen={setIsModalOpen}
+				/>
+			)}
 		</Dialog>
 	);
 };

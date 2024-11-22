@@ -173,6 +173,9 @@ importers:
       tiny-invariant:
         specifier: 1.3.3
         version: 1.3.3
+      use-media-query-react:
+        specifier: 0.1.2
+        version: 0.1.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       utif:
         specifier: 3.1.0
         version: 3.1.0
@@ -3884,6 +3887,12 @@ packages:
     peerDependenciesMeta:
       '@types/react':
         optional: true
+
+  use-media-query-react@0.1.2:
+    resolution: {integrity: sha512-NM3D209YrIbSM5mqQkayH7mtv4B8PcopDC91fFnVLofjmVS0TPkUqqGSbZFQgBrC8p4glUNQyvD+gMR2F7DFWQ==}
+    peerDependencies:
+      react: '>=16.8.0'
+      react-dom: '>=16.8.0'
 
   use-sidecar@1.1.2:
     resolution: {integrity: sha512-epTbsLuzZ7lPClpz2TyryBfztm7m+28DlEv2ZCQ3MDr5ssiwyOwGH/e5F9CkfWjJ1t4clvI58yF822/GUkjjhw==}
@@ -8039,6 +8048,11 @@ snapshots:
       tslib: 2.8.1
     optionalDependencies:
       '@types/react': 18.3.12
+
+  use-media-query-react@0.1.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
+    dependencies:
+      react: 18.3.1
+      react-dom: 18.3.1(react@18.3.1)
 
   use-sidecar@1.1.2(@types/react@18.3.12)(react@18.3.1):
     dependencies:
