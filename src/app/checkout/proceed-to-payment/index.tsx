@@ -20,7 +20,11 @@ export function ProceedToPaymentForm({
 			className={className}
 			action={async () => {
 				try {
-					await checkoutAction();
+					const allOK = await checkoutAction();
+
+					if (!allOK) {
+						return;
+					}
 
 					const response = await checkout({
 						cartId,

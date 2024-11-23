@@ -23,5 +23,5 @@ export async function checkoutAction() {
 		redirect("/");
 	}
 
-	return;
+	return true;
 }
