@@ -59,9 +59,9 @@ export const Actions = ({
 						onClick={handleShare}
 						size="sm"
 						variant="outline"
-						className="font-normal h-8 w-8 p-0 rounded-r-none border-r-0"
+						className="font-normal h-10 w-10 sm:h-8 sm:w-8 p-0 rounded-r-none border-r-0"
 					>
-						<Export className="w-4 h-4" />
+						<Export className="w-5 h-5 sm:w-4 sm:h-4" />
 					</Button>
 				</TooltipTrigger>
 				<TooltipContent>Share</TooltipContent>
@@ -81,7 +81,7 @@ export const Actions = ({
 							<Button
 								variant="outline"
 								size="sm"
-								className="font-normal h-8 p-0 px-2 rounded-l-none gap-2"
+								className="font-normal h-10 sm:h-8 p-0 px-2 rounded-l-none gap-2"
 								onClick={() => setIsCollectionsPopoverOpen(true)}
 							>
 								<span>
@@ -90,7 +90,7 @@ export const Actions = ({
 										? "Saved"
 										: "Save"}
 								</span>
-								<CaretDown className="w-3 h-3" />
+								<CaretDown className="w-4 h-4 sm:w-3 sm:h-3" />
 							</Button>
 						)}
 					</CollectionsPopover>
@@ -106,7 +106,7 @@ export const Actions = ({
 						<Button
 							variant="outline"
 							size="sm"
-							className="font-normal h-8 p-0 px-2 rounded-l-none gap-2"
+							className="font-normal text-base sm:text-sm h-10 sm:h-8 p-0 px-2 rounded-l-none gap-2"
 							asChild
 						>
 							<Link
@@ -115,7 +115,7 @@ export const Actions = ({
 								)}`}
 							>
 								Save
-								<CaretDown className="w-3 h-3" />
+								<CaretDown className="w-4 h-4 sm:w-3 sm:h-3" />
 							</Link>
 						</Button>
 					</TooltipTrigger>

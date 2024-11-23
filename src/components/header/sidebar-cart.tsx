@@ -135,10 +135,10 @@ export function SidebarCart({
 						<span className="sr-only">Close</span>
 					</Button>
 				</SheetClose>
-				<h2 className="text-lg font-semibold mb-4">Your Cart</h2>
+				<h2 className="text-lg font-semibold">Your Cart</h2>
 				{itemCount > 0 ? (
 					<>
-						<ScrollArea className="flex-grow mb-4">
+						<ScrollArea className="flex-grow">
 							{data.products.map((product) => (
 								<CartItem key={product.designId} product={product} />
 							))}
@@ -154,7 +154,7 @@ export function SidebarCart({
 					{itemCount > 0 ? (
 						<>
 							<div className="flex mb-4">
-								<div className="text-sm flex justify-between w-full font-medium">
+								<div className="text-base sm:text-sm flex justify-between w-full font-medium">
 									<p>Subtotal</p>
 									<p>
 										<span>{formatPrice(total)}</span>
@@ -172,7 +172,7 @@ export function SidebarCart({
 						</>
 					) : (
 						<SheetClose asChild>
-							<Button className="w-full">Continue Shopping</Button>
+							<Button className="w-full max-sm:h-10">Continue Shopping</Button>
 						</SheetClose>
 					)}
 				</div>
