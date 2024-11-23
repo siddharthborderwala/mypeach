@@ -122,7 +122,7 @@ export function DesignCardDialogMobile({
 				</div>
 			</div>
 
-			<div className="fixed bottom-0 left-0 right-0 p-4 backdrop-blur-[2px] bg-background/80 border-t">
+			<div className="fixed bottom-0 left-0 right-0 p-4 backdrop-blur-sm bg-background/80 border-t">
 				<AddToCartButton
 					designId={design.id}
 					setIsModalOpen={setIsModalOpen}

@@ -67,7 +67,7 @@ export function CheckoutView({
 								</div>
 							</div>
 						</div>
-						<div className="fixed bottom-0 left-0 right-0 sm:static max-sm:p-4 max-sm:bg-background max-sm:backdrop-blur-[2px] max-sm:border-t sm:p-0 col-span-1 max-sm:flex font-bold max-sm:!text-base max-sm:gap-4">
+						<div className="fixed bottom-0 left-0 right-0 sm:static max-sm:p-4 max-sm:bg-background max-sm:backdrop-blur-sm max-sm:border-t sm:p-0 col-span-1 max-sm:flex font-bold max-sm:!text-base max-sm:gap-4">
 							<div className="sm:hidden">
 								<p className="font-bold text-lg">
 									{formatPrice(calculatedTotal())}

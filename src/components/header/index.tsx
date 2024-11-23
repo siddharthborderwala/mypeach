@@ -19,7 +19,7 @@ export async function Header() {
 	const { session } = await getUserAuth();
 
 	return (
-		<header className="sticky top-0 bg-background backdrop-blur-[2px] z-[1]">
+		<header className="sticky top-0 bg-background/80 backdrop-blur-sm z-[1]">
 			<div className="flex items-center justify-between md:gap-6 p-4">
 				<div className="shrink-0 flex-1 flex justify-start">
 					<Link href="/" className="flex items-center gap-1 font-medium">
