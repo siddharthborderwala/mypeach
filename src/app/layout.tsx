@@ -33,7 +33,12 @@ export default async function RootLayout({
 				<AuthProvider auth={auth}>
 					<TooltipProvider delayDuration={150} skipDelayDuration={750}>
 						<GlobalQueryClient>{children}</GlobalQueryClient>
-						<Toaster richColors theme="light" className="font-sans" />
+						<Toaster
+							richColors
+							theme="light"
+							duration={3000}
+							className="font-sans"
+						/>
 						<FlashToast />
 					</TooltipProvider>
 				</AuthProvider>

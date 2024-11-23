@@ -7,11 +7,9 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 export function ProceedToPaymentForm({
-	amount,
 	cartId,
 	className,
 }: {
-	amount: number;
 	cartId: number;
 	className?: string;
 }) {
@@ -25,7 +23,6 @@ export function ProceedToPaymentForm({
 					await checkoutAction();
 
 					const response = await checkout({
-						amount,
 						cartId,
 					});
 

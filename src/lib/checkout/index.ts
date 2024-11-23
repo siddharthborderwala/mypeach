@@ -2,10 +2,8 @@ import axios from "axios";
 import { load } from "@cashfreepayments/cashfree-js";
 
 export const checkout = async ({
-	amount,
 	cartId,
 }: {
-	amount: number;
 	cartId: number;
 }) => {
 	// biome-ignore lint: no-let
@@ -24,7 +22,6 @@ export const checkout = async ({
 
 	try {
 		const response = await axios.post("/api/order", {
-			amount,
 			cartId,
 		});
 

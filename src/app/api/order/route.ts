@@ -8,14 +8,16 @@ import { getCashfreeReturnURL } from "@/lib/utils";
 import Cashfree from "@/lib/payments/cashfree";
 
 const createOrderValidator = z.object({
-	amount: z.number(),
 	cartId: z.number(),
 });
+
+function secureFormatAmount(amount: number) {
+	return Number.parseFloat((Math.round(amount * 100) / 100).toFixed(2));
+}
 
 async function createOrderWithDetails(orderData: {
 	cartId: number;
 	userId: string;
-	amount: number;
 	status: string;
 }) {
 	try {
@@ -28,32 +30,82 @@ async function createOrderWithDetails(orderData: {
 				throw new Error("User not found");
 			}
 
-			// Create the Vendor
-			const order = await tx.order.create({
-				data: {
-					cartId: orderData.cartId,
-					userId: orderData.userId,
-					amount: orderData.amount,
-					status: orderData.status,
-				},
-			});
-
-			// Create the split for each vendor
-			const designsInCart = await tx.cartProduct.findMany({
-				where: { cartId: orderData.cartId },
+			const activeCart = await tx.cart.findUnique({
+				where: { id: orderData.cartId, userId: orderData.userId },
 				include: {
-					design: {
-						select: {
-							vendorId: true,
-							price: true,
+					products: {
+						include: {
+							design: {
+								select: {
+									id: true,
+									price: true,
+									vendorId: true,
+									isDraft: true,
+									isSoftDeleted: true,
+								},
+							},
 						},
 					},
 				},
 			});
 
+			if (!activeCart) {
+				throw new Error("Cart not found");
+			}
+
+			const productsToDeleteFromCart = activeCart.products.filter(
+				(product) => product.design.isDraft || product.design.isSoftDeleted,
+			);
+
+			if (productsToDeleteFromCart.length > 0) {
+				await tx.cartProduct.deleteMany({
+					where: {
+						cartId: orderData.cartId,
+						designId: {
+							in: productsToDeleteFromCart.map((product) => product.designId),
+						},
+					},
+				});
+
+				throw new Error("Some products in your cart are not available anymore");
+			}
+
+			const subtotalAmount = secureFormatAmount(
+				activeCart.products.reduce(
+					(acc, product) => acc + product.design.price,
+					0,
+				),
+			);
+
+			// add 18% GST
+			const totalAmount = secureFormatAmount(subtotalAmount * 1.18);
+
+			// Create the Vendor
+			const order = await tx.order.create({
+				data: {
+					cartId: orderData.cartId,
+					userId: orderData.userId,
+					amount: totalAmount,
+					status: orderData.status,
+				},
+			});
+
+			// Create the split for each vendor
+			// const designsInCart = await tx.cartProduct.findMany({
+			// 	where: { cartId: orderData.cartId },
+			// 	include: {
+			// 		design: {
+			// 			select: {
+			// 				vendorId: true,
+			// 				price: true,
+			// 			},
+			// 		},
+			// 	},
+			// });
+
 			const splits: VendorSplit[] = [];
 
-			for (const data of designsInCart) {
+			for (const data of activeCart.products) {
 				if (
 					splits.find(
 						(split) => split.vendor_id === data.design.vendorId.toString(),
@@ -64,18 +116,18 @@ async function createOrderWithDetails(orderData: {
 					);
 
 					if (splits[index].amount) {
-						splits[index].amount += Math.floor(data.design.price * 0.8);
+						splits[index].amount += secureFormatAmount(data.design.price * 0.8);
 					}
 				} else {
 					splits.push({
 						vendor_id: data.design.vendorId.toString(),
-						amount: Math.floor(data.design.price * 0.8),
+						amount: secureFormatAmount(data.design.price * 0.8),
 					});
 				}
 			}
 
-			// Optionally, return all created records
-			return { order, user, splits };
+			// return all created records
+			return { order, user, splits, subtotalAmount, totalAmount };
 		});
 
 		// Handle the result as needed
@@ -165,16 +217,15 @@ export async function POST(request: Request) {
 			});
 		}
 
-		const { order, splits, user } = await createOrderWithDetails({
+		const { order, splits, user, totalAmount } = await createOrderWithDetails({
 			cartId: result.data.cartId,
 			userId: session.user.id,
-			amount: result.data.amount,
 			status: "ACTIVE",
 		});
 
 		const option: CreateOrderRequest = {
 			order_id: order.id.toString(),
-			order_amount: result.data.amount,
+			order_amount: totalAmount,
 			order_currency: "INR",
 			customer_details: {
 				customer_id: user.id,
@@ -207,7 +258,12 @@ export async function POST(request: Request) {
 	} catch (error) {
 		console.error(error);
 		return NextResponse.json(
-			{ error: "Failed to generate signed URL" },
+			{
+				error:
+					error instanceof Error
+						? error.message
+						: "An unexpected error occurred",
+			},
 			{ status: 500 },
 		);
 	}
