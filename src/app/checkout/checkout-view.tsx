@@ -35,14 +35,14 @@ export function CheckoutView({
 	};
 
 	return (
-		<main className="container mx-auto py-8 max-w-5xl">
-			<h1 className="text-3xl font-bold mb-8">
+		<main className="container sm:mx-auto pt-4 p-6 sm:py-8 sm:max-w-5xl">
+			<h1 className="text-xl sm:text-3xl font-bold mb-4 sm:mb-8">
 				Checkout{" "}
 				<span className="text-muted-foreground">
 					({itemCount} item{itemCount > 1 ? "s" : ""})
 				</span>
 			</h1>
-			<div className="grid grid-cols-3 grid-rows-[auto_auto] gap-8">
+			<div className="sm:grid sm:grid-cols-3 sm:grid-rows-[auto_auto] sm:gap-8">
 				{itemCount > 0 ? (
 					<>
 						<ul className="col-span-2 row-span-2">
@@ -50,7 +50,7 @@ export function CheckoutView({
 								<CartItem key={product.designId} product={product} />
 							))}
 						</ul>
-						<div>
+						<div className="max-sm:mt-6">
 							<div className="space-y-2 mb-8">
 								<div className="flex justify-between">
 									<p>Subtotal</p>
@@ -67,12 +67,21 @@ export function CheckoutView({
 								</div>
 							</div>
 						</div>
-						<div className="col-span-1">
+						<div className="fixed bottom-0 left-0 right-0 sm:static p-4 bg-background backdrop-blur-[2px] border-t sm:p-0 col-span-1 max-sm:flex font-bold max-sm:!text-base max-sm:gap-4">
+							<div>
+								<p className="font-bold text-lg">
+									{formatPrice(calculatedTotal())}
+								</p>
+								<p className="font-bold text-sm uppercase text-muted-foreground">
+									Total
+								</p>
+							</div>
 							<ProceedToPaymentForm
 								amount={calculatedTotal()}
 								cartId={data.cart?.id as number}
+								className="flex-1"
 							/>
-							<p className="text-xs text-muted-foreground text-center mt-3">
+							<p className="hidden sm:block text-xs text-muted-foreground text-center mt-3">
 								Secured by{" "}
 								<a
 									href="https://www.cashfree.com"

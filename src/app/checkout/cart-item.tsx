@@ -27,17 +27,14 @@ function CartItem_({
 	return (
 		<div key={product.designId} className="flex items-start gap-4 mb-4">
 			<img
-				src={getDesignThumbnailURL(
-					product.design.thumbnailFileStorageKey,
-					1200,
-				)}
+				src={getDesignThumbnailURL(product.design.thumbnailFileStorageKey, 600)}
 				alt={product.design.name}
-				className="w-60 object-contain rounded-lg"
+				className="w-24 sm:w-60 object-scale-down rounded-lg bg-gray-50"
 			/>
 			<div className="flex flex-col items-start">
 				<Button
 					variant="link"
-					className="text-lg text-foreground h-auto p-0"
+					className="text-lg text-foreground h-auto p-0 max-sm:max-w-[40svw] truncate"
 					asChild
 				>
 					<Link
@@ -63,12 +60,22 @@ function CartItem_({
 					variant="ghost"
 					onClick={() => mutate()}
 					disabled={isPending}
-					className="mt-4 hover:text-destructive transition-colors"
+					className="mt-4 hidden sm:block hover:text-destructive transition-colors"
 				>
 					<span className="sr-only">Remove from cart</span>
 					{isPending ? <Spinner /> : <TrashSimple size={16} weight="bold" />}
 				</Button>
 			</div>
+			<Button
+				size="icon"
+				variant="outline"
+				onClick={() => mutate()}
+				disabled={isPending}
+				className="ml-auto sm:hidden hover:text-destructive transition-colors"
+			>
+				<span className="sr-only">Remove from cart</span>
+				{isPending ? <Spinner /> : <TrashSimple size={16} weight="bold" />}
+			</Button>
 		</div>
 	);
 }

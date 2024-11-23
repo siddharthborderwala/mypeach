@@ -164,7 +164,7 @@ export function SidebarCart({
 									</p>
 								</div>
 							</div>
-							<Button className="w-full" asChild>
+							<Button className="w-full max-sm:h-10" asChild>
 								<Link prefetch={false} href="/checkout">
 									<span>Checkout</span>
 								</Link>

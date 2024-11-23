@@ -8,9 +8,13 @@ export function ProceedToPaymentButton() {
 	const { pending } = useFormStatus();
 
 	return (
-		<Button type="submit" className="w-full gap-2" disabled={pending}>
+		<Button
+			type="submit"
+			className="max-sm:h-full w-full gap-2"
+			disabled={pending}
+		>
 			{pending ? <Spinner /> : null}
-			<span>Proceed to Payment</span>
+			<span>Place Order</span>
 		</Button>
 	);
 }

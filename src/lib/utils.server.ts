@@ -9,7 +9,7 @@ export function setFlashMessage(
 		httpOnly: false, // needs to be accessible to the client
 		secure: process.env.NODE_ENV === "production",
 		sameSite: "lax",
-		maxAge: 5, // The cookie will be removed after 5 seconds
+		maxAge: 1, // The cookie will be removed after 1 second
 	});
 }
 
