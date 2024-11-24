@@ -295,7 +295,7 @@ const run = async (payload: {
 export const generateThumbnailTaskSmall = task({
 	id: "generate-thumbnail-small",
 	machine: {
-		preset: "medium-2x",
+		preset: "small-2x",
 	},
 	queue: {
 		concurrencyLimit: 1,
