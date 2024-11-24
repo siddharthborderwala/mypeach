@@ -295,7 +295,7 @@ const run = async (payload: {
 export const generateThumbnailTaskSmall = task({
 	id: "generate-thumbnail-small",
 	machine: {
-		preset: "small-1x",
+		preset: "small-2x",
 	},
 	queue: {
 		concurrencyLimit: 1,
@@ -354,8 +354,8 @@ function MB(value: number) {
 }
 
 export const getGenerateThumbnailTask = (fileSizeInBytes: number) => {
-	// upto 200MB
-	if (fileSizeInBytes < MB(200)) {
+	// upto 150MB
+	if (fileSizeInBytes < MB(150)) {
 		return generateThumbnailTaskSmall;
 	}
 	// upto 400MB
