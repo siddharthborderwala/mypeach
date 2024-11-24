@@ -32,7 +32,7 @@ function LogoutButton() {
 			className="w-full gap-2 items-center justify-start h-auto p-2 font-normal"
 		>
 			<SignOut />
-			<span>Log{pending ? "ing" : ""} out</span>
+			<span>Log{pending ? "ging" : ""} out</span>
 		</Button>
 	);
 }
