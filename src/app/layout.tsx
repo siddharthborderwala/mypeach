@@ -27,14 +27,14 @@ export const metadata: Metadata = {
 	openGraph: {
 		title,
 		description,
-		images: [`${appBaseURL}/social.png`],
+		images: [`${appBaseURL}/social-preview.jpg`],
 		url: appBaseURL,
 	},
 	twitter: {
 		card: "summary_large_image",
 		title,
 		description,
-		images: [`${appBaseURL}/social.png`],
+		images: [`${appBaseURL}/social-preview.jpg`],
 		site: appBaseURL,
 	},
 };
