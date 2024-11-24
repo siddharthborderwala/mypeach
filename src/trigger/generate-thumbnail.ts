@@ -354,8 +354,8 @@ function MB(value: number) {
 }
 
 export const getGenerateThumbnailTask = (fileSizeInBytes: number) => {
-	// upto 200MB
-	if (fileSizeInBytes < MB(200)) {
+	// upto 150MB
+	if (fileSizeInBytes < MB(150)) {
 		return generateThumbnailTaskSmall;
 	}
 	// upto 400MB
