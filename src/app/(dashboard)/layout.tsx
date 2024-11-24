@@ -8,6 +8,7 @@ import {
 	Books,
 	Gear,
 	Package,
+	Play,
 } from "@phosphor-icons/react/dist/ssr";
 
 import { Button } from "@/components/ui/button";
@@ -15,6 +16,8 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { getCurrentUser } from "@/lib/auth/utils";
 import { NavItem, NavItemMobile } from "./nav";
 import { UserMenu } from "@/components/user-menu";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { VideoDialog } from "@/components/video-dialog";
 
 const sellerNavItems = [
 	{
@@ -95,6 +98,9 @@ export default async function Layout({
 									label="Settings"
 									icon={<Gear className="h-4 w-4" />}
 								/>
+							</section>
+							<section className="mt-auto">
+								<VideoDialog />
 							</section>
 						</nav>
 					</div>
