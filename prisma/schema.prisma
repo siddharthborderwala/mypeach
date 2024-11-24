@@ -24,6 +24,7 @@ model User {
   collections             Collection[]
   vendor                  Vendor?
   PurchasedDesign         PurchasedDesign[]
+  DesignDownload          DesignDownload[]
 
   createdAt DateTime? @default(now())
   updatedAt DateTime? @updatedAt
@@ -87,6 +88,7 @@ model Design {
   collectionItems CollectionItem[]
   Sales           Sales[]
   PurchasedDesign PurchasedDesign[]
+  DesignDownload  DesignDownload[]
 
   @@index([vendorId])
   @@index([createdAt])
@@ -246,4 +248,18 @@ model Sales {
 
   @@index([vendorId])
   @@index([designId])
+}
+
+model DesignDownload {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+
+  design   Design @relation(fields: [designId], references: [id], onDelete: Cascade)
+  designId String
+
+  userId String
+  user   User   @relation(references: [id], fields: [userId], onDelete: Cascade)
+
+  @@index([designId])
+  @@index([userId])
 }

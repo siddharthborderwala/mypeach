@@ -3,6 +3,7 @@ import { storage } from "@/lib/storage";
 import { GetObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { NextResponse } from "next/server";
+import { db } from "@/lib/db";
 
 export async function PUT(request: Request) {
 	try {
@@ -33,6 +34,13 @@ export async function PUT(request: Request) {
 
 		// Generate a presigned URL valid for 15 minutes
 		const signedUrl = await getSignedUrl(storage, command, { expiresIn: 900 }); // 900 seconds = 15 minutes
+
+		await db.designDownload.create({
+			data: {
+				designId: fileName,
+				userId: session.user.id,
+			},
+		});
 
 		return NextResponse.json({ url: signedUrl });
 	} catch (error) {
