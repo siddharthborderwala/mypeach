@@ -15,7 +15,7 @@ export function VideoDialog() {
 	return (
 		<Dialog open={isOpen} onOpenChange={setIsOpen}>
 			<MotionDialogTrigger
-				className="relative mb-4 rounded-xl border group transition-transform hover:-translate-y-2 duration-300"
+				className="relative rounded-xl border group transition-transform hover:-translate-y-2 duration-300 shadow"
 				initial={{ opacity: 0, y: "12rem", filter: "blur(2px)" }}
 				animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
 				exit={{ opacity: 0, y: "12rem", filter: "blur(2px)" }}
@@ -34,8 +34,8 @@ export function VideoDialog() {
 				<div className="group-hover:scale-110 transition-all duration-300 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-foreground/80 backdrop-blur-sm rounded-full p-3 shadow">
 					<Play weight="fill" className="text-background h-8 w-8 shadow" />
 				</div>
-				<p className="absolute w-full text-left bottom-[-1.5rem] left-2 text-sm text-foreground/70">
-					Get started with Peach
+				<p className="absolute w-full text-left top-[-2rem] left-1 text-lg font-bold text-foreground/70 drop-shadow-sm">
+					Peach Tutorial
 				</p>
 			</MotionDialogTrigger>
 			<MotionDialogContent

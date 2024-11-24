@@ -46,6 +46,12 @@ export function RegisterForm() {
 					<input type="hidden" name="redirectTo" value={redirectTo} />
 				) : null}
 				<SubmitButton />
+				<p className="text-center text-sm text-muted-foreground">
+					By registering, you agree to our{" "}
+					<Link href="/terms" className="underline">
+						Terms of Service
+					</Link>
+				</p>
 			</div>
 			<FormError state={state} />
 			<div className="mt-4 text-center text-sm">
