@@ -3,7 +3,7 @@ import { DesignCard } from "@/components/pages/home/design-card";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { getDesignByIdForExplore } from "@/lib/actions/designs";
 import { getDesignSocialImageURL } from "@/lib/storage/util";
-import { formatPrice } from "@/lib/utils";
+import { formatPrice, mimeToExtension } from "@/lib/utils";
 import { WarningCircle } from "@phosphor-icons/react/dist/ssr";
 import type { Metadata } from "next";
 
@@ -20,9 +20,11 @@ export async function generateMetadata({
 	// fetch data
 	const design = await getDesignByIdForExplore(id);
 
+	const type = mimeToExtension(design.originalFileType).toUpperCase();
+
 	return {
-		title: `${design.name} | Peach`,
-		description: `Get ${design.name} for ${formatPrice(design.price)} only on Peach - the best place to get TIFF layered textile design files.`,
+		title: `Get ${type} File (${design.fileDPI} DPI) on Peach`,
+		description: `Buy this design in ${type} format (${design.fileDPI} DPI) for ${formatPrice(design.price)} only on Peach - the best place to get TIFF layered textile design files.`,
 		openGraph: {
 			images: {
 				url: getDesignSocialImageURL(design.id),
