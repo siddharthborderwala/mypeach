@@ -299,7 +299,7 @@ const run = async (payload: {
 		await convertToJpeg({
 			originalFileStorageKey: thumbnailStorageKey[1200],
 			thumbnailStorageKey: thumbnailStorageKey.social,
-			width: 1200,
+			width: 600,
 			sourceBucket: process.env.R2_PUBLIC_BUCKET_NAME!,
 			destinationBucket: process.env.R2_PUBLIC_BUCKET_NAME!,
 		});
