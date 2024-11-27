@@ -112,16 +112,12 @@ async function uploadToPublicBucket(
 	key: string,
 	bucket: string,
 ): Promise<void> {
-	const passThrough = new PassThrough();
-
-	readableStream.pipe(transform).pipe(passThrough);
-
 	const upload = new Upload({
 		client: storage,
 		params: {
 			Bucket: bucket,
 			Key: key,
-			Body: passThrough,
+			Body: readableStream.pipe(transform),
 			ContentType: "image/webp",
 			ACL: "public-read",
 		},
@@ -347,7 +343,7 @@ export const generateThumbnailTaskSmall = task({
 		preset: "small-2x",
 	},
 	queue: {
-		concurrencyLimit: 1,
+		concurrencyLimit: 4,
 	},
 	run,
 });
@@ -358,7 +354,7 @@ export const generateThumbnailTaskMedium1 = task({
 		preset: "medium-1x",
 	},
 	queue: {
-		concurrencyLimit: 1,
+		concurrencyLimit: 3,
 	},
 	run,
 });
@@ -369,7 +365,7 @@ export const generateThumbnailTaskMedium2 = task({
 		preset: "medium-2x",
 	},
 	queue: {
-		concurrencyLimit: 1,
+		concurrencyLimit: 2,
 	},
 	run,
 });
