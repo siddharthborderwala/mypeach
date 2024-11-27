@@ -296,7 +296,7 @@ const run = async (payload: {
 			originalFileStorageKey: thumbnailStorageKey[1200],
 			thumbnailStorageKey: thumbnailStorageKey.social,
 			width: 1200,
-			quality: 100,
+			quality: 75,
 			sourceBucket: process.env.R2_PUBLIC_BUCKET_NAME!,
 			destinationBucket: process.env.R2_PUBLIC_BUCKET_NAME!,
 		});
