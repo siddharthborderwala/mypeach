@@ -19,14 +19,14 @@ function PurchasedDesignPreview_({
 	const { mutateAsync: downloadFile } = useMutation({
 		mutationKey: ["download"],
 		mutationFn: ({
-			fileName,
+			designId,
 		}: {
-			fileName: string;
+			designId: string;
 		}) => {
 			return fetch("/api/download", {
 				method: "PUT",
 				body: JSON.stringify({
-					fileName,
+					designId,
 				}),
 			});
 		},
@@ -36,7 +36,7 @@ function PurchasedDesignPreview_({
 		try {
 			setIsDownloading(true);
 			const response = await downloadFile({
-				fileName: design.originalFileStorageKey,
+				designId: design.id,
 			});
 
 			if (!response.ok) {
