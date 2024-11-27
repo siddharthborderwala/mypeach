@@ -6,6 +6,7 @@ import { task, logger } from "@trigger.dev/sdk/v3";
 
 import { db } from "@/lib/db";
 import { storage } from "./util/storage";
+import stripIndent from "strip-indent";
 
 export function getDesignThumbnailFileStorageKey(id: string) {
 	return {
@@ -87,13 +88,12 @@ function generateWatermarkSVG(text: string): Buffer {
 	const fontSize = patternWidth * 0.25; // Adjust font size as needed
 
 	// Create the SVG content with fixed dimensions
-	const svgContent = `
+	const svgContent = stripIndent(`
   <svg xmlns="${xmlns}" width="${patternWidth}" height="${patternHeight}">
     <defs>
       <pattern id="watermarkPattern" patternUnits="userSpaceOnUse" width="${patternWidth}" height="${patternHeight}">
         <g transform="translate(${centerX}, ${centerY}) rotate(-45)">
-          <text x="0" y="0" font-size="${fontSize}" fill="rgba(255,255,255,0.3)"
-            text-anchor="middle" dominant-baseline="central" font-family="Arial, sans-serif">
+          <text x="0" y="0" font-size="${fontSize}" font-weight="bold" fill="rgba(255,255,255,0.3)" text-anchor="middle" dominant-baseline="central" font-family="sans-serif">
             ${text}
           </text>
         </g>
@@ -101,7 +101,7 @@ function generateWatermarkSVG(text: string): Buffer {
     </defs>
     <rect width="100%" height="100%" fill="url(#watermarkPattern)" />
   </svg>
-  `;
+  `);
 
 	return Buffer.from(svgContent);
 }
@@ -195,14 +195,37 @@ async function convertToJpeg({
 			originalFileStorageKey,
 			sourceBucket,
 		);
-		const transform = sharp()
-			.resize({
-				width: width,
-				height: 10000, // Constrain height for JPEG as well
-				fit: "inside",
-				withoutEnlargement: true,
-			})
-			.jpeg({ quality, progressive: true });
+		const transform = await sharp()
+			.metadata()
+			.then((metadata) => {
+				const originalWidth = metadata.width || width;
+				const originalHeight = metadata.height || width;
+				const aspectRatio = originalHeight / originalWidth;
+				const maxAspectRatio = 4 / 3; // 4:3 aspect ratio
+
+				// If image is taller than maxAspectRatio, crop it
+				if (aspectRatio > maxAspectRatio) {
+					const targetHeight = Math.round(width * maxAspectRatio);
+					return sharp()
+						.resize({
+							width: width,
+							height: targetHeight,
+							fit: "cover",
+							position: "top",
+						})
+						.jpeg({ quality, progressive: true });
+				}
+
+				// Otherwise, maintain original aspect ratio
+				return sharp()
+					.resize({
+						width: width,
+						fit: "inside",
+						withoutEnlargement: true,
+					})
+					.jpeg({ quality, progressive: true });
+			});
+
 		await uploadToPublicBucket(
 			readableStream,
 			transform,

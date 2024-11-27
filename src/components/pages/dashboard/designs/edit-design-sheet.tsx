@@ -9,9 +9,7 @@ import {
 } from "@/components/ui/sheet";
 import { DetailsForm } from "./new-design-modal/details-form";
 import { useUploadContext } from "./upload-context";
-import { useEffect } from "react";
-import { useMutation, type InfiniteData } from "@tanstack/react-query";
-import type { InfiniteDesignsResponse } from "@/app/api/designs/route";
+import { useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { toggleDesignPublish } from "@/lib/actions/designs";
