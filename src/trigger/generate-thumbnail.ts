@@ -298,7 +298,7 @@ export const generateThumbnailTaskSmall = task({
 		preset: "small-2x",
 	},
 	queue: {
-		concurrencyLimit: 1,
+		concurrencyLimit: 4,
 	},
 	run,
 });
@@ -309,7 +309,7 @@ export const generateThumbnailTaskMedium1 = task({
 		preset: "medium-1x",
 	},
 	queue: {
-		concurrencyLimit: 1,
+		concurrencyLimit: 2,
 	},
 	run,
 });
@@ -320,7 +320,7 @@ export const generateThumbnailTaskMedium2 = task({
 		preset: "medium-2x",
 	},
 	queue: {
-		concurrencyLimit: 1,
+		concurrencyLimit: 2,
 	},
 	run,
 });
