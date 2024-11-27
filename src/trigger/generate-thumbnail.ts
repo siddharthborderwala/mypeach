@@ -1,4 +1,4 @@
-import { GetObjectCommand } from "@aws-sdk/client-s3";
+import { GetObjectCommand, HeadObjectCommand } from "@aws-sdk/client-s3";
 import sharp from "sharp";
 import { Readable, PassThrough } from "node:stream";
 import { Upload } from "@aws-sdk/lib-storage";
@@ -175,21 +175,48 @@ async function convertToWebp({
 	}
 }
 
+async function getFileSizeInBytes(
+	originalFileStorageKey: string,
+	bucket: string,
+): Promise<number | undefined> {
+	const headObjectResponse = await storage.send(
+		new HeadObjectCommand({
+			Key: originalFileStorageKey,
+			Bucket: bucket,
+		}),
+	);
+
+	return headObjectResponse.ContentLength;
+}
+
+const THRESHOLD_600_KB = 600 * 1024;
+
 async function convertToJpeg({
 	originalFileStorageKey,
 	thumbnailStorageKey,
 	width,
-	quality,
 	sourceBucket,
 	destinationBucket,
 }: {
 	originalFileStorageKey: string;
 	thumbnailStorageKey: string;
 	width: number;
-	quality: number;
 	sourceBucket: string;
 	destinationBucket: string;
 }): Promise<void> {
+	const originalFileSizeInBytes = await getFileSizeInBytes(
+		originalFileStorageKey,
+		sourceBucket,
+	);
+
+	let finalQuality = 100;
+
+	if (originalFileSizeInBytes && originalFileSizeInBytes > THRESHOLD_600_KB) {
+		finalQuality = Math.floor(
+			(THRESHOLD_600_KB / originalFileSizeInBytes) * 100,
+		);
+	}
+
 	try {
 		const readableStream = await getInputStreamFromS3(
 			originalFileStorageKey,
@@ -202,7 +229,7 @@ async function convertToJpeg({
 				fit: "inside",
 				withoutEnlargement: true,
 			})
-			.jpeg({ quality, progressive: true });
+			.jpeg({ quality: finalQuality, mozjpeg: true, progressive: true });
 		await uploadToPublicBucket(
 			readableStream,
 			transform,
@@ -273,7 +300,6 @@ const run = async (payload: {
 			originalFileStorageKey: thumbnailStorageKey[1200],
 			thumbnailStorageKey: thumbnailStorageKey.social,
 			width: 1200,
-			quality: 100,
 			sourceBucket: process.env.R2_PUBLIC_BUCKET_NAME!,
 			destinationBucket: process.env.R2_PUBLIC_BUCKET_NAME!,
 		});
