@@ -110,6 +110,9 @@ model Vendor {
   Sales         Sales[]
   BankAccount   BankAccount?
 
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @updatedAt
+
   @@index([userId])
 }
 
@@ -119,6 +122,9 @@ model UPI {
   accountHolder String
   vendorId      Int    @unique
   vendor        Vendor @relation(references: [id], fields: [vendorId], onDelete: Cascade)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @updatedAt
 
   @@index([vendorId])
 }
@@ -131,6 +137,9 @@ model BankAccount {
   vendorId      Int    @unique
   vendor        Vendor @relation(references: [id], fields: [vendorId], onDelete: Cascade)
 
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @updatedAt
+
   @@index([vendorId])
 }
 
@@ -139,6 +148,9 @@ model KYC {
   pan      String @unique
   vendorId Int    @unique
   vendor   Vendor @relation(references: [id], fields: [vendorId], onDelete: Cascade)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @updatedAt
 
   @@index([vendorId])
 }
