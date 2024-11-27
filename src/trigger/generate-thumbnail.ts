@@ -1,4 +1,4 @@
-import { GetObjectCommand } from "@aws-sdk/client-s3";
+import { GetObjectCommand, HeadObjectCommand } from "@aws-sdk/client-s3";
 import sharp from "sharp";
 import { Readable, PassThrough } from "node:stream";
 import { Upload } from "@aws-sdk/lib-storage";
@@ -175,26 +175,53 @@ async function convertToWebp({
 	}
 }
 
+async function getFileSizeInBytes(
+	originalFileStorageKey: string,
+	bucket: string,
+): Promise<number | undefined> {
+	const headObject = await storage.send(
+		new HeadObjectCommand({
+			Key: originalFileStorageKey,
+			Bucket: bucket,
+		}),
+	);
+
+	return headObject.ContentLength;
+}
+
+const SIZE_THRESHOLD = 600 * 1024; // 600KB in bytes
+
 async function convertToJpeg({
 	originalFileStorageKey,
 	thumbnailStorageKey,
 	width,
-	quality,
 	sourceBucket,
 	destinationBucket,
 }: {
 	originalFileStorageKey: string;
 	thumbnailStorageKey: string;
 	width: number;
-	quality: number;
 	sourceBucket: string;
 	destinationBucket: string;
 }): Promise<void> {
 	try {
+		const fileSize = await getFileSizeInBytes(
+			originalFileStorageKey,
+			sourceBucket,
+		);
+
+		// Calculate quality based on file size
+		// 600KB is the maximum target size
+		const quality =
+			fileSize && fileSize > SIZE_THRESHOLD
+				? Math.floor((SIZE_THRESHOLD / (fileSize / 1024)) * 100)
+				: 75;
+
 		const readableStream = await getInputStreamFromS3(
 			originalFileStorageKey,
 			sourceBucket,
 		);
+
 		const transform = await sharp()
 			.metadata()
 			.then((metadata) => {
@@ -296,7 +323,6 @@ const run = async (payload: {
 			originalFileStorageKey: thumbnailStorageKey[1200],
 			thumbnailStorageKey: thumbnailStorageKey.social,
 			width: 1200,
-			quality: 75,
 			sourceBucket: process.env.R2_PUBLIC_BUCKET_NAME!,
 			destinationBucket: process.env.R2_PUBLIC_BUCKET_NAME!,
 		});
