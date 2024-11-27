@@ -2,10 +2,10 @@
 
 import { notFound, redirect } from "next/navigation";
 import type { Prisma } from "@prisma/client";
-import { errAsync, okAsync } from "neverthrow";
 
 import Cashfree from "@/lib/payments/cashfree";
 import { db } from "@/lib/db";
+import { err, ok } from "@/lib/result";
 import { getUserAuth } from "../auth/utils";
 import type { Prettify } from "../type-utils";
 
@@ -292,20 +292,20 @@ export async function toggleDesignPublish(designId: string) {
 		]);
 
 		if (!vendor) {
-			return errAsync("Please create a vendor profile before publishing");
+			return err("Please create a vendor profile before publishing");
 		}
 
 		if (!design) {
-			return errAsync("No such design found");
+			return err("No such design found");
 		}
 
 		// user is trying to publish
 		if (design.isDraft) {
 			if (!design.isUploadComplete) {
-				return errAsync("Design upload is not complete");
+				return err("Design upload is not complete");
 			}
 			if (!design.thumbnailFileStorageKey) {
-				return errAsync("Wait for thumbnail to be generated before publishing");
+				return err("Wait for thumbnail to be generated before publishing");
 			}
 		}
 
@@ -318,7 +318,7 @@ export async function toggleDesignPublish(designId: string) {
 					vendor.id.toString(),
 				);
 				if (result.data.status !== "ACTIVE") {
-					return errAsync(
+					return err(
 						"Your vendor account is not active, please reach out to support",
 					);
 				}
@@ -346,14 +346,14 @@ export async function toggleDesignPublish(designId: string) {
 			},
 		});
 
-		return okAsync({
+		return ok({
 			...published,
 			metadata: {
 				fileDPI: (published.metadata as FileMetadata).fileDPI,
 			},
 		});
 	} catch (error) {
-		return errAsync("Something went wrong, please try again");
+		return err("Something went wrong, please try again");
 	}
 }
 

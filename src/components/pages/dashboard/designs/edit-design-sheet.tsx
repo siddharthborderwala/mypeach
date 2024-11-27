@@ -15,6 +15,7 @@ import { toast } from "sonner";
 import { toggleDesignPublish } from "@/lib/actions/designs";
 import { queryClient } from "@/app/global-query-client";
 import { Spinner } from "@/components/spinner";
+import { isErr } from "@/lib/result";
 
 const formatDate = (date: Date | string) => {
 	return new Date(date).toLocaleDateString("en", {
@@ -35,7 +36,7 @@ const OtherDetails = ({
 		mutationKey: ["togglePublish", editDesignDetails.id],
 		mutationFn: async () => {
 			const result = await toggleDesignPublish(editDesignDetails.id);
-			if (result.isErr()) {
+			if (isErr(result)) {
 				throw new Error(result.error);
 			}
 			return result.value;
