@@ -112,6 +112,11 @@ async function uploadToPublicBucket(
 	key: string,
 	bucket: string,
 ): Promise<void> {
+	logger.info("Uploading to public bucket", {
+		key,
+		sizeInBytes: (await transform.metadata()).size,
+	});
+
 	const upload = new Upload({
 		client: storage,
 		params: {
@@ -292,6 +297,7 @@ const run = async (payload: {
 	);
 
 	try {
+		logger.info("Generating 1200w WebP");
 		// Generate 1200w WebP
 		await convertToWebp({
 			originalFileStorageKey: payload.originalFileStorageKey,
@@ -303,6 +309,7 @@ const run = async (payload: {
 			addWatermark: false,
 		});
 
+		logger.info("Generating 600w WebP from 1200w WebP");
 		// Generate 600w WebP from 1200w WebP
 		await convertToWebp({
 			originalFileStorageKey: thumbnailStorageKey[1200],
@@ -314,6 +321,7 @@ const run = async (payload: {
 			addWatermark: false,
 		});
 
+		logger.info("Generating 1200w JPEG for social sharing from 1200w WebP");
 		// Generate 1200w JPEG for social sharing from 1200w WebP
 		await convertToJpeg({
 			originalFileStorageKey: thumbnailStorageKey[1200],
@@ -323,6 +331,7 @@ const run = async (payload: {
 			destinationBucket: process.env.R2_PUBLIC_BUCKET_NAME!,
 		});
 
+		logger.info("Updating design record with thumbnail file storage key");
 		await updateDesignRecord(payload.designId, thumbnailStorageKey.folder);
 
 		logger.info("generateThumbnailTask completed successfully", {
