@@ -36,7 +36,11 @@ const OtherDetails = ({
 	const { mutate: togglePublish, isPending } = useMutation({
 		mutationKey: ["togglePublish", editDesignDetails.id],
 		mutationFn: async () => {
-			return await toggleDesignPublish(editDesignDetails.id);
+			const result = await toggleDesignPublish(editDesignDetails.id);
+			if (result.isErr()) {
+				throw new Error(result.error);
+			}
+			return result.value;
 		},
 		onSuccess: (data) => {
 			setEditDesignDetails(data);

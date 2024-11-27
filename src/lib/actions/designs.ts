@@ -7,6 +7,7 @@ import Cashfree from "@/lib/payments/cashfree";
 import { db, PrismaError, TxError } from "@/lib/db";
 import { getUserAuth } from "../auth/utils";
 import type { Prettify } from "../type-utils";
+import { err, errAsync, okAsync, ResultAsync } from "neverthrow";
 
 export async function getCurrentUserDesigns(
 	options?: {
@@ -282,23 +283,29 @@ export async function toggleDesignPublish(designId: string) {
 
 	try {
 		const [vendor, design] = await db.$transaction([
-			db.vendor.findUniqueOrThrow({
+			db.vendor.findUnique({
 				where: { userId: session.user.id },
 			}),
-			db.design.findUniqueOrThrow({
+			db.design.findUnique({
 				where: { id: designId },
 			}),
 		]);
 
+		if (!vendor) {
+			return errAsync("Please create a vendor profile before publishing");
+		}
+
+		if (!design) {
+			return errAsync("No such design found");
+		}
+
 		// user is trying to publish
 		if (design.isDraft) {
 			if (!design.isUploadComplete) {
-				throw new TxError("Design upload is not complete");
+				return errAsync("Design upload is not complete");
 			}
 			if (!design.thumbnailFileStorageKey) {
-				throw new TxError(
-					"Wait for thumbnail to be generated before publishing",
-				);
+				return errAsync("Wait for thumbnail to be generated before publishing");
 			}
 		}
 
@@ -311,7 +318,7 @@ export async function toggleDesignPublish(designId: string) {
 					vendor.id.toString(),
 				);
 				if (result.data.status !== "ACTIVE") {
-					throw new TxError(
+					return errAsync(
 						"Your vendor account is not active, please reach out to support",
 					);
 				}
@@ -339,24 +346,14 @@ export async function toggleDesignPublish(designId: string) {
 			},
 		});
 
-		return {
+		return okAsync({
 			...published,
 			metadata: {
 				fileDPI: (published.metadata as FileMetadata).fileDPI,
 			},
-		};
+		});
 	} catch (error) {
-		if (error instanceof PrismaError && error.code === "P2025") {
-			if (typeof error.meta?.target === "string") {
-				if (error.meta?.target.includes("design")) {
-					throw new TxError("Design not found");
-				}
-				if (error.meta?.target.includes("vendor")) {
-					throw new TxError("Vendor not found");
-				}
-			}
-		}
-		throw error;
+		return errAsync("Something went wrong, please try again");
 	}
 }
 
