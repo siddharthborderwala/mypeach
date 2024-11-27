@@ -213,7 +213,7 @@ async function convertToJpeg({
 
 	if (originalFileSizeInBytes && originalFileSizeInBytes > THRESHOLD_600_KB) {
 		finalQuality = Math.floor(
-			(THRESHOLD_600_KB / originalFileSizeInBytes) * 100,
+			(THRESHOLD_600_KB / originalFileSizeInBytes) * 80,
 		);
 	}
 
