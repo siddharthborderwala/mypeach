@@ -33,7 +33,7 @@ export function VendorForm({
 	const { mutateAsync: createVendorProfile, error: createVendorProfileError } =
 		useMutation({
 			mutationKey: ["create-vendor-profile"],
-			mutationFn: ({
+			mutationFn: async ({
 				phone,
 				bankAccount,
 				kyc,
@@ -46,7 +46,7 @@ export function VendorForm({
 				};
 				kyc: { pan: string };
 			}) => {
-				return fetch("/api/vendor", {
+				const res = await fetch("/api/vendor", {
 					method: "POST",
 					body: JSON.stringify({
 						phone,
@@ -54,6 +54,14 @@ export function VendorForm({
 						kyc,
 					}),
 				});
+
+				const data = await res.json();
+
+				if (!res.ok) {
+					throw new Error(data.error);
+				}
+
+				return data;
 			},
 			onSuccess: () => {
 				toast.success(
@@ -73,7 +81,6 @@ export function VendorForm({
 						position: "bottom-left",
 					},
 				);
-
 				setTimeout(() => {
 					// Refresh the page to reflect the changes
 					window.location.reload();

@@ -1,10 +1,12 @@
 import type { AxiosError } from "axios";
 import { NextResponse } from "next/server";
+
 import type { CreateVendorRequest, KycDetails, BankDetails } from "cashfree-pg";
 import { z } from "zod";
 import { getUserAuth } from "@/lib/auth/utils";
-import { db } from "@/lib/db";
+import { db, PrismaError } from "@/lib/db";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
+import type { Maybe } from "@/lib/type-utils";
 import Cashfree from "@/lib/payments/cashfree";
 
 interface VendorRequest
@@ -174,8 +176,27 @@ export async function POST(request: Request) {
 			});
 		}
 
+		if (error instanceof PrismaError) {
+			// Check if unique constraint failed error (e.g. duplicate vendor)
+			if (error.code === "P2002") {
+				if ((error.meta?.field_name as Maybe<string>)?.includes("userId")) {
+					return NextResponse.json(
+						{ error: "A vendor already exists for this user" },
+						{ status: 409 },
+					);
+				}
+				if ((error.meta?.field_name as Maybe<string>)?.includes("phone")) {
+					return NextResponse.json(
+						{ error: "A vendor with this phone number already exists" },
+						{ status: 409 },
+					);
+				}
+			}
+		}
+
+		console.error(error);
 		return NextResponse.json(
-			{ error: (error as Error).message },
+			{ error: "Sorry, we could not process your request" },
 			{ status: 500 },
 		);
 	}
