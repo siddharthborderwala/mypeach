@@ -5,12 +5,15 @@ import {
 	keepPreviousData,
 	useInfiniteQuery,
 	useMutation,
+	useQuery,
 } from "@tanstack/react-query";
 import {
 	getCollectionDesigns,
 	removeManyDesignsFromCollection,
 	type CollectionData,
 	type CollectionDesignsData,
+	toggleCollectionIsPublic,
+	getCollectionById,
 } from "@/lib/actions/collections";
 import { AddDesigns } from "../add-designs";
 import { InfiniteScrollCollectionItems } from "./infinite-scroll-collection-items";
@@ -35,6 +38,8 @@ import {
 import { toast } from "sonner";
 import { Spinner } from "@/components/spinner";
 import { queryClient } from "@/app/global-query-client";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 
 export function AllCollectionItems({
 	initialData,
@@ -43,11 +48,25 @@ export function AllCollectionItems({
 	initialData: CollectionDesignsData;
 	collection: NonNullable<CollectionData>;
 }) {
+	const collectionId = collection.id;
+
 	const [isSelectDesignsMode, setIsSelectDesignsMode] = useState(false);
 	const [selectedDesigns, setSelectedDesigns] = useState<string[]>([]);
 	const [isRemoveDesignsDialogOpen, setIsRemoveDesignsDialogOpen] =
 		useState(false);
-	const collectionId = collection.id;
+
+	const { data: collectionData } = useQuery({
+		queryKey: ["collection", collectionId],
+		queryFn: async () => {
+			const collection = await getCollectionById(collectionId);
+			if (!collection) {
+				throw new Error("Collection not found");
+			}
+			return collection;
+		},
+		placeholderData: keepPreviousData,
+		initialData: collection,
+	});
 
 	const {
 		data: allDesigns,
@@ -93,6 +112,25 @@ export function AllCollectionItems({
 		},
 	});
 
+	const { mutate: toggleIsPublic, isPending: isTogglingPublic } = useMutation({
+		mutationKey: ["toggle-collection-public", collectionId],
+		mutationFn: (isPublic: boolean) =>
+			toggleCollectionIsPublic(collectionId, isPublic),
+		onSuccess: (data) => {
+			toast.success(
+				`Collection is now ${data.isPublic ? "public" : "private"}`,
+			);
+		},
+		onError: () => {
+			toast.error("Failed to update collection visibility");
+		},
+		onSettled: () => {
+			queryClient.invalidateQueries({
+				queryKey: ["collection", collectionId],
+			});
+		},
+	});
+
 	const handleRemoveDesigns = useCallback(() => {
 		removeManyDesignsFromCollectionFn(selectedDesigns);
 	}, [removeManyDesignsFromCollectionFn, selectedDesigns]);
@@ -103,19 +141,30 @@ export function AllCollectionItems({
 
 	return (
 		<main className="relative flex h-[calc(100svh-3.5rem)] flex-col gap-4 md:gap-6">
-			<div className="flex items-start justify-between pt-4 px-4 md:pt-8 md:px-8">
+			<div className="flex items-center justify-between pt-4 px-4 md:pt-8 md:px-8">
 				<div>
 					<Button variant="link" className="h-auto p-0 text-sm">
 						<Link href="/collections">All Collections</Link>
 					</Button>
-					<h1 className="text-lg font-semibold md:text-2xl">
-						{collection.name}
-					</h1>
+					<div className="flex items-end gap-4">
+						<h1 className="text-lg font-semibold md:text-2xl">
+							{collectionData.name}
+						</h1>
+						<div className="flex items-center space-x-2 mb-1">
+							<Switch
+								id="public"
+								checked={collectionData.isPublic}
+								disabled={isTogglingPublic}
+								onCheckedChange={(checked) => toggleIsPublic(checked)}
+							/>
+							<Label htmlFor="public">Public</Label>
+						</div>
+					</div>
 				</div>
 				<div className="flex items-center gap-2">
 					<Button
-						size="sm"
 						variant="outline"
+						className="text-sm"
 						onClick={() => setIsSelectDesignsMode((prev) => !prev)}
 					>
 						{isSelectDesignsMode ? "Cancel" : "Select Designs"}
@@ -128,8 +177,13 @@ export function AllCollectionItems({
 							<Tooltip>
 								<DialogTrigger asChild>
 									<TooltipTrigger asChild>
-										<Button size="sm" variant="destructive">
+										<Button
+											disabled={selectedDesigns.length === 0}
+											variant="destructive"
+											className="gap-2"
+										>
 											<TrashSimple weight="bold" className="" />
+											<span>Remove</span>
 										</Button>
 									</TooltipTrigger>
 								</DialogTrigger>

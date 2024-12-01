@@ -15,7 +15,7 @@ import { toast } from "sonner";
 import { toggleDesignPublish } from "@/lib/actions/designs";
 import { queryClient } from "@/app/global-query-client";
 import { Spinner } from "@/components/spinner";
-import { isErr } from "@/lib/result";
+import { isErr, unwrapPromise } from "@/lib/result";
 
 const formatDate = (date: Date | string) => {
 	return new Date(date).toLocaleDateString("en", {
@@ -34,13 +34,7 @@ const OtherDetails = ({
 
 	const { mutate: togglePublish, isPending } = useMutation({
 		mutationKey: ["togglePublish", editDesignDetails.id],
-		mutationFn: async () => {
-			const result = await toggleDesignPublish(editDesignDetails.id);
-			if (isErr(result)) {
-				throw new Error(result.error);
-			}
-			return result.value;
-		},
+		mutationFn: () => unwrapPromise(toggleDesignPublish(editDesignDetails.id)),
 		onSuccess: (data) => {
 			setEditDesignDetails(data);
 			queryClient.invalidateQueries({ queryKey: ["designs"] });

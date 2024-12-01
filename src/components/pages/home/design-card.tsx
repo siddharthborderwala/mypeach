@@ -123,17 +123,25 @@ const DesignCard_ = ({
 	design,
 	className,
 	style,
+	disableModal,
 }: {
 	design: ExploreDesign;
 	className?: string;
 	style?: React.CSSProperties;
+	disableModal?: boolean;
 }) => {
 	const [isModalOpen, setIsModalOpen] = useState(false);
 	const isMobile = useMediaQuery("(max-width: 768px)");
 
 	return (
 		<Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-			<DialogTrigger className={cn("text-left", className)} style={style}>
+			<DialogTrigger
+				className={cn("text-left", className, {
+					"pointer-events-none opacity-100": disableModal,
+				})}
+				style={style}
+				disabled={disableModal}
+			>
 				<DesignCardView design={design} />
 			</DialogTrigger>
 			{isMobile ? (

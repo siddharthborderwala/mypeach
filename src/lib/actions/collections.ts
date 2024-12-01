@@ -1,6 +1,6 @@
 "use server";
 
-import { db, PrismaError } from "@/lib/db";
+import { db, PrismaError, TxError } from "@/lib/db";
 import type { Prisma } from "@prisma/client";
 import { redirect } from "next/navigation";
 import { getUserAuth } from "../auth/utils";
@@ -8,6 +8,7 @@ import type { FileMetadata } from "./designs";
 import { generateId } from "lucia";
 import { z } from "zod";
 import { formatFlattenedErrors } from "../utils";
+import { err, ok } from "../result";
 
 export async function getCurrentUserCollectionsList(
 	options?: {
@@ -86,11 +87,43 @@ export type UserCollectionsListData = Awaited<
 export type UserCollectionsList = UserCollectionsListData["collections"];
 
 export async function getCollectionById(id: string) {
+	const { session } = await getUserAuth();
+
 	const collection = await db.collection.findUnique({
 		where: { id },
 		include: {
-			collectionItems: false,
+			user: {
+				select: {
+					username: true,
+				},
+			},
 		},
+	});
+
+	if (
+		!collection ||
+		(!collection.isPublic && collection.userId !== session?.user.id)
+	) {
+		return undefined;
+	}
+
+	return collection;
+}
+
+export async function toggleCollectionIsPublic(id: string, isPublic: boolean) {
+	const { session } = await getUserAuth();
+
+	if (!session) {
+		redirect("/login");
+	}
+
+	const collection = await db.$transaction(async (tx) => {
+		const collection = await tx.collection.update({
+			where: { id, userId: session.user.id },
+			data: { isPublic },
+		});
+
+		return collection;
 	});
 
 	return collection;
@@ -108,14 +141,19 @@ export async function getCollectionDesigns(
 	const cursor = pagination?.cursor;
 	const take = pagination?.take ?? 24;
 
-	const { session } = await getUserAuth();
+	const collection = await getCollectionById(collectionId);
 
-	if (!session) {
-		redirect("/login");
+	if (!collection) {
+		throw new Error("Collection not found");
 	}
 
 	const designs = await db.collectionItem.findMany({
-		where: { collectionId },
+		where: {
+			collectionId,
+			design: {
+				isSoftDeleted: false,
+			},
+		},
 		include: {
 			design: {
 				include: {
@@ -197,16 +235,20 @@ export async function addDesignToCollection(
 			});
 
 			if (!collection) {
-				throw new Error("Collection not found or unauthorized");
+				throw new TxError("Collection not found");
 			}
 
 			// Check if the design exists
 			const design = await tx.design.findUnique({
-				where: { id: designId },
+				where: { id: designId, isSoftDeleted: false },
 			});
 
 			if (!design) {
-				throw new Error("Design not found");
+				throw new TxError("Design not found");
+			}
+
+			if (design.isDraft) {
+				throw new TxError("Cannot add draft design to collection");
 			}
 
 			// Add the design to the collection
@@ -223,15 +265,19 @@ export async function addDesignToCollection(
 			};
 		});
 
-		return collectionItem;
+		return ok(collectionItem);
 	} catch (error) {
 		if (error instanceof PrismaError) {
 			// Handle unique constraint violation
 			if (error.code === "P2002") {
-				throw new Error("Design is already in the collection");
+				return err("Design is already in the collection");
 			}
 		}
-		throw error;
+		if (error instanceof TxError) {
+			return err(error.message);
+		}
+		console.error(error);
+		return err("Sorry, we couldn't add the design to the collection");
 	}
 }
 
@@ -340,7 +386,7 @@ export async function removeDesignFromCollection(
 	});
 
 	if (!validatedData.success) {
-		throw new Error(formatFlattenedErrors(validatedData.error.flatten()));
+		return err(formatFlattenedErrors(validatedData.error.flatten()));
 	}
 
 	// Delete the collection item
@@ -363,7 +409,7 @@ export async function removeDesignFromCollection(
 		},
 	});
 
-	return collectionItem.collection;
+	return ok(collectionItem.collection);
 }
 
 // Update the return type to reflect the possibility of null

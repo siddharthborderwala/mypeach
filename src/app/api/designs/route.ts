@@ -258,6 +258,9 @@ export async function DELETE(request: Request) {
 					where: { id: designId },
 					data: { isSoftDeleted: true },
 				});
+				await tx.collectionItem.deleteMany({
+					where: { designId },
+				});
 				return null;
 			}
 

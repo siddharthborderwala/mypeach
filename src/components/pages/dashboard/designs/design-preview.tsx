@@ -6,8 +6,6 @@ import { getDesignThumbnailURL } from "@/lib/storage/util";
 import { parseAsString, useQueryState } from "nuqs";
 import { Badge } from "@/components/ui/badge";
 import { useUploadContext } from "./upload-context";
-import Separator from "@/components/ui/separator";
-import { Trash } from "@phosphor-icons/react/dist/ssr";
 import {
 	Dialog,
 	DialogContent,
@@ -15,8 +13,25 @@ import {
 	DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { memo, useState } from "react";
+import { memo, useState, useCallback } from "react";
 import { useDeleteDesign } from "@/hooks/dashboard";
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuTrigger,
+	DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
+import { toast } from "sonner";
+import { appBaseURL, isMobileUA } from "@/lib/utils";
+import {
+	CaretDown,
+	DotsThreeVertical,
+	Export,
+	FolderPlus,
+	Trash,
+} from "@phosphor-icons/react";
+import { CollectionsPopover } from "@/components/collections-popover";
+import { NewCollectionModal } from "@/components/new-collection-modal";
 
 function DesignPreview_({
 	design,
@@ -26,8 +41,34 @@ function DesignPreview_({
 	const [, setDesign] = useQueryState("design", parseAsString);
 	const { newDesignId, setEditDesignDetails } = useUploadContext();
 	const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+	const [showCollectionsPopover, setShowCollectionsPopover] = useState(false);
+	const [isNewCollectionModalOpen, setIsNewCollectionModalOpen] =
+		useState(false);
 
 	const { mutate, isPending } = useDeleteDesign();
+
+	const handleShare = useCallback(() => {
+		const designURL = `${appBaseURL}/d/${design.id}`;
+		const isMobile = isMobileUA(navigator.userAgent);
+
+		if (navigator.share && isMobile) {
+			navigator
+				.share({
+					url: designURL,
+				})
+				.catch(() => {
+					navigator.clipboard
+						.writeText(designURL)
+						.then(() => toast.success("Copied URL to clipboard"))
+						.catch(() => toast.error("Failed to copy URL to clipboard"));
+				});
+		} else {
+			navigator.clipboard
+				.writeText(designURL)
+				.then(() => toast.success("Copied URL to clipboard"))
+				.catch(() => toast.error("Failed to copy URL to clipboard"));
+		}
+	}, [design.id]);
 
 	return (
 		<>
@@ -45,28 +86,73 @@ function DesignPreview_({
 					width="100%"
 					className="aspect-square rounded flex items-center justify-center select-none pointer-events-none object-cover"
 				/>
-				<div className="flex flex-col mt-2 text-left">
-					<div className="flex items-center justify-between">
-						<h3 className="font-semibold truncate">{design.name}</h3>
-						{newDesignId === design.id && <Badge>Uploading</Badge>}
+				<div className="flex mt-2">
+					<div className="flex flex-col text-left flex-1">
+						<p className="text-sm font-medium truncate">
+							{design.originalFileName}
+						</p>
+						<div className="flex items-center justify-between mt-1">
+							{newDesignId === design.id ? (
+								<Badge>Uploading</Badge>
+							) : (
+								<Badge variant={design.isDraft ? "warning" : "success"}>
+									{design.isDraft ? "Draft" : "Published"}
+								</Badge>
+							)}
+						</div>
 					</div>
-					<p className="text-sm text-muted-foreground truncate">
-						{design.originalFileName}
-					</p>
-				</div>
-				<Separator />
-				<div className="mt-3 flex justify-between">
-					<Badge variant={design.isDraft ? "warning" : "success"}>
-						{design.isDraft ? "Draft" : "Published"}
-					</Badge>
-					<Trash
-						size={18}
-						weight="regular"
-						onClick={(e) => {
-							e.stopPropagation();
-							setShowDeleteDialog(true);
-						}}
-					/>
+					<DropdownMenu modal={true}>
+						<DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+							<Button variant="outline" size="sm" className="h-8 w-8 p-0">
+								<DotsThreeVertical weight="bold" className="h-4 w-4" />
+							</Button>
+						</DropdownMenuTrigger>
+						<DropdownMenuContent align="end">
+							<DropdownMenuItem
+								disabled={isPending || design.isDraft}
+								onClick={(e) => {
+									e.stopPropagation();
+									handleShare();
+								}}
+							>
+								<Export className="mr-2 h-4 w-4" />
+								Share URL
+							</DropdownMenuItem>
+							<CollectionsPopover
+								open={showCollectionsPopover}
+								onOpenChange={setShowCollectionsPopover}
+								designToAdd={design.id}
+								onCreateNewCollection={() => {
+									setShowCollectionsPopover(false);
+									setIsNewCollectionModalOpen(true);
+								}}
+							>
+								{() => (
+									<DropdownMenuItem
+										disabled={isPending || design.isDraft}
+										onClick={(e) => {
+											e.stopPropagation();
+											setShowCollectionsPopover(true);
+											e.preventDefault();
+										}}
+									>
+										<FolderPlus className="mr-2 h-4 w-4" />
+										Add to Collection
+									</DropdownMenuItem>
+								)}
+							</CollectionsPopover>
+							<DropdownMenuItem
+								className="text-destructive"
+								onClick={(e) => {
+									e.stopPropagation();
+									setShowDeleteDialog(true);
+								}}
+							>
+								<Trash className="mr-2 h-4 w-4" />
+								Delete
+							</DropdownMenuItem>
+						</DropdownMenuContent>
+					</DropdownMenu>
 				</div>
 			</button>
 			<Dialog open={showDeleteDialog}>
@@ -105,6 +191,11 @@ function DesignPreview_({
 					</div>
 				</DialogContent>
 			</Dialog>
+			<NewCollectionModal
+				firstDesign={design}
+				open={isNewCollectionModalOpen}
+				onOpenChange={setIsNewCollectionModalOpen}
+			/>
 		</>
 	);
 }

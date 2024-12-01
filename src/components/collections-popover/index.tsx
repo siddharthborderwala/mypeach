@@ -29,6 +29,7 @@ import {
 import { useDebounce } from "@/hooks/use-debounce";
 import { Button } from "../ui/button";
 import { useAuth } from "@/contexts/auth";
+import { isErr, unwrap, unwrapPromise } from "@/lib/result";
 
 export function CollectionsPopover({
 	open,
@@ -92,9 +93,8 @@ export function CollectionsPopover({
 		isPending: isAddingDesignToCollection,
 	} = useMutation({
 		mutationKey: ["add-design-to-collection", designToAdd],
-		mutationFn: (collectionId: string) => {
-			return addDesignToCollection(designToAdd, collectionId);
-		},
+		mutationFn: (collectionId: string) =>
+			unwrapPromise(addDesignToCollection(designToAdd, collectionId)),
 		onSuccess: (data) => {
 			refetch();
 			refetchCollectionsInWhichDesignIs();
@@ -110,9 +110,8 @@ export function CollectionsPopover({
 		isPending: isRemovingDesignFromCollection,
 	} = useMutation({
 		mutationKey: ["remove-design-from-collection", designToAdd],
-		mutationFn: (collectionId: string) => {
-			return removeDesignFromCollection(designToAdd, collectionId);
-		},
+		mutationFn: (collectionId: string) =>
+			unwrapPromise(removeDesignFromCollection(designToAdd, collectionId)),
 		onSuccess: (data) => {
 			refetch();
 			refetchCollectionsInWhichDesignIs();
@@ -161,7 +160,11 @@ export function CollectionsPopover({
 				})}
 			</PopoverTrigger>
 			<PopoverContent
+				side="right"
 				onWheel={(e) => e.preventDefault()}
+				onClick={(e) => {
+					e.stopPropagation();
+				}}
 				className="h-auto py-4 px-0 rounded-xl relative"
 			>
 				<div>

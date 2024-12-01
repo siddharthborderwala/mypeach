@@ -1,12 +1,25 @@
 "use server";
 
+import axios from "axios";
+import { cookies } from "next/headers";
 import { db } from "@/lib/db";
 import { getUserId } from "../auth/utils";
 import type { FileMetadata } from "./designs";
 import { CartStatus } from "../db/schema/cart";
-import axios from "axios";
 import { appBaseURL } from "../utils";
-import { cookies } from "next/headers";
+
+async function deleteOrder(orderId: number | undefined) {
+	if (!orderId) return;
+	try {
+		await axios.delete(`${appBaseURL}/api/order?order_id=${orderId}`, {
+			headers: {
+				cookie: cookies().toString(),
+			},
+		});
+	} catch (error) {
+		console.error(error);
+	}
+}
 
 export async function addItemAction(designId: string) {
 	const userId = await getUserId();
@@ -52,13 +65,7 @@ export async function addItemAction(designId: string) {
 		return { order };
 	});
 
-	if (data.order?.id) {
-		await axios.delete(`${appBaseURL}/api/order?order_id=${data.order.id}`, {
-			headers: {
-				cookie: cookies().toString(),
-			},
-		});
-	}
+	await deleteOrder(data.order?.id);
 
 	return null;
 }
@@ -95,13 +102,7 @@ export async function removeItemAction(designId: string) {
 		return { order };
 	});
 
-	if (data?.order?.id) {
-		await axios.delete(`${appBaseURL}/api/order?order_id=${data.order.id}`, {
-			headers: {
-				cookie: cookies().toString(),
-			},
-		});
-	}
+	await deleteOrder(data?.order?.id);
 
 	return null;
 }
@@ -167,3 +168,85 @@ export async function getActiveCartAndProducts() {
 export type ActiveCartAndProducts = Awaited<
 	ReturnType<typeof getActiveCartAndProducts>
 >;
+
+export async function addItemsAction(designIds: string[]) {
+	const userId = await getUserId();
+
+	const data = await db.$transaction(async (tx) => {
+		// 1. check if there is a cart for the user, if not create one
+		const _cart = await tx.cart.findFirst({
+			where: {
+				userId,
+				status: CartStatus.ACTIVE,
+			},
+		});
+
+		const cart = !_cart
+			? await tx.cart.create({
+					data: {
+						userId,
+					},
+				})
+			: _cart;
+
+		// get order if it exists
+		const order = await tx.order.findFirst({
+			where: {
+				cartId: cart.id,
+			},
+		});
+
+		// Create all cart products in a single transaction
+		await tx.cartProduct.createMany({
+			data: designIds.map((designId) => ({
+				cartId: cart.id,
+				designId,
+			})),
+			skipDuplicates: true, // Skips records that would cause unique constraint violations
+		});
+
+		return { order };
+	});
+
+	await deleteOrder(data.order?.id);
+
+	return null;
+}
+
+export async function removeItemsAction(designIds: string[]) {
+	const userId = await getUserId();
+
+	const data = await db.$transaction(async (tx) => {
+		const cart = await tx.cart.findFirst({
+			where: {
+				userId,
+				status: CartStatus.ACTIVE,
+			},
+		});
+
+		if (!cart) return;
+
+		// get order if it exists
+		const order = await tx.order.findFirst({
+			where: {
+				cartId: cart.id,
+			},
+		});
+
+		// Delete multiple cart products in a single transaction
+		await tx.cartProduct.deleteMany({
+			where: {
+				cartId: cart.id,
+				designId: {
+					in: designIds,
+				},
+			},
+		});
+
+		return { order };
+	});
+
+	await deleteOrder(data?.order?.id);
+
+	return null;
+}

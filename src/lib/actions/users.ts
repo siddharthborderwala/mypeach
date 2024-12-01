@@ -10,11 +10,7 @@ import { z } from "zod";
 import { cookies } from "next/headers";
 
 import { lucia, validateRequest } from "../auth/lucia";
-import {
-	clearSessionCookie,
-	setCookie,
-	validateAuthFormData,
-} from "../auth/utils";
+import { clearSessionCookie, setCookie } from "../auth/utils";
 
 import { generateUsername } from "../username";
 import { emailVerificationTask } from "@/trigger/email-verification";
