@@ -384,16 +384,16 @@ export const getGenerateThumbnailTask = (fileSizeInBytes: number) => {
 	if (fileSizeInBytes < MB(150)) {
 		return generateThumbnailTaskSmall;
 	}
-	// upto 400MB
-	if (fileSizeInBytes < MB(400)) {
+	// upto 300MB
+	if (fileSizeInBytes < MB(300)) {
 		return generateThumbnailTaskMedium1;
 	}
-	// upto 800MB
-	if (fileSizeInBytes < MB(800)) {
+	// upto 600MB
+	if (fileSizeInBytes < MB(600)) {
 		return generateThumbnailTaskMedium2;
 	}
-	// upto 1600MB
-	if (fileSizeInBytes < MB(1600)) {
+	// upto 1200MB
+	if (fileSizeInBytes < MB(1200)) {
 		return generateThumbnailTaskLarge1;
 	}
 	// upto 2400MB
