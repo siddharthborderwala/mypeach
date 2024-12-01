@@ -96,7 +96,12 @@ export function formatFlattenedErrors<T>(errors: z.typeToFlattenedError<T>) {
 		.join(", ");
 }
 
-const oneMB = 1024 * 1024;
+const oneMiB = 1024 * 1024;
+const oneMB = 1000 * 1000;
+
+export function MiB(value: number) {
+	return value * oneMiB;
+}
 
 export function MB(value: number) {
 	return value * oneMB;
