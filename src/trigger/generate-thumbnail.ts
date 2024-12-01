@@ -111,6 +111,7 @@ async function uploadToPublicBucket(
 	transform: sharp.Sharp,
 	key: string,
 	bucket: string,
+	contentType: string,
 ): Promise<void> {
 	const passThrough = new PassThrough();
 
@@ -122,7 +123,34 @@ async function uploadToPublicBucket(
 			Bucket: bucket,
 			Key: key,
 			Body: passThrough,
-			ContentType: "image/webp",
+			ContentType: contentType,
+			ACL: "public-read",
+		},
+	});
+
+	upload.on("httpUploadProgress", (progress) => {
+		logger.info("Upload progress:", {
+			loaded: progress.loaded,
+			total: progress.total,
+		});
+	});
+
+	await upload.done();
+}
+
+async function directUploadToPublicBucket(
+	readableStream: Readable,
+	key: string,
+	bucket: string,
+	contentType: string,
+): Promise<void> {
+	const upload = new Upload({
+		client: storage,
+		params: {
+			Bucket: bucket,
+			Key: key,
+			Body: readableStream,
+			ContentType: contentType,
 			ACL: "public-read",
 		},
 	});
@@ -166,6 +194,7 @@ async function convertToWebp({
 			transform,
 			thumbnailStorageKey,
 			destinationBucket,
+			"image/webp",
 		);
 	} finally {
 		if (transform) {
@@ -173,20 +202,6 @@ async function convertToWebp({
 			transform.destroy();
 		}
 	}
-}
-
-async function getFileSizeInBytes(
-	originalFileStorageKey: string,
-	bucket: string,
-): Promise<number | undefined> {
-	const headObjectResponse = await storage.send(
-		new HeadObjectCommand({
-			Key: originalFileStorageKey,
-			Bucket: bucket,
-		}),
-	);
-
-	return headObjectResponse.ContentLength;
 }
 
 const THRESHOLD_600_KiB = 600 * 1024;
@@ -212,42 +227,38 @@ async function convertToJpeg({
 			sourceBucket,
 		);
 
-		let transform = sharp()
+		const transform = sharp()
 			.resize({
 				width: width,
-				height: 10000, // Constrain height for JPEG as well
+				height: 10000,
 				fit: "inside",
 				withoutEnlargement: true,
 			})
 			.jpeg({ quality, mozjpeg: true, progressive: true });
 
 		// Process the actual image data and get the buffer
-		const buffer = await readableStream.pipe(transform).toBuffer();
+		let buffer = await readableStream.pipe(transform).toBuffer();
 
+		// If buffer is too large, recompress with lower quality
 		if (buffer.byteLength > THRESHOLD_600_KiB) {
 			const newQuality = Math.floor(
 				(THRESHOLD_600_KiB / buffer.byteLength) * 90,
 			);
 
-			// Create a new transform with adjusted quality
-			transform = sharp(buffer).jpeg({
-				quality: newQuality,
-				mozjpeg: true,
-				progressive: true,
-			});
-		} else {
-			// If size is okay, create new transform from the original buffer
-			transform = sharp(buffer);
+			buffer = await sharp(buffer)
+				.jpeg({
+					quality: newQuality,
+					mozjpeg: true,
+					progressive: true,
+				})
+				.toBuffer();
 		}
 
-		// Create a new readable stream from the buffer
-		const finalReadableStream = Readable.from(buffer);
-
-		await uploadToPublicBucket(
-			finalReadableStream,
-			transform,
+		await directUploadToPublicBucket(
+			Readable.from(buffer),
 			thumbnailStorageKey,
 			destinationBucket,
+			"image/jpeg",
 		);
 	} catch (error) {
 		logger.error(`Error in convertToJpeg for ${width}w:`, {
