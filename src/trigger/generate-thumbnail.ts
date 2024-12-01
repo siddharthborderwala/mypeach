@@ -189,7 +189,7 @@ async function getFileSizeInBytes(
 	return headObjectResponse.ContentLength;
 }
 
-const THRESHOLD_600_KB = 600 * 1024;
+const THRESHOLD_600_KiB = 600 * 1024;
 
 async function convertToJpeg({
 	originalFileStorageKey,
@@ -204,34 +204,47 @@ async function convertToJpeg({
 	sourceBucket: string;
 	destinationBucket: string;
 }): Promise<void> {
-	const originalFileSizeInBytes = await getFileSizeInBytes(
-		originalFileStorageKey,
-		sourceBucket,
-	);
-
-	let finalQuality = 100;
-
-	if (originalFileSizeInBytes && originalFileSizeInBytes > THRESHOLD_600_KB) {
-		finalQuality = Math.floor(
-			(THRESHOLD_600_KB / originalFileSizeInBytes) * 80,
-		);
-	}
+	const quality = 100;
 
 	try {
 		const readableStream = await getInputStreamFromS3(
 			originalFileStorageKey,
 			sourceBucket,
 		);
-		const transform = sharp()
+
+		let transform = sharp()
 			.resize({
 				width: width,
 				height: 10000, // Constrain height for JPEG as well
 				fit: "inside",
 				withoutEnlargement: true,
 			})
-			.jpeg({ quality: finalQuality, mozjpeg: true, progressive: true });
+			.jpeg({ quality, mozjpeg: true, progressive: true });
+
+		// Process the actual image data and get the buffer
+		const buffer = await readableStream.pipe(transform).toBuffer();
+
+		if (buffer.byteLength > THRESHOLD_600_KiB) {
+			const newQuality = Math.floor(
+				(THRESHOLD_600_KiB / buffer.byteLength) * 90,
+			);
+
+			// Create a new transform with adjusted quality
+			transform = sharp(buffer).jpeg({
+				quality: newQuality,
+				mozjpeg: true,
+				progressive: true,
+			});
+		} else {
+			// If size is okay, create new transform from the original buffer
+			transform = sharp(buffer);
+		}
+
+		// Create a new readable stream from the buffer
+		const finalReadableStream = Readable.from(buffer);
+
 		await uploadToPublicBucket(
-			readableStream,
+			finalReadableStream,
 			transform,
 			thumbnailStorageKey,
 			destinationBucket,
@@ -373,31 +386,31 @@ export const generateThumbnailTaskLarge2 = task({
 	run,
 });
 
-const oneMB = 1024 * 1024;
+const oneMiB = 1024 * 1024;
 
-function MB(value: number) {
-	return value * oneMB;
+function MiB(value: number) {
+	return value * oneMiB;
 }
 
 export const getGenerateThumbnailTask = (fileSizeInBytes: number) => {
-	// upto 150MB
-	if (fileSizeInBytes < MB(150)) {
+	// upto 150MiB
+	if (fileSizeInBytes < MiB(150)) {
 		return generateThumbnailTaskSmall;
 	}
-	// upto 300MB
-	if (fileSizeInBytes < MB(300)) {
+	// upto 300MiB
+	if (fileSizeInBytes < MiB(300)) {
 		return generateThumbnailTaskMedium1;
 	}
-	// upto 600MB
-	if (fileSizeInBytes < MB(600)) {
+	// upto 600MiB
+	if (fileSizeInBytes < MiB(600)) {
 		return generateThumbnailTaskMedium2;
 	}
-	// upto 1200MB
-	if (fileSizeInBytes < MB(1200)) {
+	// upto 1200MiB
+	if (fileSizeInBytes < MiB(1200)) {
 		return generateThumbnailTaskLarge1;
 	}
-	// upto 2400MB
-	if (fileSizeInBytes < MB(2400)) {
+	// upto 2400MiB
+	if (fileSizeInBytes < MiB(2400)) {
 		return generateThumbnailTaskLarge2;
 	}
 	// bigger sizes not supported
