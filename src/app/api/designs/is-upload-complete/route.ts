@@ -73,10 +73,16 @@ export async function POST(request: Request) {
 
 			const task = getGenerateThumbnailTask(result.ContentLength);
 
-			await task.trigger({
-				designId,
-				originalFileStorageKey: dbResult.originalFileStorageKey,
-			});
+			if (task) {
+				await task.trigger({
+					designId,
+					originalFileStorageKey: dbResult.originalFileStorageKey,
+				});
+			} else {
+				console.log(
+					"Generated thumbnail task not triggered as file size is too big > 2400MiB",
+				);
+			}
 		}
 
 		return NextResponse.json({ design: dbResult });

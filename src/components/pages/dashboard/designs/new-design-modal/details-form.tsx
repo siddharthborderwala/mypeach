@@ -90,11 +90,14 @@ export function DetailsForm({
 			setFormState({ state: "loading" });
 			const response = await fetch("/api/designs", {
 				method: "PUT",
-				body: JSON.stringify(values),
+				body: JSON.stringify({
+					...values,
+					tags: values.tags?.split(",").filter(Boolean),
+				}),
 			});
 			if (!response.ok) {
 				const error = await response.json();
-				setFormState({ state: "error", error: error.message });
+				setFormState({ state: "error", error: error.error });
 				return;
 			}
 			const data = await response.json();
@@ -197,7 +200,9 @@ export function DetailsForm({
 				<Button type="submit" disabled={disableForm()} className="w-full">
 					{formState.state === "loading" ? <Spinner className="mr-2" /> : null}
 					{formState.state === "loading" ? "Saving..." : null}
-					{formState.state === "idle" ? "Save" : null}
+					{formState.state === "idle" || formState.state === "error"
+						? "Save"
+						: null}
 					{formState.state === "success" ? "Saved" : null}
 				</Button>
 			</form>

@@ -17,6 +17,7 @@ import type { ExploreDesign } from "./types";
 import { AddToCartButton } from "./add-to-cart-button";
 import { X } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
+import ImageWithFallback from "@/components/image-with-fallback";
 
 export function DesignCardDialogMobile({
 	design,
@@ -43,7 +44,7 @@ export function DesignCardDialogMobile({
 			</DialogClose>
 			<div className="relative overflow-y-auto w-full">
 				<div className="relative h-[50svh] w-full">
-					<img
+					<ImageWithFallback
 						src={getDesignThumbnailURL(design.thumbnailFileStorageKey, 1200)}
 						alt={design.name}
 						className="absolute inset-0 w-full h-full object-scale-down select-none pointer-events-none"

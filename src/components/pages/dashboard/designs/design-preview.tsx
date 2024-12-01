@@ -28,6 +28,7 @@ import {
 	DotsThreeVertical,
 	Export,
 	FolderPlus,
+	Pencil,
 	Trash,
 } from "@phosphor-icons/react";
 import { CollectionsPopover } from "@/components/collections-popover";
@@ -72,25 +73,16 @@ function DesignPreview_({
 
 	return (
 		<>
-			<button
-				type="button"
-				className="border rounded-lg p-4 shadow-sm"
-				onClick={() => {
-					setDesign(design.id);
-					setEditDesignDetails(design);
-				}}
-			>
+			<div className="border rounded-lg p-4 shadow-sm">
 				<ImageWithFallback
 					suppressHydrationWarning
 					src={getDesignThumbnailURL(design.thumbnailFileStorageKey, 1200)}
 					width="100%"
 					className="aspect-square rounded flex items-center justify-center select-none pointer-events-none object-cover"
 				/>
-				<div className="flex mt-2">
-					<div className="flex flex-col text-left flex-1">
-						<p className="text-sm font-medium truncate">
-							{design.originalFileName}
-						</p>
+				<div className="flex mt-2 justify-between">
+					<div className="flex flex-col text-left flex-1 max-w-[80%]">
+						<p className="font-medium truncate">{design.name}</p>
 						<div className="flex items-center justify-between mt-1">
 							{newDesignId === design.id ? (
 								<Badge>Uploading</Badge>
@@ -102,12 +94,26 @@ function DesignPreview_({
 						</div>
 					</div>
 					<DropdownMenu modal={true}>
-						<DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+						<DropdownMenuTrigger
+							asChild
+							onClick={(e) => e.stopPropagation()}
+							className="mt-1"
+						>
 							<Button variant="outline" size="sm" className="h-8 w-8 p-0">
 								<DotsThreeVertical weight="bold" className="h-4 w-4" />
 							</Button>
 						</DropdownMenuTrigger>
 						<DropdownMenuContent align="end">
+							<DropdownMenuItem
+								onClick={(e) => {
+									e.stopPropagation();
+									setDesign(design.id);
+									setEditDesignDetails(design);
+								}}
+							>
+								<Pencil className="mr-2 h-4 w-4" />
+								Edit
+							</DropdownMenuItem>
 							<DropdownMenuItem
 								disabled={isPending || design.isDraft}
 								onClick={(e) => {
@@ -154,7 +160,7 @@ function DesignPreview_({
 						</DropdownMenuContent>
 					</DropdownMenu>
 				</div>
-			</button>
+			</div>
 			<Dialog open={showDeleteDialog}>
 				<DialogContent>
 					<DialogHeader>

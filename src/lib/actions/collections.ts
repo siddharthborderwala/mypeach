@@ -62,6 +62,11 @@ export async function getCurrentUserCollectionsList(
 					},
 				},
 			},
+			_count: {
+				select: {
+					collectionItems: true,
+				},
+			},
 		},
 		cursor: cursor ? { id: cursor } : undefined,
 		take: take + 1,

@@ -1,3 +1,4 @@
+import ImageWithFallback from "@/components/image-with-fallback";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getRelatedDesigns } from "@/lib/actions/designs";
@@ -33,7 +34,7 @@ export async function List({
 							prefetch={false}
 							target="_blank"
 						>
-							<img
+							<ImageWithFallback
 								src={getDesignThumbnailURL(
 									design.thumbnailFileStorageKey,
 									1200,

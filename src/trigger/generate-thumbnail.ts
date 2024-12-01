@@ -425,5 +425,5 @@ export const getGenerateThumbnailTask = (fileSizeInBytes: number) => {
 		return generateThumbnailTaskLarge2;
 	}
 	// bigger sizes not supported
-	throw new Error("File to big to process and generate thumbnail");
+	return null;
 };

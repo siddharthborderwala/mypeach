@@ -21,6 +21,7 @@ import { getDesignThumbnailURL } from "@/lib/storage/util";
 import Link from "next/link";
 import { memo } from "react";
 import { queryClient } from "@/app/global-query-client";
+import ImageWithFallback from "../image-with-fallback";
 
 function CartItem_({
 	product,
@@ -34,7 +35,7 @@ function CartItem_({
 
 	return (
 		<div key={product.designId} className="flex items-start gap-4 mb-4">
-			<img
+			<ImageWithFallback
 				src={getDesignThumbnailURL(
 					product.design.thumbnailFileStorageKey,
 					1200,

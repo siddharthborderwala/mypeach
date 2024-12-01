@@ -24,6 +24,7 @@ import { Actions } from "./actions";
 import { AddToCartButton } from "./add-to-cart-button";
 import { useMediaQuery } from "use-media-query-react";
 import { DesignCardDialogMobile } from "./design-card-dialog-mobile";
+import ImageWithFallback from "@/components/image-with-fallback";
 
 const DesignCardDialogContent = ({
 	design,
@@ -37,7 +38,7 @@ const DesignCardDialogContent = ({
 		className="flex flex-row items-start w-fit max-w-[unset] h-[90svh] gap-6"
 	>
 		<div className="relative block h-full aspect-[3/4] rounded-lg overflow-hidden">
-			<img
+			<ImageWithFallback
 				src={getDesignThumbnailURL(design.thumbnailFileStorageKey, 1200)}
 				alt={design.name}
 				className="absolute inset-0 w-full h-full object-cover select-none pointer-events-none"

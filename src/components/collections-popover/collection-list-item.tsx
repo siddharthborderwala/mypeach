@@ -36,7 +36,7 @@ export function CollectionListItem({
 			<div className="text-left">
 				<h3 className="font-semibold">{collection.name}</h3>
 				<p className="text-sm text-muted-foreground font-normal">
-					{collection.collectionItems.length} designs
+					{collection._count.collectionItems} designs
 				</p>
 			</div>
 			{isSelected ? (

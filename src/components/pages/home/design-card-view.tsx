@@ -4,6 +4,7 @@ import { getDesignThumbnailURL } from "@/lib/storage/util";
 import type { ExploreDesign } from "./types";
 import { getUserAvatarURL } from "@/lib/utils";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
+import ImageWithFallback from "@/components/image-with-fallback";
 
 export const DesignCardView = ({
 	design,
@@ -14,7 +15,7 @@ export const DesignCardView = ({
 }) => (
 	<>
 		<div className="relative block w-full aspect-[3/4] rounded-lg overflow-hidden">
-			<img
+			<ImageWithFallback
 				src={getDesignThumbnailURL(design.thumbnailFileStorageKey, 1200)}
 				alt={design.name}
 				className="absolute inset-0 w-full h-full object-cover rounded-lg select-none pointer-events-none"

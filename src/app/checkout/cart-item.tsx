@@ -13,6 +13,7 @@ import { useMutation } from "@tanstack/react-query";
 import { queryClient } from "@/app/global-query-client";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/spinner";
+import ImageWithFallback from "@/components/image-with-fallback";
 
 function CartItem_({
 	product,
@@ -26,7 +27,7 @@ function CartItem_({
 
 	return (
 		<div key={product.designId} className="flex items-start gap-4 mb-4">
-			<img
+			<ImageWithFallback
 				src={getDesignThumbnailURL(product.design.thumbnailFileStorageKey, 600)}
 				alt={product.design.name}
 				className="w-24 sm:w-60 object-scale-down rounded-lg bg-gray-50"

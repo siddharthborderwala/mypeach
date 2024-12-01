@@ -84,13 +84,16 @@ const OtherDetails = ({
 export default function EditDesignSheet() {
 	const [design, setDesign] = useQueryState("design", parseAsString);
 
-	const { editDesignDetails } = useUploadContext();
+	const { editDesignDetails, setEditDesignDetails } = useUploadContext();
 
 	return (
 		<Sheet
 			open={!!design}
 			onOpenChange={(v) => {
 				setDesign(v ? design : null);
+				if (!v) {
+					setEditDesignDetails(undefined);
+				}
 			}}
 		>
 			<SheetContent>

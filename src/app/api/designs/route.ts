@@ -1,16 +1,25 @@
 import { NextResponse } from "next/server";
+import { z } from "zod";
 import { getUserAuth } from "@/lib/auth/utils";
+import { DeleteObjectCommand } from "@aws-sdk/client-s3";
 import { db } from "@/lib/db";
 import { getDesignFileStorageKey } from "@/lib/storage/util";
-import { z } from "zod";
 import type { DesignData } from "@/lib/actions/designs";
 import { checkDesignUploaded } from "@/trigger/check-design-upload-after-a-day";
-import { DeleteObjectCommand } from "@aws-sdk/client-s3";
 import { storage } from "@/lib/storage";
 import { env } from "@/lib/env.mjs";
+import { formatFlattenedErrors } from "@/lib/utils";
+
+const designNameValidator = z
+	.string()
+	.max(24, "Name cannot be longer than 24 characters")
+	// only allow a-z characters - optional
+	.regex(/^[a-zA-Z\s]*$/, "Name can only contain letters and spaces")
+	.optional()
+	.default("Untitled");
 
 const bodyValidator = z.object({
-	name: z.string().optional().default("Untitled"),
+	name: designNameValidator,
 	designId: z.string().length(36),
 	fileId: z.string().length(36),
 	fileName: z.string(),
@@ -81,14 +90,20 @@ export async function POST(request: Request) {
 	}
 }
 
+const tagValidator = z
+	.string()
+	.max(12, "Tag cannot be longer than 12 characters")
+	// only allow a-z characters - optional
+	.regex(/^[a-zA-Z\s]*$/, "Tag can only contain letters and spaces");
+
 const putValidator = z.object({
-	name: z.string().optional(),
+	name: designNameValidator,
 	designId: z.string().length(36),
 	isDraft: z.boolean().optional(),
 	thumbnailFileStorageKey: z.string().optional(),
 	thumbnailFileType: z.string().optional(),
 	price: z.number().min(290).optional(),
-	tags: z.union([z.string(), z.array(z.string())]),
+	tags: z.array(tagValidator).optional(),
 	fileDPI: z.number().min(72).optional(),
 });
 
@@ -114,20 +129,14 @@ export async function PUT(request: Request) {
 
 		if (!result.success) {
 			return NextResponse.json(
-				{ error: result.error.message },
+				{ error: formatFlattenedErrors(result.error.flatten()) },
 				{ status: 400 },
 			);
 		}
 
 		const { designId, fileDPI, tags, name, ...designData } = result.data;
 
-		const tagsArray =
-			typeof tags === "string"
-				? tags
-						.split(",")
-						.map((t) => t.trim())
-						.filter((t) => t.length > 0)
-				: tags;
+		const tagsArray = tags ? tags.filter(Boolean) : [];
 
 		const dbResult = await db.design.update({
 			where: { id: designId },
