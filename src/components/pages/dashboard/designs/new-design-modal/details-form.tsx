@@ -92,7 +92,10 @@ export function DetailsForm({
 				method: "PUT",
 				body: JSON.stringify({
 					...values,
-					tags: values.tags?.split(",").filter(Boolean),
+					tags: values.tags
+						?.split(",")
+						.map((tag) => tag.trim())
+						.filter(Boolean),
 				}),
 			});
 			if (!response.ok) {
