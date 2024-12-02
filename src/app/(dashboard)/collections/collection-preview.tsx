@@ -11,9 +11,11 @@ export function CollectionPreview({
 }) {
 	const hasEnoughItems = collection._count.collectionItems >= 3;
 
-	const placeHolders = new Array(3 - collection._count.collectionItems)
-		.fill(null)
-		.map((_, index) => index);
+	const placeHolders = hasEnoughItems
+		? []
+		: new Array(3 - collection._count.collectionItems)
+				.fill(null)
+				.map((_, index) => index);
 
 	return (
 		<Link href={`/collections/${collection.id}`} className="w-[18rem]">
