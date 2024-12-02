@@ -1,6 +1,11 @@
 "use client";
 
-import { PaintBrush, TrashSimple } from "@phosphor-icons/react";
+import {
+	Check,
+	Clipboard as ClipboardIcon,
+	PaintBrush,
+	TrashSimple,
+} from "@phosphor-icons/react";
 import {
 	keepPreviousData,
 	useInfiniteQuery,
@@ -40,6 +45,31 @@ import { Spinner } from "@/components/spinner";
 import { queryClient } from "@/app/global-query-client";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+
+function CopyCollectionLinkButton({ collectionId }: { collectionId: string }) {
+	const [isCopied, setIsCopied] = useState(false);
+
+	const handleCopy = useCallback(() => {
+		navigator.clipboard.writeText(
+			`${window.location.origin}/c/${collectionId}`,
+		);
+		setIsCopied(true);
+		setTimeout(() => {
+			setIsCopied(false);
+		}, 1000);
+	}, [collectionId]);
+
+	return (
+		<Button
+			size="sm"
+			className="text-xs font-medium gap-2"
+			onClick={handleCopy}
+		>
+			{isCopied ? <Check weight="bold" /> : <ClipboardIcon weight="bold" />}
+			<span>{isCopied ? "Copied!" : "Copy Link"}</span>
+		</Button>
+	);
+}
 
 export function AllCollectionItems({
 	initialData,
@@ -159,6 +189,9 @@ export function AllCollectionItems({
 							/>
 							<Label htmlFor="public">Public</Label>
 						</div>
+						{collectionData.isPublic ? (
+							<CopyCollectionLinkButton collectionId={collectionId} />
+						) : null}
 					</div>
 				</div>
 				<div className="flex items-center gap-2">
