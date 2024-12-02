@@ -1,7 +1,7 @@
 "use server";
 
 import { notFound, redirect } from "next/navigation";
-import { Prisma } from "@prisma/client";
+import type { Prisma } from "@prisma/client";
 import Cashfree from "@/lib/payments/cashfree";
 import { db } from "@/lib/db";
 import { err, ok } from "@/lib/result";
@@ -146,16 +146,16 @@ export async function getDesignsForExplore(
 ) {
 	const cursor = pagination?.cursor;
 	const take = pagination?.take ?? 24;
+	const offset = cursor ? Number.parseInt(cursor, 10) : 0;
 
 	const searchTerm = options?.search?.toLowerCase().trim();
 
-	// If we have a search term, we'll use raw SQL for better performance
 	if (searchTerm) {
 		const designs = await db.$queryRaw<RawDesignQueryResult[]>`
 					WITH matched_designs AS (
-							SELECT DISTINCT d.*
-							FROM "Design" d,
-									 unnest(d.tags) tag
+							SELECT DISTINCT ON (d.id) d.*
+							FROM "Design" d
+							LEFT JOIN LATERAL unnest(d.tags) tag ON true
 							WHERE 
 									d."isDraft" = false 
 									AND d."isUploadComplete" = true 
@@ -164,9 +164,7 @@ export async function getDesignsForExplore(
 											d.name ILIKE ${`%${searchTerm}%`}
 											OR LOWER(tag) LIKE ${`%${searchTerm}%`}
 									)
-							ORDER BY d."createdAt" DESC
-							LIMIT ${take + 1}
-							${cursor ? Prisma.sql`OFFSET ${cursor}` : Prisma.sql``}
+							ORDER BY d.id, d."createdAt" DESC
 					)
 					SELECT 
 							d.id,
@@ -182,7 +180,6 @@ export async function getDesignsForExplore(
 							d."isUploadComplete",
 							d."isSoftDeleted",
 							d."vendorId",
-							-- vendor fields
 							v.id as vendor_id,
 							v.name as vendor_name,
 							v.phone as vendor_phone,
@@ -191,19 +188,19 @@ export async function getDesignsForExplore(
 							v."userId" as vendor_userId,
 							v."createdAt" as vendor_createdAt,
 							v."updatedAt" as vendor_updatedAt,
-							-- user fields
 							u.id as "userId",
 							u.username
 					FROM matched_designs d
 					LEFT JOIN "Vendor" v ON d."vendorId" = v.id
 					LEFT JOIN "User" u ON v."userId" = u.id
+					ORDER BY d."createdAt" DESC
+					LIMIT ${take + 1}
+					OFFSET ${offset}::bigint
 			`;
 
 		const hasNextPage = designs.length > take;
 		const items = designs.slice(0, take);
-		const nextCursor = hasNextPage
-			? String(Number(cursor || 0) + take)
-			: undefined;
+		const nextCursor = hasNextPage ? String(offset + take) : undefined;
 
 		return {
 			designs: items.map((d) => ({
@@ -239,7 +236,7 @@ export async function getDesignsForExplore(
 		};
 	}
 
-	// For non-search queries, use the regular Prisma query
+	// For non-search queries, use the regular Prisma query with cursor-based pagination
 	const designs = await db.design.findMany({
 		where: {
 			isDraft: false,
@@ -267,16 +264,16 @@ export async function getDesignsForExplore(
 				},
 			},
 		},
-		cursor: cursor ? { id: cursor } : undefined,
-		take: take + 1,
 		orderBy: {
 			createdAt: "desc",
 		},
+		skip: offset,
+		take: take + 1,
 	});
 
 	const hasNextPage = designs.length > take;
 	const items = designs.slice(0, take);
-	const nextCursor = hasNextPage ? items[items.length - 1]?.id : undefined;
+	const nextCursor = hasNextPage ? String(offset + take) : undefined;
 
 	return {
 		designs: items.map((d) => ({
