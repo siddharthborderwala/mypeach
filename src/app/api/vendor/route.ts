@@ -36,9 +36,9 @@ const UNIQUE_CONSTRAINT_ERRORS = {
 		"A vendor with this phone number already exists, please use a different phone number",
 } as const;
 
-function handleUniqueConstraintError(fieldName: Maybe<string>) {
+function handleUniqueConstraintError(message: Maybe<string>) {
 	const errorField = Object.keys(UNIQUE_CONSTRAINT_ERRORS).find((key) =>
-		fieldName?.includes(key),
+		message?.includes(key),
 	);
 
 	if (errorField) {
@@ -208,9 +208,7 @@ export async function POST(request: Request) {
 
 		if (error instanceof PrismaError) {
 			if (error.code === "P2002") {
-				const response = handleUniqueConstraintError(
-					error.meta?.field_name as Maybe<string>,
-				);
+				const response = handleUniqueConstraintError(error.message);
 				if (response) return response;
 			}
 		}
