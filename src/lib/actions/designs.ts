@@ -106,6 +106,35 @@ export type DesignData = Prettify<
 	}
 >;
 
+// First, define the return type for the raw query
+type RawDesignQueryResult = {
+	id: string;
+	name: string;
+	thumbnailFileStorageKey: string | null;
+	metadata: FileMetadata;
+	createdAt: Date;
+	price: number;
+	currency: string;
+	tags: string[];
+	originalFileType: string;
+	isDraft: boolean;
+	isUploadComplete: boolean;
+	isSoftDeleted: boolean;
+	vendorId: number;
+	// vendor fields
+	vendor_id: number;
+	vendor_name: string;
+	vendor_phone: string;
+	vendor_status: string;
+	vendor_totalEarnings: number;
+	vendor_userId: string;
+	vendor_createdAt: Date;
+	vendor_updatedAt: Date;
+	// user fields
+	userId: string;
+	username: string;
+};
+
 export async function getDesignsForExplore(
 	options?: {
 		search?: string | null;
@@ -122,8 +151,7 @@ export async function getDesignsForExplore(
 
 	// If we have a search term, we'll use raw SQL for better performance
 	if (searchTerm) {
-		// biome-ignore lint: reason
-		const designs = await db.$queryRaw<any>`
+		const designs = await db.$queryRaw<RawDesignQueryResult[]>`
 					WITH matched_designs AS (
 							SELECT DISTINCT d.*
 							FROM "Design" d,
@@ -141,8 +169,29 @@ export async function getDesignsForExplore(
 							${cursor ? Prisma.sql`OFFSET ${cursor}` : Prisma.sql``}
 					)
 					SELECT 
-							d.*,
-							v.*,
+							d.id,
+							d.name,
+							d."thumbnailFileStorageKey",
+							d.metadata,
+							d."createdAt",
+							d.price,
+							d.currency,
+							d.tags,
+							d."originalFileType",
+							d."isDraft",
+							d."isUploadComplete",
+							d."isSoftDeleted",
+							d."vendorId",
+							-- vendor fields
+							v.id as vendor_id,
+							v.name as vendor_name,
+							v.phone as vendor_phone,
+							v.status as vendor_status,
+							v."totalEarnings" as vendor_totalEarnings,
+							v."userId" as vendor_userId,
+							v."createdAt" as vendor_createdAt,
+							v."updatedAt" as vendor_updatedAt,
+							-- user fields
 							u.id as "userId",
 							u.username
 					FROM matched_designs d
@@ -157,8 +206,7 @@ export async function getDesignsForExplore(
 			: undefined;
 
 		return {
-			// biome-ignore lint: reason
-			designs: items.map((d: any) => ({
+			designs: items.map((d) => ({
 				id: d.id,
 				name: d.name,
 				thumbnailFileStorageKey: d.thumbnailFileStorageKey,
@@ -168,14 +216,21 @@ export async function getDesignsForExplore(
 				currency: d.currency,
 				tags: d.tags,
 				originalFileType: d.originalFileType,
-				fileDPI: (d.metadata as FileMetadata).fileDPI,
 				vendor: {
-					id: d.vendorId,
+					id: d.vendor_id,
+					name: d.vendor_name,
+					phone: d.vendor_phone,
+					status: d.vendor_status,
+					totalEarnings: d.vendor_totalEarnings,
+					userId: d.vendor_userId,
+					createdAt: d.vendor_createdAt,
+					updatedAt: d.vendor_updatedAt,
 					user: {
 						id: d.userId,
 						username: d.username,
 					},
 				},
+				fileDPI: (d.metadata as FileMetadata).fileDPI,
 			})),
 			pagination: {
 				hasNextPage,
