@@ -95,7 +95,7 @@ const DesignCardDialogContent = ({
 								Tags
 							</h3>
 							<div className="flex flex-wrap gap-2 mt-1">
-								{design.tags.map((tag) => (
+								{design.tags.map((tag: string) => (
 									<Badge
 										variant="outline"
 										key={tag}
