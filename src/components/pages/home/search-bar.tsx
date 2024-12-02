@@ -1,12 +1,29 @@
 "use client";
 
-import { useState } from "react";
-import { toast } from "sonner";
+import { useEffect, useState } from "react";
 import { MagnifyingGlass } from "@phosphor-icons/react";
 import { Input } from "../../ui/input";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useDebounce } from "@/hooks/use-debounce";
 
 export const SearchBar = () => {
-	const [showedToast, setShowedToast] = useState(false);
+	const router = useRouter();
+	const searchParams = useSearchParams();
+	const [searchTerm, setSearchTerm] = useState(searchParams.get("q") || "");
+
+	// Debounce the search term to avoid too many updates
+	const debouncedSearch = useDebounce(searchTerm, 300);
+
+	// Update URL when debounced search term changes
+	useEffect(() => {
+		const params = new URLSearchParams(searchParams);
+		if (debouncedSearch) {
+			params.set("q", debouncedSearch);
+		} else {
+			params.delete("q");
+		}
+		router.push(`/?${params.toString()}`);
+	}, [debouncedSearch, router, searchParams]);
 
 	return (
 		<div className="relative justify-self-center flex-1 w-[20rem]">
@@ -15,12 +32,8 @@ export const SearchBar = () => {
 				type="search"
 				placeholder="Search designs..."
 				className="w-full rounded-lg bg-background pl-8"
-				onKeyDown={() => {
-					if (!showedToast) {
-						toast.error("This feature is not available yet.");
-						setShowedToast(true);
-					}
-				}}
+				value={searchTerm}
+				onChange={(e) => setSearchTerm(e.target.value)}
 			/>
 		</div>
 	);

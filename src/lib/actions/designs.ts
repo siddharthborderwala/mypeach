@@ -1,8 +1,7 @@
 "use server";
 
 import { notFound, redirect } from "next/navigation";
-import type { Prisma } from "@prisma/client";
-
+import { Prisma } from "@prisma/client";
 import Cashfree from "@/lib/payments/cashfree";
 import { db } from "@/lib/db";
 import { err, ok } from "@/lib/result";
@@ -119,39 +118,79 @@ export async function getDesignsForExplore(
 	const cursor = pagination?.cursor;
 	const take = pagination?.take ?? 24;
 
-	const searchTerms = options?.search
-		?.split(" ")
-		.map((t) => t.trim())
-		.filter(Boolean);
+	const searchTerm = options?.search?.toLowerCase().trim();
 
-	const where: Prisma.DesignWhereInput = {
-		isDraft: false,
-		isUploadComplete: true,
-		isSoftDeleted: false,
-		OR:
-			options?.search || searchTerms
-				? [
-						{
-							name: options?.search
-								? {
-										contains: options.search,
-										mode: "insensitive",
-									}
-								: undefined,
-						},
-						{
-							tags: searchTerms
-								? {
-										hasSome: searchTerms,
-									}
-								: undefined,
-						},
-					]
-				: undefined,
-	};
+	// If we have a search term, we'll use raw SQL for better performance
+	if (searchTerm) {
+		// biome-ignore lint: reason
+		const designs = await db.$queryRaw<any>`
+					WITH matched_designs AS (
+							SELECT DISTINCT d.*
+							FROM "Design" d,
+									 unnest(d.tags) tag
+							WHERE 
+									d."isDraft" = false 
+									AND d."isUploadComplete" = true 
+									AND d."isSoftDeleted" = false
+									AND (
+											d.name ILIKE ${`%${searchTerm}%`}
+											OR LOWER(tag) LIKE ${`%${searchTerm}%`}
+									)
+							ORDER BY d."createdAt" DESC
+							LIMIT ${take + 1}
+							${cursor ? Prisma.sql`OFFSET ${cursor}` : Prisma.sql``}
+					)
+					SELECT 
+							d.*,
+							v.*,
+							u.id as "userId",
+							u.username
+					FROM matched_designs d
+					LEFT JOIN "Vendor" v ON d."vendorId" = v.id
+					LEFT JOIN "User" u ON v."userId" = u.id
+			`;
 
+		const hasNextPage = designs.length > take;
+		const items = designs.slice(0, take);
+		const nextCursor = hasNextPage
+			? String(Number(cursor || 0) + take)
+			: undefined;
+
+		return {
+			// biome-ignore lint: reason
+			designs: items.map((d: any) => ({
+				id: d.id,
+				name: d.name,
+				thumbnailFileStorageKey: d.thumbnailFileStorageKey,
+				metadata: d.metadata,
+				createdAt: d.createdAt,
+				price: d.price,
+				currency: d.currency,
+				tags: d.tags,
+				originalFileType: d.originalFileType,
+				fileDPI: (d.metadata as FileMetadata).fileDPI,
+				vendor: {
+					id: d.vendorId,
+					user: {
+						id: d.userId,
+						username: d.username,
+					},
+				},
+			})),
+			pagination: {
+				hasNextPage,
+				nextCursor,
+			},
+		};
+	}
+
+	// For non-search queries, use the regular Prisma query
 	const designs = await db.design.findMany({
-		where,
+		where: {
+			isDraft: false,
+			isUploadComplete: true,
+			isSoftDeleted: false,
+		},
 		select: {
 			id: true,
 			name: true,
