@@ -1,4 +1,4 @@
-import type { AxiosError } from "axios";
+import { AxiosError } from "axios";
 import { NextResponse } from "next/server";
 
 import type { CreateVendorRequest, KycDetails, BankDetails } from "cashfree-pg";
@@ -26,6 +26,35 @@ const createVendorValidator = z.object({
 		pan: z.string(),
 	}),
 });
+
+const UNIQUE_CONSTRAINT_ERRORS = {
+	userId: "You already have a vendor profile",
+	accountNumber:
+		"Someone else has registered with this bank account, please use a different bank account",
+	pan: "Someone else has registered with this PAN, please use a different PAN",
+	phone:
+		"A vendor with this phone number already exists, please use a different phone number",
+} as const;
+
+function handleUniqueConstraintError(fieldName: Maybe<string>) {
+	const errorField = Object.keys(UNIQUE_CONSTRAINT_ERRORS).find((key) =>
+		fieldName?.includes(key),
+	);
+
+	if (errorField) {
+		return NextResponse.json(
+			{
+				error:
+					UNIQUE_CONSTRAINT_ERRORS[
+						errorField as keyof typeof UNIQUE_CONSTRAINT_ERRORS
+					],
+			},
+			{ status: 409 },
+		);
+	}
+
+	return null;
+}
 
 // Function to create vendor, UPI, and KYC within a single transaction
 async function createVendorWithDetails(vendorData: {
@@ -161,36 +190,28 @@ export async function POST(request: Request) {
 
 		return NextResponse.json({ data: vendor });
 	} catch (error: unknown) {
-		// Delete the vendor if the transaction fails
-		await db.vendor.delete({
-			where: {
-				userId: session.user.id,
-			},
-		});
-
-		const err = error as AxiosError;
-
-		if (err.response) {
-			return NextResponse.json(err.response.data, {
-				status: err.response.status ? err.response.status : 500,
+		if (error instanceof AxiosError && error.response) {
+			// Delete the vendor if the transaction fails
+			await db.vendor.delete({
+				where: {
+					userId: session.user.id,
+				},
 			});
+
+			return NextResponse.json(
+				{ error: "Sorry, our banking partner could not register your account" },
+				{
+					status: error.response.status ? error.response.status : 500,
+				},
+			);
 		}
 
 		if (error instanceof PrismaError) {
-			// Check if unique constraint failed error (e.g. duplicate vendor)
 			if (error.code === "P2002") {
-				if ((error.meta?.field_name as Maybe<string>)?.includes("userId")) {
-					return NextResponse.json(
-						{ error: "A vendor already exists for this user" },
-						{ status: 409 },
-					);
-				}
-				if ((error.meta?.field_name as Maybe<string>)?.includes("phone")) {
-					return NextResponse.json(
-						{ error: "A vendor with this phone number already exists" },
-						{ status: 409 },
-					);
-				}
+				const response = handleUniqueConstraintError(
+					error.meta?.field_name as Maybe<string>,
+				);
+				if (response) return response;
 			}
 		}
 
