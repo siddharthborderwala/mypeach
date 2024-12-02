@@ -55,16 +55,6 @@ const faqItems: { question: string; answer: React.ReactNode }[] = [
 		),
 	},
 	{
-		question: "What fees does Peach charge?",
-		answer: (
-			<>
-				Peach charges a 20% commission on each sale. This fee covers payment
-				processing, customer support, and platform maintenance. There are no
-				listing fees or monthly charges.
-			</>
-		),
-	},
-	{
 		question: "How are disputes handled?",
 		answer: (
 			<>
