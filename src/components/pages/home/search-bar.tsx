@@ -17,6 +17,7 @@ export const SearchBar = () => {
 	// Update URL when debounced search term changes
 	useEffect(() => {
 		const params = new URLSearchParams(searchParams);
+
 		if (debouncedSearch) {
 			params.set("q", debouncedSearch);
 		} else {

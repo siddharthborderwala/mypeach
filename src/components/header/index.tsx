@@ -8,6 +8,7 @@ import { getActiveCartAndProducts } from "@/lib/actions/cart";
 import { SidebarCart } from "./sidebar-cart";
 import { SearchButton } from "./search-button";
 import { MobileMenu } from "./mobile-menu";
+import SearchBarWrapper from "./SearchBarWrapper";
 
 async function HeaderCartButton() {
 	const initialData = await getActiveCartAndProducts();
@@ -28,7 +29,7 @@ export async function Header() {
 					</Link>
 				</div>
 				<div className="hidden md:block">
-					<SearchBar />
+					{<SearchBarWrapper component={<SearchBar />} />}
 				</div>
 				{session?.user.id ? (
 					<div className="flex-1 flex items-center justify-end gap-2 md:gap-4">
@@ -43,7 +44,8 @@ export async function Header() {
 								<Plus weight="bold" className="h-6 w-6 sm:h-5 sm:w-5" />
 							</Link>
 						</Button>
-						<SearchButton />
+						{<SearchBarWrapper component={<SearchButton />} />}
+
 						<HeaderCartButton />
 						<UserMenu
 							userId={session.user.id}
