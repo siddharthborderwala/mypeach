@@ -1,12 +1,18 @@
 "use client";
+
+import { useState } from "react";
+import { useMutation } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { CheckCircle } from "@phosphor-icons/react";
+
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { Spinner } from "../spinner";
-import { useState } from "react";
-import { useMutation } from "@tanstack/react-query";
 import { Label } from "../ui/label";
-import { toast } from "sonner";
-import { CheckCircle } from "@phosphor-icons/react";
+import { useRouter } from "next/navigation";
+import { createVendorWithCashfreeAction } from "@/lib/actions/vendor";
+import { unwrapPromise } from "@/lib/result";
+import { FormError } from "../form-error";
 
 export function VendorForm({
 	data,
@@ -28,68 +34,56 @@ export function VendorForm({
 	const [ifsc, setIfsc] = useState(data?.ifsc ?? "");
 	const [accountHolder, setAccountHolder] = useState(data?.accountHolder ?? "");
 	const [pan, setPan] = useState(data?.pan ?? "");
-	const [isLoading, setIsLoading] = useState(false);
+	const router = useRouter();
 
-	const { mutateAsync: createVendorProfile, error: createVendorProfileError } =
-		useMutation({
-			mutationKey: ["create-vendor-profile"],
-			mutationFn: async ({
-				phone,
-				bankAccount,
-				kyc,
-			}: {
-				phone: string;
-				bankAccount: {
-					accountNumber: string;
-					ifsc: string;
-					accountHolder: string;
-				};
-				kyc: { pan: string };
-			}) => {
-				const res = await fetch("/api/vendor", {
-					method: "POST",
-					body: JSON.stringify({
-						phone,
-						bankAccount,
-						kyc,
-					}),
-				});
-
-				const data = await res.json();
-
-				if (!res.ok) {
-					throw new Error(data.error);
-				}
-
-				return data;
-			},
-			onSuccess: () => {
-				toast.success(
-					<div className="flex items-start w-full">
-						<CheckCircle weight="bold" size={24} className="mr-2" />
-						<div className="w-full">
-							<p className="font-bold text-lg break-words">
-								Created vendor profile
-							</p>
-							<p className="text-sm text-gray-500 mt-1">
-								Your profile has been created.
-							</p>
-						</div>
-					</div>,
-					{
-						id: "vendor-profile-created",
-						position: "bottom-left",
-					},
-				);
-				setTimeout(() => {
-					// Refresh the page to reflect the changes
-					window.location.reload();
-				}, 1500);
-			},
-		});
+	const {
+		mutateAsync: createVendorProfile,
+		error: createVendorProfileError,
+		isPending,
+	} = useMutation({
+		mutationKey: ["create-vendor-profile"],
+		mutationFn: ({
+			phone,
+			bankAccount,
+			kyc,
+		}: {
+			phone: string;
+			bankAccount: {
+				accountNumber: string;
+				ifsc: string;
+				accountHolder: string;
+			};
+			kyc: { pan: string };
+		}) =>
+			unwrapPromise(
+				createVendorWithCashfreeAction({ phone, bankAccount, kyc }),
+			),
+		onSuccess: () => {
+			toast.success(
+				<div className="flex items-start w-full">
+					<CheckCircle weight="bold" size={24} className="mr-2" />
+					<div className="w-full">
+						<p className="font-bold text-lg break-words">
+							Created vendor profile
+						</p>
+						<p className="text-sm text-gray-500 mt-1">
+							Your profile has been created.
+						</p>
+					</div>
+				</div>,
+				{
+					id: "vendor-profile-created",
+					position: "bottom-left",
+				},
+			);
+			setTimeout(() => {
+				router.refresh();
+			}, 1500);
+		},
+	});
 
 	const getName = () => {
-		if (isLoading) {
+		if (isPending) {
 			return (
 				<>
 					<Spinner />
@@ -125,8 +119,6 @@ export function VendorForm({
 			className="flex flex-col gap-4"
 			onSubmit={async (e) => {
 				e.preventDefault();
-
-				setIsLoading(true);
 
 				await createVendorProfile({
 					phone,
@@ -265,9 +257,7 @@ export function VendorForm({
 			</div>
 
 			{createVendorProfileError ? (
-				<p className="text-red-500 text-sm font-medium">
-					{createVendorProfileError?.message}
-				</p>
+				<FormError state={{ error: createVendorProfileError.message }} />
 			) : null}
 
 			{data != null && (
@@ -298,7 +288,7 @@ export function VendorForm({
 				<Button
 					type="submit"
 					className={`gap-2${data != null ? " w-fit" : ""}`}
-					disabled={isLoading}
+					disabled={isPending}
 				>
 					{getName()}
 				</Button>

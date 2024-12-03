@@ -2,9 +2,15 @@
 
 import { redirect } from "next/navigation";
 import { z } from "zod";
+import { AxiosError } from "axios";
+import type { BankAccount, KYC, User, Vendor } from "@prisma/client";
 import { db, PrismaError } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth/utils";
 import { formatFlattenedErrors } from "../utils";
+import { ok, err, type Result } from "@/lib/result";
+import Cashfree from "@/lib/payments/cashfree";
+import type { BankDetails, CreateVendorRequest, KycDetails } from "cashfree-pg";
+import type { Maybe } from "../type-utils";
 
 const phoneRegex = /^(\+\d{1,2}\s?)?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}$/;
 
@@ -339,4 +345,165 @@ export async function updateUPIAction(data: {
 		}
 		throw new Error("Failed to update UPI");
 	}
+}
+
+const UNIQUE_CONSTRAINT_ERRORS = {
+	userId: "You already have a vendor profile",
+	accountNumber:
+		"Someone else has registered with this bank account, please use a different bank account",
+	pan: "Someone else has registered with this PAN, please use a different PAN",
+	phone:
+		"A vendor with this phone number already exists, please use a different phone number",
+} as const;
+
+function handleUniqueConstraintError(message: Maybe<string>) {
+	const errorField = Object.keys(UNIQUE_CONSTRAINT_ERRORS).find((key) =>
+		message?.includes(key),
+	);
+
+	if (errorField) {
+		return UNIQUE_CONSTRAINT_ERRORS[
+			errorField as keyof typeof UNIQUE_CONSTRAINT_ERRORS
+		];
+	}
+
+	return null;
+}
+
+const createVendorWithCashfreeSchema = z.object({
+	phone: z.string(),
+	bankAccount: z.object({
+		accountNumber: z.string(),
+		accountHolder: z.string(),
+		ifsc: z.string(),
+	}),
+	kyc: z.object({
+		pan: z.string(),
+	}),
+});
+
+interface VendorRequest
+	extends Omit<CreateVendorRequest, "bank" | "kyc_details"> {
+	bank: BankDetails;
+	kyc_details: KycDetails;
+}
+
+export async function createVendorWithCashfreeAction(
+	data: z.infer<typeof createVendorWithCashfreeSchema>,
+) {
+	const currentUser = await getCurrentUser();
+
+	const result = createVendorWithCashfreeSchema.safeParse(data);
+	if (!result.success) {
+		return err(formatFlattenedErrors(result.error.flatten()), 400);
+	}
+
+	let dbVendorData: {
+		user: User;
+		vendor: Vendor;
+		bankAccount: BankAccount;
+		kyc: KYC;
+	};
+
+	try {
+		const txResult = await db.$transaction(async (tx) => {
+			// Get the user
+			const user = await tx.user.findUnique({
+				where: {
+					id: currentUser.id,
+				},
+			});
+
+			// If the user is not found, throw an error
+			if (!user) {
+				throw new Error("User not found");
+			}
+
+			// Create the Vendor
+			const vendor = await tx.vendor.create({
+				data: {
+					userId: currentUser.id,
+					status: "IN_BENE_CREATION",
+					name: result.data.bankAccount.accountHolder,
+					phone: result.data.phone,
+				},
+			});
+
+			// Create the bank Account associated with the Vendor
+			const bankAccount = await tx.bankAccount.create({
+				data: {
+					accountNumber: result.data.bankAccount.accountNumber,
+					accountHolder: result.data.bankAccount.accountHolder,
+					IFSC: result.data.bankAccount.ifsc,
+					vendorId: vendor.id,
+				},
+			});
+
+			// Create the KYC associated with the Vendor
+			const kyc = await tx.kYC.create({
+				data: {
+					pan: result.data.kyc.pan,
+					vendorId: vendor.id,
+				},
+			});
+
+			// Optionally, return all created records
+			return { user, vendor, bankAccount, kyc };
+		});
+
+		dbVendorData = txResult;
+	} catch (error) {
+		if (error instanceof PrismaError && error.code === "P2002") {
+			const errorMessage = handleUniqueConstraintError(error.message);
+			if (errorMessage) {
+				return err(errorMessage, 409);
+			}
+		}
+		return err("Sorry, we could not process your request", 500);
+	}
+
+	try {
+		const vendorData: VendorRequest = {
+			vendor_id: dbVendorData.vendor.id.toString(),
+			status: "ACTIVE",
+			email: dbVendorData.user.email,
+			name: dbVendorData.vendor.name,
+			phone: dbVendorData.vendor.phone,
+			bank: {
+				account_number: dbVendorData.bankAccount.accountNumber,
+				ifsc: dbVendorData.bankAccount.IFSC,
+				account_holder: dbVendorData.bankAccount.accountHolder,
+			},
+			verify_account: false,
+			dashboard_access: false,
+			schedule_option: 2, // Every second day at 11:00 AM
+			kyc_details: {
+				business_type: "Digital Goods",
+				pan: dbVendorData.kyc.pan,
+			},
+		};
+
+		await Cashfree.PGESCreateVendors(
+			"2023-08-01",
+			undefined,
+			undefined,
+			vendorData as CreateVendorRequest,
+		);
+	} catch (error) {
+		await db.vendor.delete({
+			where: { id: dbVendorData.vendor.id },
+		});
+
+		console.log("Cashfree vendor registration error", error);
+
+		if (error instanceof AxiosError && error.response) {
+			return err(
+				"Sorry, our banking partner could not register your account",
+				error.response.status,
+			);
+		}
+		return err("Sorry, we could not process your request", 500);
+	}
+
+	return ok({ id: dbVendorData.vendor.id });
 }
