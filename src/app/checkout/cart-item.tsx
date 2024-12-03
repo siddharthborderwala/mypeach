@@ -61,7 +61,7 @@ function CartItem_({
 					variant="ghost"
 					onClick={() => mutate()}
 					disabled={isPending}
-					className="mt-4 hidden sm:block hover:text-destructive transition-colors"
+					className="mt-4 hidden sm:block hover:text-destructive transition-colors !flex"
 				>
 					<span className="sr-only">Remove from cart</span>
 					{isPending ? <Spinner /> : <TrashSimple size={16} weight="bold" />}
