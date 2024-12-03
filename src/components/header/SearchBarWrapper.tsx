@@ -8,7 +8,8 @@ const SearchBarWrapper = ({
 	component: React.ReactNode;
 }) => {
 	const pathname = usePathname();
-	return pathname === "/" ? <>{component}</> : null;
+
+	return pathname === "/" ? component : null;
 };
 
 export default SearchBarWrapper;

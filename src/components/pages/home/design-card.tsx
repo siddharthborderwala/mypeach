@@ -25,6 +25,7 @@ import { AddToCartButton } from "./add-to-cart-button";
 import { useMediaQuery } from "use-media-query-react";
 import { DesignCardDialogMobile } from "./design-card-dialog-mobile";
 import ImageWithFallback from "@/components/image-with-fallback";
+import Link from "next/link";
 
 const DesignCardDialogContent = ({
 	design,
@@ -89,29 +90,11 @@ const DesignCardDialogContent = ({
 							<p>{design.fileDPI} DPI</p>
 						</div>
 					</div>
-					{design.tags && design.tags.length > 0 ? (
-						<div>
-							<h3 className="text-sm tracking-wider uppercase text-muted-foreground">
-								Tags
-							</h3>
-							<div className="flex flex-wrap gap-2 mt-1">
-								{design.tags.map((tag: string) => (
-									<Badge
-										variant="outline"
-										key={tag}
-										className="font-normal border select-none text-sm"
-									>
-										{tag}
-									</Badge>
-								))}
-							</div>
-						</div>
-					) : null}
 				</div>
 				<div className="flex flex-col gap-2 mt-auto">
 					<AddToCartButton
 						designId={design.id}
-						setIsModalOpen={setIsModalOpen}
+						onAdd={() => setIsModalOpen(false)}
 					/>
 				</div>
 			</div>
@@ -131,33 +114,38 @@ const DesignCard_ = ({
 	style?: React.CSSProperties;
 	disableModal?: boolean;
 }) => {
-	const [isModalOpen, setIsModalOpen] = useState(false);
-	const isMobile = useMediaQuery("(max-width: 768px)");
-
 	return (
-		<Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-			<DialogTrigger
-				className={cn("text-left", className, {
-					"pointer-events-none opacity-100": disableModal,
-				})}
-				style={style}
-				disabled={disableModal}
-			>
-				<DesignCardView design={design} />
-			</DialogTrigger>
-			{isMobile ? (
-				<DesignCardDialogMobile
-					design={design}
-					setIsModalOpen={setIsModalOpen}
-				/>
-			) : (
-				<DesignCardDialogContent
-					design={design}
-					setIsModalOpen={setIsModalOpen}
-				/>
-			)}
-		</Dialog>
+		<Link href={`/d/${design.id}`}>
+			<DesignCardView design={design} />
+		</Link>
 	);
+	// const [isModalOpen, setIsModalOpen] = useState(false);
+	// const isMobile = useMediaQuery("(max-width: 768px)");
+
+	// return (
+	// 	<Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+	// 		<DialogTrigger
+	// 			className={cn("text-left", className, {
+	// 				"pointer-events-none opacity-100": disableModal,
+	// 			})}
+	// 			style={style}
+	// 			disabled={disableModal}
+	// 		>
+	// 			<DesignCardView design={design} />
+	// 		</DialogTrigger>
+	// 		{isMobile ? (
+	// 			<DesignCardDialogMobile
+	// 				design={design}
+	// 				setIsModalOpen={setIsModalOpen}
+	// 			/>
+	// 		) : (
+	// 			<DesignCardDialogContent
+	// 				design={design}
+	// 				setIsModalOpen={setIsModalOpen}
+	// 			/>
+	// 		)}
+	// 	</Dialog>
+	// );
 };
 
 export const DesignCard = memo(DesignCard_);

@@ -1,3 +1,5 @@
+"use client";
+
 import { queryClient } from "@/app/global-query-client";
 import { addItemAction, type ActiveCartAndProducts } from "@/lib/actions/cart";
 import { useMutation } from "@tanstack/react-query";
@@ -9,11 +11,11 @@ import { cn } from "@/lib/utils";
 
 export const AddToCartButton = ({
 	designId,
-	setIsModalOpen,
+	onAdd,
 	className,
 }: {
 	designId: string;
-	setIsModalOpen: (isModalOpen: boolean) => void;
+	onAdd?: () => void;
 	className?: string;
 }) => {
 	const data = queryClient.getQueryData<ActiveCartAndProducts>(["cart"]);
@@ -31,7 +33,7 @@ export const AddToCartButton = ({
 				dismissible: true,
 				duration: 1000,
 			});
-			setIsModalOpen(false);
+			onAdd?.();
 		},
 		onError: () => {
 			toast.error("Failed to add to cart", {

@@ -1,7 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { useState, useEffect } from "react";
+import { useState, useEffect, forwardRef } from "react";
 
 interface ImageWithFallbackProps
 	extends React.ImgHTMLAttributes<HTMLImageElement> {
@@ -10,57 +10,60 @@ interface ImageWithFallbackProps
 	alt?: string;
 }
 
-const ImageWithFallback: React.FC<ImageWithFallbackProps> = ({
-	src,
-	fallbackSrc = "/logo.png",
-	className,
-	alt = "",
-	onError,
-	...props
-}) => {
-	const [hasError, setHasError] = useState(false);
+const ImageWithFallback = forwardRef<HTMLImageElement, ImageWithFallbackProps>(
+	(
+		{ src, fallbackSrc = "/logo.png", className, alt = "", onError, ...props },
+		ref,
+	) => {
+		const [hasError, setHasError] = useState(false);
 
-	// biome-ignore lint/correctness/useExhaustiveDependencies(src): This is a false positive
-	useEffect(() => {
-		// Reset the error state when src changes
-		setHasError(false);
-	}, [src]);
+		// biome-ignore lint/correctness/useExhaustiveDependencies(src): This is a false positive
+		useEffect(() => {
+			// Reset the error state when src changes
+			setHasError(false);
+		}, [src]);
 
-	const handleError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
-		setHasError(true);
-		if (onError) {
-			onError(e);
+		const handleError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+			setHasError(true);
+			if (onError) {
+				onError(e);
+			}
+		};
+
+		if (hasError || !src) {
+			// Render your custom fallback HTML
+			return (
+				<div
+					ref={ref}
+					className={cn(
+						"flex flex-col items-center justify-center border rounded",
+						className,
+					)}
+				>
+					<img
+						src={fallbackSrc}
+						alt={alt}
+						className="w-8 h-8 md:w-10 md:h-10 filter grayscale"
+					/>
+				</div>
+			);
 		}
-	};
 
-	if (hasError || !src) {
-		// Render your custom fallback HTML
+		// Render the normal image
 		return (
-			<div
+			<img
+				{...props}
+				ref={ref}
+				src={src}
+				alt={alt}
 				className={cn(
-					"flex flex-col items-center justify-center border rounded",
+					"border-none flex items-center justify-center",
 					className,
 				)}
-			>
-				<img
-					src={fallbackSrc}
-					alt={alt}
-					className="w-8 h-8 md:w-10 md:h-10 filter grayscale"
-				/>
-			</div>
+				onError={handleError}
+			/>
 		);
-	}
-
-	// Render the normal image
-	return (
-		<img
-			{...props}
-			src={src}
-			alt={alt}
-			className={cn("border-none flex items-center justify-center", className)}
-			onError={handleError}
-		/>
-	);
-};
+	},
+);
 
 export default ImageWithFallback;

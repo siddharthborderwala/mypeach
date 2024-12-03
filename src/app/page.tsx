@@ -4,8 +4,6 @@ import { getDesignsForExplore } from "@/lib/actions/designs";
 import { Suspense } from "react";
 import { Header } from "@/components/header";
 
-// hack it
-
 export const metadata: Metadata = {
 	title: "Peach",
 	description:

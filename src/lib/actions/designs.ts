@@ -289,7 +289,12 @@ export async function getDesignsForExplore(
 
 export async function getDesignByIdForExplore(id: string) {
 	const design = await db.design.findFirst({
-		where: { id, isDraft: false, isUploadComplete: true, isSoftDeleted: false },
+		where: {
+			id,
+			isDraft: false,
+			isUploadComplete: true,
+			isSoftDeleted: false,
+		},
 		select: {
 			id: true,
 			name: true,

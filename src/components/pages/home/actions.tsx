@@ -1,7 +1,8 @@
+"use client";
+
 import { CollectionsPopover } from "@/components/collections-popover";
 import { NewCollectionModal } from "@/components/new-collection-modal";
 import { useAuth } from "@/contexts/auth";
-import { appBaseURL, isMobileUA } from "@/lib/utils";
 import { Export, CaretDown } from "@phosphor-icons/react";
 import {
 	Tooltip,
@@ -10,14 +11,17 @@ import {
 } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { useState, useCallback } from "react";
-import { toast } from "sonner";
+import { useState } from "react";
 import type { ExploreDesign } from "./types";
+import { useShareDesign } from "@/hooks/use-share-design";
+import { cn } from "@/lib/utils";
 
 export const Actions = ({
 	design,
+	share = true,
 }: {
 	design: ExploreDesign;
+	share?: boolean;
 }) => {
 	const { isLoggedIn } = useAuth();
 
@@ -28,44 +32,25 @@ export const Actions = ({
 
 	const designId = design.id;
 
-	const handleShare = useCallback(() => {
-		const designURL = `${appBaseURL}/d/${designId}`;
-		const isMobile = isMobileUA(navigator.userAgent);
-
-		if (navigator.share && isMobile) {
-			navigator
-				.share({
-					url: designURL,
-				})
-				.catch(() => {
-					navigator.clipboard
-						.writeText(designURL)
-						.then(() => toast.success("Copied URL to clipboard"))
-						.catch(() => toast.error("Failed to copy URL to clipboard"));
-				});
-		} else {
-			navigator.clipboard
-				.writeText(designURL)
-				.then(() => toast.success("Copied URL to clipboard"))
-				.catch(() => toast.error("Failed to copy URL to clipboard"));
-		}
-	}, [designId]);
+	const handleShare = useShareDesign(designId);
 
 	return (
 		<div className="flex items-center">
-			<Tooltip>
-				<TooltipTrigger asChild>
-					<Button
-						onClick={handleShare}
-						size="sm"
-						variant="outline"
-						className="font-normal h-10 w-10 sm:h-8 sm:w-8 p-0 rounded-r-none border-r-0"
-					>
-						<Export className="w-5 h-5 sm:w-4 sm:h-4" />
-					</Button>
-				</TooltipTrigger>
-				<TooltipContent>Share</TooltipContent>
-			</Tooltip>
+			{share ? (
+				<Tooltip>
+					<TooltipTrigger asChild>
+						<Button
+							onClick={handleShare}
+							size="sm"
+							variant="outline"
+							className="font-normal h-10 w-10 sm:h-8 sm:w-8 p-0 rounded-r-none border-r-0"
+						>
+							<Export className="w-5 h-5 sm:w-4 sm:h-4" />
+						</Button>
+					</TooltipTrigger>
+					<TooltipContent>Share</TooltipContent>
+				</Tooltip>
+			) : null}
 			{isLoggedIn ? (
 				<>
 					<CollectionsPopover
@@ -81,7 +66,10 @@ export const Actions = ({
 							<Button
 								variant="outline"
 								size="sm"
-								className="font-normal h-10 sm:h-8 p-0 px-2 rounded-l-none gap-2"
+								className={cn("font-normal h-10 sm:h-8 p-0 px-2 gap-2", {
+									"rounded-l-none": share,
+									"px-4": !share,
+								})}
 								onClick={() => setIsCollectionsPopoverOpen(true)}
 							>
 								<span>
@@ -106,7 +94,13 @@ export const Actions = ({
 						<Button
 							variant="outline"
 							size="sm"
-							className="font-normal text-base sm:text-sm h-10 sm:h-8 p-0 px-2 rounded-l-none gap-2"
+							className={cn(
+								"font-normal text-base sm:text-sm h-10 sm:h-8 p-0 px-2 gap-2",
+								{
+									"rounded-l-none": share,
+									"px-4": !share,
+								},
+							)}
 							asChild
 						>
 							<Link

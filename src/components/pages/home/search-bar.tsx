@@ -1,30 +1,27 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { parseAsString, useQueryState } from "nuqs";
 import { MagnifyingGlass } from "@phosphor-icons/react";
-import { Input } from "../../ui/input";
-import { useRouter, useSearchParams } from "next/navigation";
 import { useDebounce } from "@/hooks/use-debounce";
+import { Input } from "../../ui/input";
 
 export const SearchBar = () => {
-	const router = useRouter();
-	const searchParams = useSearchParams();
-	const [searchTerm, setSearchTerm] = useState(searchParams.get("q") || "");
+	const [searchQuery, setSearchQuery] = useQueryState("q", parseAsString);
+
+	const [searchTerm, setSearchTerm] = useState(searchQuery ?? "");
 
 	// Debounce the search term to avoid too many updates
 	const debouncedSearch = useDebounce(searchTerm, 300);
 
-	// Update URL when debounced search term changes
 	useEffect(() => {
-		const params = new URLSearchParams(searchParams);
-
-		if (debouncedSearch) {
-			params.set("q", debouncedSearch);
+		const cleanSearchTerm = debouncedSearch.trim();
+		if (cleanSearchTerm) {
+			setSearchQuery(cleanSearchTerm);
 		} else {
-			params.delete("q");
+			setSearchQuery(null);
 		}
-		router.push(`/?${params.toString()}`);
-	}, [debouncedSearch, router, searchParams]);
+	}, [debouncedSearch, setSearchQuery]);
 
 	return (
 		<div className="relative justify-self-center flex-1 w-[20rem]">

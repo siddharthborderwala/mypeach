@@ -48,7 +48,7 @@ export default async function RootLayout({
 
 	return (
 		<html lang="en">
-			<body className={`${manrope.variable} font-sans`}>
+			<body className={`${manrope.variable} font-sans antialiased`}>
 				<AuthProvider auth={auth}>
 					<TooltipProvider delayDuration={150} skipDelayDuration={750}>
 						<GlobalQueryClient>{children}</GlobalQueryClient>

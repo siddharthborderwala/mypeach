@@ -23,33 +23,16 @@ export const DesignCardView = ({
 			/>
 		</div>
 		{details === "explore" ? (
-			<div className="flex items-center justify-between gap-2 py-2">
-				<div className="flex items-center gap-2">
-					<Avatar className="h-9 w-9 rounded-full">
-						<AvatarImage
-							src={getUserAvatarURL(design.vendor.user.username, 72)}
-						/>
-					</Avatar>
-					<div className="flex flex-col">
-						<p className="font-medium">{design.vendor.user.username}</p>
-						<span
-							suppressHydrationWarning
-							className="text-sm text-muted-foreground"
-						>
-							Added {relativeTime(design.createdAt)}
-						</span>
-					</div>
-				</div>
-				<div className="flex flex-col items-end">
-					<p className="font-medium">{formatPrice(design.price)}</p>
-					<p className="text-sm text-muted-foreground">
-						<span className="uppercase text-primary">
-							{mimeToExtension(design.originalFileType)}
-						</span>
-						<span className="mx-2 font-bold">&middot;</span>
-						<span className="text-primary">{design.fileDPI} DPI</span>
-					</p>
-				</div>
+			<div className="flex items-start justify-between gap-2 py-2 font-medium">
+				<p>
+					<span className="uppercase text-primary">
+						{mimeToExtension(design.originalFileType)}
+					</span>
+					<span className="text-muted-foreground max-sm:text-xs text-sm ml-1">
+						({design.fileDPI} DPI)
+					</span>
+				</p>
+				<p>{formatPrice(design.price)}</p>
 			</div>
 		) : (
 			<div className="flex items-start justify-between gap-2 py-2 text-sm">
