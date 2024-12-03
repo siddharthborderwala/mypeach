@@ -476,7 +476,7 @@ export async function createVendorWithCashfreeAction(
 			},
 			verify_account: false,
 			dashboard_access: false,
-			schedule_option: 2, // Every second day at 11:00 AM
+			schedule_option: 2, // T+2 days at 11:00 AM
 			kyc_details: {
 				business_type: "Digital Goods",
 				pan: dbVendorData.kyc.pan,
@@ -494,14 +494,11 @@ export async function createVendorWithCashfreeAction(
 			where: { id: dbVendorData.vendor.id },
 		});
 
-		console.log("Cashfree vendor registration error", error);
-
 		if (error instanceof AxiosError && error.response) {
-			return err(
-				"Sorry, our banking partner could not register your account",
-				error.response.status,
-			);
+			console.log("Cashfree vendor registration error", error.response);
+			return err(error.response.data.message, error.response.status);
 		}
+		console.log("Cashfree vendor registration error", error);
 		return err("Sorry, we could not process your request", 500);
 	}
 
