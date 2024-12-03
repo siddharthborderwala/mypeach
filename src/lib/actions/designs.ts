@@ -115,7 +115,7 @@ type RawDesignQueryResult = {
 	createdAt: Date;
 	price: number;
 	currency: string;
-	tags: string[];
+	tags: string[] | null;
 	originalFileType: string;
 	isDraft: boolean;
 	isUploadComplete: boolean;

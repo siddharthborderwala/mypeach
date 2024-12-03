@@ -28,7 +28,8 @@ export const DesignsGrid = ({ initialData }: InfiniteScrollDesignsProps) => {
 		});
 
 	const allDesigns = useMemo(() => {
-		return data.pages.flatMap((page) => page.designs);
+		// biome-ignore lint/complexity/useFlatMap: <explanation>
+		return data.pages.map((page) => page.designs).flat();
 	}, [data.pages]);
 
 	const { ref, inView } = useInView();

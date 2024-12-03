@@ -96,7 +96,7 @@ export function DesignCardDialogMobile({
 								<p>{design.fileDPI} DPI</p>
 							</div>
 
-							{design.tags.length > 0 && (
+							{design.tags && design.tags.length > 0 && (
 								<div>
 									<h3 className="text-sm tracking-wider uppercase text-muted-foreground">
 										Tags
