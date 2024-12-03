@@ -115,7 +115,7 @@ const DesignCard_ = ({
 	disableModal?: boolean;
 }) => {
 	return (
-		<Link href={`/d/${design.id}`}>
+		<Link prefetch={false} href={`/d/${design.id}`}>
 			<DesignCardView design={design} />
 		</Link>
 	);

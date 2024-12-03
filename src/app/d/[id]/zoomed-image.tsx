@@ -4,7 +4,14 @@ import { motion, type PanInfo } from "framer-motion";
 import { useEffect, useState } from "react";
 import { getDesignThumbnailURL } from "@/lib/storage/util";
 import ImageWithFallback from "@/components/image-with-fallback";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import {
+	Dialog,
+	DialogClose,
+	DialogContent,
+	DialogTrigger,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { X } from "@phosphor-icons/react";
 
 const MotionImageWithFallback = motion(ImageWithFallback);
 
@@ -59,6 +66,11 @@ export function ZoomedImage({
 				className="w-[100dvw] h-[100dvh] p-0 bg-transparent block border-0 ring-0"
 				isCloseButtonHidden={true}
 			>
+				<DialogClose asChild>
+					<Button variant="ghost" className="p-0 h-7 w-7">
+						<X weight="bold" className="h-5 w-5 text-white" />
+					</Button>
+				</DialogClose>
 				<motion.div
 					onPan={handlePan}
 					onPanEnd={handlePanEnd}
