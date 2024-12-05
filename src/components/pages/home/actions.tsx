@@ -19,9 +19,11 @@ import { cn } from "@/lib/utils";
 export const Actions = ({
 	design,
 	share = true,
+	saveBtnClassName,
 }: {
 	design: ExploreDesign;
 	share?: boolean;
+	saveBtnClassName?: string;
 }) => {
 	const { isLoggedIn } = useAuth();
 
@@ -66,10 +68,13 @@ export const Actions = ({
 							<Button
 								variant="outline"
 								size="sm"
-								className={cn("font-normal h-10 sm:h-8 p-0 px-2 gap-2", {
-									"rounded-l-none": share,
-									"px-4": !share,
-								})}
+								className={cn(
+									"font-normal text-base sm:text-sm h-10 sm:h-8 p-0 px-2 gap-2",
+									{
+										"rounded-l-none": share,
+									},
+									saveBtnClassName,
+								)}
 								onClick={() => setIsCollectionsPopoverOpen(true)}
 							>
 								<span>
@@ -98,8 +103,8 @@ export const Actions = ({
 								"font-normal text-base sm:text-sm h-10 sm:h-8 p-0 px-2 gap-2",
 								{
 									"rounded-l-none": share,
-									"px-4": !share,
 								},
+								saveBtnClassName,
 							)}
 							asChild
 						>

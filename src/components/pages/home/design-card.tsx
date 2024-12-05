@@ -1,29 +1,20 @@
 "use client";
 
-import { memo, useState } from "react";
+import { memo } from "react";
 import type { ExploreDesign } from "./types";
 import {
-	cn,
 	formatPrice,
 	getUserAvatarURL,
 	mimeToExtension,
 	relativeTime,
 } from "@/lib/utils";
-import {
-	Dialog,
-	DialogContent,
-	DialogTitle,
-	DialogTrigger,
-} from "@/components/ui/dialog";
+import { DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { getDesignThumbnailURL } from "@/lib/storage/util";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import RelatedDesignsMiniList from "./related-designs";
 import { DesignCardView } from "./design-card-view";
 import { Actions } from "./actions";
 import { AddToCartButton } from "./add-to-cart-button";
-import { useMediaQuery } from "use-media-query-react";
-import { DesignCardDialogMobile } from "./design-card-dialog-mobile";
 import ImageWithFallback from "@/components/image-with-fallback";
 import Link from "next/link";
 
@@ -115,7 +106,7 @@ const DesignCard_ = ({
 	disableModal?: boolean;
 }) => {
 	return (
-		<Link prefetch={false} href={`/d/${design.id}`}>
+		<Link href={`/d/${design.id}?from=explore`}>
 			<DesignCardView design={design} />
 		</Link>
 	);

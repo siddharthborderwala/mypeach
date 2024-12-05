@@ -35,28 +35,20 @@ function CartItem_({
 
 	return (
 		<div key={product.designId} className="flex items-start gap-4 mb-4">
-			<ImageWithFallback
-				src={getDesignThumbnailURL(
-					product.design.thumbnailFileStorageKey,
-					1200,
-				)}
-				alt={product.design.name}
-				className="w-40 h-40 object-cover rounded-lg"
-			/>
-			<div className="flex flex-col items-start">
-				<Button
-					variant="link"
-					className="text-lg text-foreground h-auto p-0"
-					asChild
-				>
-					<Link
-						href={`/d/${product.designId}`}
-						prefetch={false}
-						target="_blank"
-					>
-						{product.design.name}
-					</Link>
-				</Button>
+			<Link href={`/d/${product.designId}?from=explore`} prefetch={false}>
+				<ImageWithFallback
+					src={getDesignThumbnailURL(
+						product.design.thumbnailFileStorageKey,
+						1200,
+					)}
+					alt={product.design.name}
+					className="w-40 h-40 object-cover rounded-lg"
+				/>
+			</Link>
+			<div className="flex flex-col items-start max-w-[calc(100%-12rem)]">
+				<p className="text-lg font-medium text-foreground h-auto p-0 max-w-full truncate">
+					{product.design.name}
+				</p>
 				<p className="text-sm mt-1">
 					<span className="text-primary">{product.design.fileDPI} DPI</span>
 					<span className="mx-1">&middot;</span>
@@ -132,11 +124,11 @@ export function SidebarCart({
 						size="icon"
 						className="absolute right-4 top-4 z-50"
 					>
-						<X weight="bold" className="h-4 w-4" />
+						<X weight="bold" className="h-6 w-6 sm:h-5 sm:w-5" />
 						<span className="sr-only">Close</span>
 					</Button>
 				</SheetClose>
-				<h2 className="text-lg font-semibold">Your Cart</h2>
+				<h2 className="text-xl sm:text-lg font-semibold">Your Cart</h2>
 				{itemCount > 0 ? (
 					<>
 						<ScrollArea className="flex-grow">
@@ -165,7 +157,7 @@ export function SidebarCart({
 									</p>
 								</div>
 							</div>
-							<Button className="w-full max-sm:h-10" asChild>
+							<Button className="w-full max-sm:h-12" asChild>
 								<Link prefetch={false} href="/checkout">
 									<span>Checkout</span>
 								</Link>

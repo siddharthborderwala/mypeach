@@ -1,17 +1,11 @@
 import { Header } from "@/components/header";
-import ImageWithFallback from "@/components/image-with-fallback";
 import { Actions } from "@/components/pages/home/actions";
 import { AddToCartButton } from "@/components/pages/home/add-to-cart-button";
 import { getDesignByIdForExplore } from "@/lib/actions/designs";
-import {
-	getDesignSocialImageURL,
-	getDesignThumbnailURL,
-} from "@/lib/storage/util";
-import { formatPrice, mimeToExtension, relativeTime } from "@/lib/utils";
+import { getDesignSocialImageURL } from "@/lib/storage/util";
+import { formatPrice, mimeToExtension } from "@/lib/utils";
 import type { Metadata } from "next";
 import { ShareDesignButton } from "./share-design-button";
-import { CaretLeft } from "@phosphor-icons/react/dist/ssr";
-import { Button } from "@/components/ui/button";
 import { ZoomedImage } from "./zoomed-image";
 
 export async function generateMetadata({
@@ -51,53 +45,57 @@ export async function generateMetadata({
 
 export default async function DesignPage({
 	params,
-}: { params: { id: string } }) {
+	searchParams,
+}: {
+	params: { id: string };
+	searchParams: { from?: string };
+}) {
 	const design = await getDesignByIdForExplore(params.id);
 
 	return (
 		<>
-			<Header />
+			<Header
+				showBackButton={searchParams.from === "explore"}
+				className="max-sm:bg-transparent max-sm:backdrop-blur-0 max-sm:fixed max-sm:w-full max-sm:[&>div>nav]:bg-background max-sm:[&>div>nav]:border max-sm:[&>div>nav]:rounded-md max-sm:[&>div>nav]:p-0.5 max-sm:[&>div>nav>button:nth-of-type(2)]:hidden"
+			/>
 			<main className="bg-white w-full md:py-6 md:px-8 mb-48">
 				<div className="relative overflow-y-auto w-full">
-					<Button variant="outline" className="absolute top-4 left-4">
-						<CaretLeft weight="bold" />
-						<span className="sr-only">Back</span>
-					</Button>
-					<ZoomedImage
-						thumbnailFileStorageKey={design.thumbnailFileStorageKey}
-						name={design.name}
-					/>
-					<div className="flex justify-between mt-4 px-4">
-						<div className="flex flex-col">
-							<p className="text-2xl font-medium">{design.name}</p>
-							<p className="font-bold">
-								<span className="uppercase text-primary">
-									{mimeToExtension(design.originalFileType)}
-								</span>
-								<span className="text-muted-foreground ml-1">
-									({design.fileDPI} DPI)
-								</span>
+					<div className="max-sm:border max-sm:rounded-xl">
+						<ZoomedImage
+							thumbnailFileStorageKey={design.thumbnailFileStorageKey}
+							name={design.name}
+						>
+							<Actions
+								design={design}
+								share={false}
+								saveBtnClassName="px-3 py-1 h-auto absolute bottom-3 right-4 font-medium"
+							/>
+						</ZoomedImage>
+						<div className="flex justify-between p-4">
+							<div className="flex flex-col font-semibold">
+								<p className="text-xl">{design.name}</p>
+								<p>
+									<span className="uppercase text-primary">
+										{mimeToExtension(design.originalFileType)}
+									</span>
+									<span className="text-muted-foreground ml-1">
+										({design.fileDPI} DPI)
+									</span>
+								</p>
+							</div>
+							<p className="text-2xl text-foreground/90 font-semibold">
+								{formatPrice(design.price)}
 							</p>
 						</div>
-						<p className="text-2xl text-foreground/90 font-medium">
-							{formatPrice(design.price)}
-						</p>
 					</div>
-					<div className="px-4 mt-4 flex justify-between">
-						<div className="flex flex-col mr-auto">
-							<p className="font-medium">by {design.vendor.user.username}</p>
-							<span
-								suppressHydrationWarning
-								className="text-xs text-muted-foreground"
-							>
-								Added {relativeTime(design.createdAt)}
-							</span>
+					<div className="px-4 mt-4 flex items-start justify-between">
+						<div className="flex items-center gap-2 mr-auto text-foreground/80">
+							<p className="text-lg font-semibold">✨ More Designs</p>
 						</div>
-						<Actions design={design} share={false} />
 					</div>
 				</div>
 
-				<div className="fixed bottom-0 left-0 right-0 p-4 backdrop-blur-sm bg-background/80 border-t flex gap-2">
+				<div className="fixed bottom-0 left-0 right-0 p-4 backdrop-blur-sm bg-background/10 flex gap-2 border-t">
 					<ShareDesignButton designId={design.id} />
 					<AddToCartButton designId={design.id} className="h-12 flex-[2]" />
 				</div>

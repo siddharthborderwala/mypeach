@@ -2,13 +2,15 @@ import Link from "next/link";
 import { SearchBar } from "@/components/pages/home/search-bar";
 import { getUserAuth } from "@/lib/auth/utils";
 import { Button } from "@/components/ui/button";
-import { Plus } from "@phosphor-icons/react/dist/ssr";
+import { CaretLeft, Plus } from "@phosphor-icons/react/dist/ssr";
 import { UserMenu } from "@/components/user-menu";
 import { getActiveCartAndProducts } from "@/lib/actions/cart";
 import { SidebarCart } from "./sidebar-cart";
 import { SearchButton } from "./search-button";
 import { MobileMenu } from "./mobile-menu";
 import SearchBarWrapper from "./SearchBarWrapper";
+import { BackButton } from "./back-button";
+import { cn } from "@/lib/utils";
 
 async function HeaderCartButton() {
 	const initialData = await getActiveCartAndProducts();
@@ -16,14 +18,26 @@ async function HeaderCartButton() {
 	return <SidebarCart initialData={initialData} />;
 }
 
-export async function Header() {
+export async function Header({
+	showBackButton = false,
+	className,
+}: {
+	showBackButton?: boolean;
+	className?: string;
+}) {
 	const { session } = await getUserAuth();
 
 	return (
-		<header className="sticky top-0 bg-background/10 backdrop-blur-sm z-[1]">
+		<header
+			className={cn(
+				"sticky top-0 bg-background/10 backdrop-blur-[2px] z-[1]",
+				className,
+			)}
+		>
 			<div className="flex items-center justify-between md:gap-6 p-4">
-				<div className="shrink-0 flex-1 flex justify-start">
-					<Link href="/" className="flex items-center gap-1 font-medium">
+				<div className="shrink-0 flex-1">
+					{showBackButton ? <BackButton /> : null}
+					<Link href="/" className="inline-flex items-center gap-1 font-medium">
 						<img src="/logo.png" alt="Peach" className="h-10 w-10" />
 						<span className="text-xl mt-1">Peach</span>
 					</Link>
