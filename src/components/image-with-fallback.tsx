@@ -34,7 +34,6 @@ const ImageWithFallback = forwardRef<HTMLImageElement, ImageWithFallbackProps>(
 			// Render your custom fallback HTML
 			return (
 				<div
-					ref={ref}
 					className={cn(
 						"flex flex-col items-center justify-center border rounded",
 						className,
@@ -56,10 +55,7 @@ const ImageWithFallback = forwardRef<HTMLImageElement, ImageWithFallbackProps>(
 				ref={ref}
 				src={src}
 				alt={alt}
-				className={cn(
-					"border-none flex items-center justify-center",
-					className,
-				)}
+				className={cn("border-none", className)}
 				onError={handleError}
 			/>
 		);
