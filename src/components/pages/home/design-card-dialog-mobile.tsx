@@ -15,7 +15,7 @@ function ShareDesignButton({ designId }: { designId: string }) {
 	const handleShare = useShareDesign(designId);
 
 	return (
-		<Button variant="outline" onClick={handleShare} className="h-12 flex-[1]">
+		<Button variant="outline" onClick={handleShare} className="flex-[1]">
 			<Export weight="bold" />
 			<span className="ml-2">Share</span>
 		</Button>
@@ -89,7 +89,7 @@ export function DesignCardDialogMobile({
 				<AddToCartButton
 					designId={design.id}
 					onAdd={() => setIsModalOpen(false)}
-					className="h-12 flex-[2]"
+					className="flex-[2]"
 				/>
 			</div>
 		</DialogContent>

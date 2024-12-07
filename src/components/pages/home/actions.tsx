@@ -75,7 +75,10 @@ export const Actions = ({
 									},
 									saveBtnClassName,
 								)}
-								onClick={() => setIsCollectionsPopoverOpen(true)}
+								onClick={(e) => {
+									e.stopPropagation();
+									setIsCollectionsPopoverOpen(true);
+								}}
 							>
 								<span>
 									{collectionsInWhichDesignIs &&

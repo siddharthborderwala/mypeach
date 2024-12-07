@@ -9,7 +9,7 @@ export function BackButton() {
 	return (
 		<Button
 			variant="outline"
-			className="sm:hidden absolute top-4 left-4 w-auto h-auto p-2.5 [&+a]:hidden"
+			className="sm:hidden absolute top-4 left-4 w-auto h-auto p-2.5 max-sm:[&+a]:hidden"
 			onClick={() => router.back()}
 		>
 			<CaretLeft weight="bold" className="h-5 w-5" />

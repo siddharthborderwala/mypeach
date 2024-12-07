@@ -60,14 +60,14 @@ function DesignPreview_({
 				.catch(() => {
 					navigator.clipboard
 						.writeText(designURL)
-						.then(() => toast.success("Copied URL to clipboard"))
-						.catch(() => toast.error("Failed to copy URL to clipboard"));
+						.then(() => toast.success("Copied URL"))
+						.catch(() => toast.error("Failed to copy URL"));
 				});
 		} else {
 			navigator.clipboard
 				.writeText(designURL)
-				.then(() => toast.success("Copied URL to clipboard"))
-				.catch(() => toast.error("Failed to copy URL to clipboard"));
+				.then(() => toast.success("Copied URL"))
+				.catch(() => toast.error("Failed to copy URL"));
 		}
 	}, [design.id]);
 

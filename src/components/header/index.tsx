@@ -46,7 +46,7 @@ export async function Header({
 					{<SearchBarWrapper component={<SearchBar />} />}
 				</div>
 				{session?.user.id ? (
-					<div className="flex-1 flex items-center justify-end gap-2 md:gap-4">
+					<nav className="flex-1 flex items-center justify-end gap-2 md:gap-4">
 						<Button
 							asChild
 							size="sm"
@@ -55,17 +55,16 @@ export async function Header({
 						>
 							<Link href="/designs?new=true">
 								<span>Create</span>
-								<Plus weight="bold" className="h-6 w-6 sm:h-5 sm:w-5" />
+								<Plus weight="bold" className="max-sm:h-5 max-sm:w-5" />
 							</Link>
 						</Button>
 						{<SearchBarWrapper component={<SearchButton />} />}
-
 						<HeaderCartButton />
 						<UserMenu
 							userId={session.user.id}
 							username={session.user.username}
 						/>
-					</div>
+					</nav>
 				) : (
 					<>
 						<nav className="sm:hidden space-x-2">

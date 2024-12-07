@@ -58,12 +58,12 @@ export function ZoomedImage({
 	return (
 		<Dialog open={isOpen} onOpenChange={setIsOpen}>
 			<DialogTrigger asChild>
-				<div className="relative h-[65svh] w-full bg-[hsl(0,3%,94%)] border-b shadow-inner flex items-center justify-center">
+				<div className="relative h-[65svh] w-full bg-[hsl(0,3%,94%)] sm:bg-white border-b sm:border shadow-inner sm:shadow-none flex items-center justify-center">
 					{isOpen ? null : (
 						<MotionImageWithFallback
 							src={getDesignThumbnailURL(thumbnailFileStorageKey, 1200)}
 							alt={name}
-							className="max-w-[80%] max-h-[75%] object-contain select-none pointer-events-none drop-shadow-xl"
+							className="max-w-[80%] max-h-[75%] sm:max-w-[90%] sm:max-h-[90%] object-contain select-none pointer-events-none drop-shadow-xl"
 							loading="lazy"
 							initial={{ opacity: 0 }}
 							animate={{ opacity: 1 }}
@@ -73,7 +73,7 @@ export function ZoomedImage({
 				</div>
 			</DialogTrigger>
 			<DialogContent
-				className="w-[100dvw] h-[100dvh] p-0 bg-transparent block border-0 ring-0"
+				className="w-[100dvw] h-[100dvh] max-w-none p-0 bg-transparent block border-0 ring-0"
 				isCloseButtonHidden={true}
 			>
 				{!panY ? (
@@ -82,7 +82,7 @@ export function ZoomedImage({
 							variant="secondary"
 							className="p-0 h-8 w-8 absolute top-4 right-4"
 						>
-							<X weight="bold" className="h-6 w-6" />
+							<X weight="bold" className="h-5 w-5" />
 						</Button>
 					</DialogClose>
 				) : null}

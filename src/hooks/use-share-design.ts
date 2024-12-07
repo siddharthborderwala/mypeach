@@ -18,8 +18,8 @@ export const useShareDesign = (designId: string) => {
 		} else {
 			navigator.clipboard
 				.writeText(designURL)
-				.then(() => toast.success("Copied URL to clipboard"))
-				.catch(() => toast.error("Failed to copy URL to clipboard"));
+				.then(() => toast.success("Copied design URL"))
+				.catch(() => toast.error("Failed to copy design URL"));
 		}
 	}, [designId]);
 

@@ -124,7 +124,7 @@ export function SidebarCart({
 						size="icon"
 						className="absolute right-4 top-4 z-50"
 					>
-						<X weight="bold" className="h-6 w-6 sm:h-5 sm:w-5" />
+						<X weight="bold" className="h-5 w-5" />
 						<span className="sr-only">Close</span>
 					</Button>
 				</SheetClose>
@@ -157,7 +157,7 @@ export function SidebarCart({
 									</p>
 								</div>
 							</div>
-							<Button className="w-full max-sm:h-12" asChild>
+							<Button className="w-full" asChild>
 								<Link prefetch={false} href="/checkout">
 									<span>Checkout</span>
 								</Link>

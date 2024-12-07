@@ -29,7 +29,7 @@ function LogoutButton() {
 		<Button
 			type="submit"
 			variant="ghost"
-			className="w-full gap-2 items-center justify-start h-auto p-2 font-normal"
+			className="w-full gap-2 items-center px-3 py-1 justify-start h-9 text-sm font-normal"
 		>
 			<SignOut />
 			<span>Log{pending ? "ging" : ""} out</span>

@@ -1,10 +1,16 @@
 import Link from "next/link";
-import { List, Headset, SignIn } from "@phosphor-icons/react/dist/ssr";
+import {
+	List,
+	Headset,
+	SignIn,
+	UserPlus,
+} from "@phosphor-icons/react/dist/ssr";
 import { Button } from "../ui/button";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
 	DropdownMenuItem,
+	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 
@@ -21,23 +27,24 @@ export function MobileMenu() {
 				</Button>
 			</DropdownMenuTrigger>
 			<DropdownMenuContent align="end" className="w-[160px]">
-				<DropdownMenuItem asChild className="gap-3">
-					<Link href="/support">
-						<Headset />
+				<DropdownMenuItem asChild>
+					<Link href="/support" className="gap-3 h-11 !text-base">
+						<Headset className="h-5 w-5" />
 						<span>Support</span>
 					</Link>
 				</DropdownMenuItem>
 				<DropdownMenuItem asChild>
-					<Link href="/login" className="gap-3">
-						<SignIn />
+					<Link href="/login" className="gap-3 h-11 !text-base">
+						<SignIn className="h-5 w-5" />
 						<span>Login</span>
 					</Link>
 				</DropdownMenuItem>
-				<DropdownMenuItem
-					asChild
-					className="bg-primary text-primary-foreground hover:bg-primary/90"
-				>
-					<Link href="/register">Register</Link>
+				<DropdownMenuSeparator />
+				<DropdownMenuItem asChild className="h-11">
+					<Link href="/register" className="gap-3 h-11 !text-base">
+						<UserPlus className="h-5 w-5" />
+						<span>Register</span>
+					</Link>
 				</DropdownMenuItem>
 			</DropdownMenuContent>
 		</DropdownMenu>

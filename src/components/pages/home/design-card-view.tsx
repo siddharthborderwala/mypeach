@@ -15,7 +15,7 @@ export const DesignCardView = ({
 			<ImageWithFallback
 				src={getDesignThumbnailURL(design.thumbnailFileStorageKey, 1200)}
 				alt={design.name}
-				className="absolute inset-0 w-full h-full object-cover rounded-lg select-none pointer-events-none"
+				className="absolute inset-0 w-full h-full object-cover transition-all duration-300 rounded-lg select-none pointer-events-none"
 				loading="lazy"
 			/>
 		</div>
