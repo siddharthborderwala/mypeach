@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "Vendor" ALTER COLUMN "status" SET DEFAULT 'IN_BENE_CREATION';

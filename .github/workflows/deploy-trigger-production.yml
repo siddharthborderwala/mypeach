@@ -1,0 +1,44 @@
+name: Deploy to Trigger.dev (prod)
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "src/trigger/**"
+      - "trigger.config.ts"
+      - ".github/workflows/deploy-trigger-production.yml"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 🛑 Cancel Previous Runs
+        uses: styfle/cancel-workflow-action@0.11.0
+
+      - name: ⬇️ Checkout Repo
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - uses: pnpm/action-setup@v4
+
+      - name: Use Node.js 20.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20.x"
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: 🚀 Deploy Trigger.dev
+        env:
+          # TRIGGER_ACCESS_TOKEN: ${{ secrets.TRIGGER_ACCESS_TOKEN }}
+          TRIGGER_ACCESS_TOKEN: ${{ secrets.TRIGGER_ACCESS_TOKEN_SID }}
+        run: |
+          pnpm run db:generate
+          NODE_ENV=production pnpm dlx trigger.dev deploy

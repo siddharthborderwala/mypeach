@@ -1,0 +1,38 @@
+name: Create Follow-up Commit
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  create-commit:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check commit author and create empty commit
+        run: |
+          LAST_COMMIT_AUTHOR=$(git log -1 --pretty=format:'%ae')
+          if [ "$LAST_COMMIT_AUTHOR" != "siddharthborderwala@gmail.com" ]; then
+            echo "Commit author is not Siddharth, creating follow-up commit"
+          else
+            echo "Commit author is Siddharth, skipping follow-up commit"
+            exit 1
+          fi
+
+      - name: Create empty commit
+        run: |
+          git config --local user.email "siddharthborderwala@gmail.com"
+          git config --local user.name "Siddharth Borderwala"
+          git commit --allow-empty -m "Vercel deployment hack commit - $(git log -1 --pretty=%B)"
+          
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: main

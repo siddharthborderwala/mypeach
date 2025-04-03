@@ -1,0 +1,282 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DATABASE_URL_DIRECT")
+}
+
+model User {
+  id                      String                   @id
+  email                   String                   @unique
+  username                String                   @unique
+  hashedPassword          String
+  emailVerified           Boolean                  @default(false)
+  name                    String?
+  phone                   String?
+  emailVerificationTokens EmailVerificationToken[]
+  passwordResetTokens     PasswordResetToken[]
+  orders                  Order[]
+  collections             Collection[]
+  vendor                  Vendor?
+  PurchasedDesign         PurchasedDesign[]
+  DesignDownload          DesignDownload[]
+
+  createdAt DateTime? @default(now())
+  updatedAt DateTime? @updatedAt
+
+  @@index([email])
+  @@index([username])
+}
+
+model PasswordResetToken {
+  hashedToken String   @id @unique
+  userId      String
+  user        User     @relation(references: [id], fields: [userId], onDelete: Cascade)
+  expiresAt   DateTime
+  createdAt   DateTime @default(now())
+
+  @@index([userId])
+}
+
+model EmailVerificationToken {
+  hashedToken String   @id @unique
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt   DateTime
+  createdAt   DateTime @default(now())
+
+  @@index([userId])
+}
+
+model Design {
+  id               String  @id
+  name             String  @default("Untitled")
+  isDraft          Boolean @default(true)
+  isUploadComplete Boolean @default(false)
+
+  // should be different than id for security purposes
+  originalFileStorageKey String @unique
+  originalFileName       String
+  originalFileType       String @default("image/tiff")
+  originalFileSizeBytes  Int?
+
+  // key will be based on the id of Design
+  thumbnailFileStorageKey String? @unique
+  thumbnailFileType       String? @default("image/webp")
+
+  metadata Json?
+  tags     String[]
+
+  isSoftDeleted Boolean @default(false)
+
+  // price is stored in the smallest unit of the currency
+  price    Int    @default(290)
+  currency String @default("INR")
+
+  vendorId Int
+  vendor   Vendor @relation(references: [id], fields: [vendorId], onDelete: Cascade)
+
+  cartProducts CartProduct[]
+
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  collectionItems CollectionItem[]
+  Sales           Sales[]
+  PurchasedDesign PurchasedDesign[]
+  DesignDownload  DesignDownload[]
+
+  @@index([vendorId])
+  @@index([createdAt])
+  @@index([isDraft])
+  @@index([isUploadComplete])
+}
+
+model Vendor {
+  id            Int          @id @default(autoincrement())
+  name          String
+  phone         String       @unique
+  status        String       @default("IN_BENE_CREATION") // ACTIVE, BLOCKED, DELETED, IN_BENE_CREATION, ACTION_REQUIRED, BANK_VALIDATION_FAILED
+  UPI           UPI?
+  KYC           KYC?
+  totalEarnings Int          @default(0)
+  userId        String       @unique
+  user          User         @relation(references: [id], fields: [userId], onDelete: Cascade)
+  Design        Design[]
+  Sales         Sales[]
+  BankAccount   BankAccount?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @updatedAt
+
+  @@index([userId])
+}
+
+model UPI {
+  id            Int    @id @default(autoincrement())
+  vpa           String @unique
+  accountHolder String
+  vendorId      Int    @unique
+  vendor        Vendor @relation(references: [id], fields: [vendorId], onDelete: Cascade)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @updatedAt
+
+  @@index([vendorId])
+}
+
+model BankAccount {
+  id            Int    @id @default(autoincrement())
+  accountHolder String
+  accountNumber String @unique
+  IFSC          String
+  vendorId      Int    @unique
+  vendor        Vendor @relation(references: [id], fields: [vendorId], onDelete: Cascade)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @updatedAt
+
+  @@index([vendorId])
+}
+
+model KYC {
+  id       Int    @id @default(autoincrement())
+  pan      String @unique
+  vendorId Int    @unique
+  vendor   Vendor @relation(references: [id], fields: [vendorId], onDelete: Cascade)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @updatedAt
+
+  @@index([vendorId])
+}
+
+model Order {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  status   String  @default("ACTIVE") // ACTIVE, PAID, FAILED
+  amount   Int
+  location String?
+
+  paymentSessionId  String?
+  cashFreeOrderId   String?
+  bankReference     String?
+  cashFreePaymentId String?
+  paymentFailed     Boolean @default(false)
+  failedReason      String?
+
+  cartId Int  @unique
+  cart   Cart @relation(references: [id], fields: [cartId], onDelete: Cascade)
+
+  userId String
+  user   User   @relation(references: [id], fields: [userId], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([cartId])
+}
+
+model Collection {
+  id       String  @id
+  name     String
+  userId   String
+  user     User    @relation(references: [id], fields: [userId], onDelete: Cascade)
+  isPublic Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  collectionItems CollectionItem[]
+
+  @@index([userId])
+  @@index([isPublic])
+}
+
+model CollectionItem {
+  collectionId String
+  collection   Collection @relation(references: [id], fields: [collectionId], onDelete: Cascade)
+
+  designId String
+  design   Design @relation(references: [id], fields: [designId], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([collectionId, designId])
+}
+
+model Cart {
+  id Int @id @default(autoincrement())
+
+  userId String
+  status String @default("ACTIVE") // ACTIVE, ORDERED
+
+  products CartProduct[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  order Order?
+
+  @@index([userId])
+}
+
+model CartProduct {
+  cartId Int
+  cart   Cart @relation(references: [id], fields: [cartId], onDelete: Cascade)
+
+  designId String
+  design   Design @relation(references: [id], fields: [designId], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([cartId, designId])
+}
+
+model PurchasedDesign {
+  id        Int      @id @default(autoincrement())
+  designId  String
+  design    Design   @relation(references: [id], fields: [designId], onDelete: Cascade)
+  userId    String
+  user      User     @relation(references: [id], fields: [userId], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([designId])
+}
+
+model Sales {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  amount   Int
+  vendor   Vendor @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+  vendorId Int
+
+  design   Design @relation(fields: [designId], references: [id], onDelete: Cascade)
+  designId String
+
+  @@index([vendorId])
+  @@index([designId])
+}
+
+model DesignDownload {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+
+  design   Design @relation(fields: [designId], references: [id], onDelete: Cascade)
+  designId String
+
+  userId String
+  user   User   @relation(references: [id], fields: [userId], onDelete: Cascade)
+
+  @@index([designId])
+  @@index([userId])
+}
